@@ -107,10 +107,10 @@ def make_tilted_card(t):
     skew=card.transform((560,330),Image.Transform.AFFINE,(1,-.15,40,.08,1,0),resample=Image.Resampling.BICUBIC)
     shadow=Image.new('RGBA',skew.size,(0,0,0,0)); shadow.alpha_composite(skew); shadow=shadow.getchannel('A').filter(ImageFilter.GaussianBlur(18))
     sh=Image.new('RGBA',skew.size,(0,0,0,105));sh.putalpha(shadow.point(lambda q:int(q*.52)))
-    angle=-5+2*math.sin(t*2.2)
+    angle=-7+3.5*math.sin(t*2.8)
     sk=skew.rotate(angle,resample=Image.Resampling.BICUBIC,expand=True)
     ss=sh.rotate(angle,resample=Image.Resampling.BICUBIC,expand=True)
-    x=int(84+24*math.sin(t*2)); y=int(406-18*math.sin(t*1.6))
+    x=int(78+16*math.sin(t*2.7)); y=int(397-21*math.sin(t*2.1))
     return sk,ss,x,y
 
 def draw_tool_icon(d,x,y,kind,scale,alpha):
@@ -155,6 +155,13 @@ def render_frame(t):
     orange=(231,137,85,alpha)
     cx,cy=W//2,H//2
     drift=int((t*18)%140)
+    # A recurring Monarch-amber runner bridges every cut in one continuous visual language.
+    if local<.16:
+        runner=ease(local/.16)
+        endx=50+int((W-100)*runner)
+        d.line((50,128,endx,128),fill=(239,150,91,int(alpha*.78)),width=2)
+        halo(im,endx,128,(239,150,91),4,int(70*alpha/255))
+        d=ImageDraw.Draw(im,'RGBA')
 
     if scene in (0,1,2,3,4,11,12,13):
         # Reference's fine editing-grid system; shifts positions per frame and resolves into clean title card.
@@ -336,11 +343,14 @@ def render_frame(t):
     elif scene==9:
         # Hero 3-D name card showcase; unique artwork, layered stock-free vector geometry.
         sk,sh,x,y=make_tilted_card(t)
-        im.paste(sh,(x+8,y+19),sh); im.paste(sk,(x,y),sk)
+        im.paste(sh,(x+10,y+22),sh)
+        edge=Image.new('RGBA',sk.size,(102,57,39,0));edge.putalpha(sk.getchannel('A').point(lambda q:int(q*.86)))
+        im.paste(edge,(x+3,y+7),edge); im.paste(sk,(x,y),sk)
         d=ImageDraw.Draw(im,'RGBA')
-        # secondary paper stock peeking from underneath
-        d.polygon([(142,993),(568,910),(626,1004),(200,1094)],fill=(244,243,238,255))
-        d.polygon([(93,1014),(198,994),(232,1057),(123,1085)],fill=(17,19,22,255))
+        # Secondary paper stock drifts by a few pixels for a tactile parallax stack.
+        dy=int(5*math.sin(t*2.6))
+        d.polygon([(142,993+dy),(568,910+dy),(626,1004+dy),(200,1094+dy)],fill=(244,243,238,255))
+        d.polygon([(93,1014+dy),(198,994+dy),(232,1057+dy),(123,1085+dy)],fill=(17,19,22,255))
         d.text((50,90),'IDENTITY / MONARCH',font=font(12,mono=True),fill=(87,90,91,alpha))
 
     elif scene==10:
@@ -359,7 +369,13 @@ def render_frame(t):
     elif scene in (11,12):
         # Name lock-up grows from a clean type card into the final grid-guided signature.
         if scene==11:
-            centered(d,'Adil Chandio',cy-30,fit_font(d,'Adil Chandio',40,W-84),(245,246,246,alpha))
+            # Split-word signature locks together from opposite sides, then holds cleanly.
+            q=ease(local/.42); f1=font(40); f2=font(40,bold=True)
+            w1=d.textlength('Adil',font=f1); ws=d.textlength(' ',font=f1); w2=d.textlength('Chandio',font=f2)
+            x=(W-(w1+ws+w2))/2; slide=int(52*(1-q))
+            d.text((x-slide,cy-30),'Adil',font=f1,fill=(245,246,246,alpha))
+            d.text((x+w1+ws+slide,cy-30),'Chandio',font=f2,fill=(245,246,246,alpha))
+            d.line((cx-68,cy+29,cx-68+int(136*q),cy+29),fill=(239,150,91,alpha),width=2)
             d.text((51,H-126),'ADIL CHANDIO',font=font(12,bold=True),fill=(228,231,232,alpha))
             d.text((51,H-104),'AI LEARNING  •  CREATOR  •  DEVELOPER',font=font(10,mono=True),fill=(141,151,160,alpha))
         else:

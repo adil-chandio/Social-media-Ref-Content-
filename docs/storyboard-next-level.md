@@ -12,7 +12,7 @@ A personal intro for **Adil Chandio** that follows the supplied reference’s ac
 - **Palette:** blueprint cobalt `#2373A8`, warm paper `#F0EEE7`, near-black `#111215`, high-contrast white, Monarch amber `#EF965B` as the one recurring signal.
 - **Type:** Manrope for large words and IBM Plex Mono for micro-labels; avoid tiny essential copy and keep mobile safe zones clear.
 - **Silhouette:** use Adil’s supplied AI silhouette PNG with its checkerboard removed to real transparency. Keep it one connected, solid-black shape—no face, clothing detail, glow on the body, or visible source background.
-- **Motion language:** every reveal has a readable start, focal action, and settle. Use eased position/scale, controlled overshoot, type masks, graphic match-cuts, orbital motion, and short easing overlaps—not random shake, excessive glow, or effects that obscure the reference’s clean design.
+- **Motion language:** every reveal has a readable start, focal action, and settle. Use a recurring amber runner across cuts, eased position/scale, controlled overshoot, type masks, graphic match-cuts, orbital motion, card sheen/parallax, and short easing overlaps—not random shake, excessive glow, or effects that obscure the reference’s clean design.
 - **Output checks:** inspect the rendered video at every second and at all cut points; check text legibility, silhouette edges, aspect ratio, audio packet identity, and phone-safe composition.
 
 ## Story arc
