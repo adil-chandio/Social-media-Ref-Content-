@@ -210,7 +210,8 @@ def draw_adil_skills_carousel(im,t):
         # The slight angle/scale falloff echoes the reference's curved text plane.
         angle=max(-7,min(7,-pos*1.8))
         draw_rotated_skill(im,labels[(active+slot)%len(labels)],422,y,size,ink,angle)
-    # Keep this footer clear: no personal or creator handle beside the removed social mark.
+    # Keep the source's footer counter, but clear the creator-name stamp at lower left.
+    paint_row_patch(im,(22,1070,190,1135))
     return im
 
 def render_reference_frame(frame_bytes,t):
@@ -218,30 +219,24 @@ def render_reference_frame(frame_bytes,t):
     # Instagram marks are removed wherever the reference placed them; no replacement icon is added.
     if .90<=t<9.6 or 22.0<=t<26.0:
         im=remove_instagram_icon(im,(620,298,675,360))
-    if 9.6<=t<15.0 or 26.0<=t<29.95:
+    if 8.8<=t<15.0 or 22.0<=t<29.95:
         im=remove_instagram_icon(im,(80,838,138,897))
     if 15.0<=t<22.0:
         im=draw_adil_skills_carousel(im,t)
     # Replace source creator handles in place, retaining per-row colors and exact shot timing.
     if .90<=t<9.6 or 22.0<=t<26.0:
         paint_row_patch(im,(520,369,683,412))
-    if 9.6<=t<15.0 or 26.0<=t<30.0:
+    if 8.8<=t<15.0 or 22.0<=t<30.0:
         paint_row_patch(im,(82,914,262,949))
     # Replace the source creator's centered name in-place, retaining source background, cut and type motion.
     name_window=(100,560,620,690)
     if 2.68<=t<4.94 or 7.82<=t<8.88 or 22.0<=t<26.12 or 25.85<=t<34.05:
         if t>=29.95:
+            # The original closing Instagram mark and both names occupy this lock-up; clear it entirely.
             patch(im,(120,535,600,665),color=(4,3,6))
-            meta={'bbox':(200,600,520,650),'color':(43,43,45),'angle':0,'height':50}
-            draw_replacement(im,'Adil Chandio',meta)
         else:
-            im,meta=erase_text(im,name_window,threshold=4)
-            if meta:
-                progress=1.0
-                if 2.68<=t<4.94:
-                    if t<3.58:progress=max(0,min(1,(t-2.68)/.90))
-                    elif t>4.56:progress=max(0,min(1,(4.94-t)/.34))
-                draw_replacement(im,'Adil Chandio',meta,progress=progress)
+            # Remove the creator/adapted name only; leave the underlying shot and all other graphics intact.
+            im,_=erase_text(im,name_window,threshold=4)
     if 22.0<=t<22.98:
         d=ImageDraw.Draw(im)
         spaced_center(d,'6M+ VIEWS  •  4+ CHANNELS',360,703,fnt(13,'mono'),(69,69,69),1)
