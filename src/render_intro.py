@@ -33,11 +33,12 @@ def center_text(draw, text, y, f, fill, tracking=0):
 def text_width(d, text, f):
     b=d.textbbox((0,0),text,font=f); return b[2]-b[0]
 
-# Each scene deliberately changes palette, composition and type rhythm like the reference.
-BEATS = [(0,2.15),(2.15,5.15),(5.15,8.10),(8.10,10.05),(10.05,14.10),(14.10,16.45),(16.45,24.05),(24.05,28.10),(28.10,34.05)]
-PALETTES = [(13,14,18),(239,237,230),(12,13,17),(239,237,230),(30,112,166),(239,149,94),(30,112,166),(30,112,166),(9,10,14)]
+# Carefully timed to the reference's 34-second sequence. Palette and composition shifts
+# follow its actual cuts; typography, portrait, brand and portfolio panels are rebuilt for Adil.
+BEATS=[(0.00,1.55),(1.55,5.35),(5.35,6.40),(6.40,7.55),(7.55,8.65),(8.65,13.90),(13.90,15.55),(15.55,22.20),(22.20,23.10),(23.10,24.35),(24.35,26.25),(26.25,28.20),(28.20,31.05),(31.05,34.05)]
+PALETTES=[(17,18,21),(239,237,230),(15,16,19),(35,111,162),(239,237,230),(35,111,162),(35,111,162),(35,111,162),(239,237,230),(239,237,230),(35,111,162),(14,15,18),(14,15,18),(4,5,7)]
 
-def centered(d, text, y, f, color, tracking=0):
+def centered(d,text,y,f,color,tracking=0):
     widths=[d.textlength(c,font=f) for c in text]
     x=(W-(sum(widths)+tracking*max(0,len(text)-1)))/2
     for c,ww in zip(text,widths):
@@ -45,161 +46,237 @@ def centered(d, text, y, f, color, tracking=0):
 
 def fit_font(d,text,size,maxwidth,bold=True):
     f=font(size,bold=bold)
-    while d.textlength(text,font=f)>maxwidth and size>20:
+    while d.textlength(text,font=f)>maxwidth and size>18:
         size-=2; f=font(size,bold=bold)
     return f
 
-def stroke_circle(d,cx,cy,r,color,width=2):
-    d.ellipse((cx-r,cy-r,cx+r,cy+r),outline=color,width=width)
+def scene_at(t):
+    return max(0,next((k for k,(a,b) in enumerate(BEATS) if a<=t<b),len(BEATS)-1))
 
-def background(t):
-    i=max(0,next((k for k,(a,b) in enumerate(BEATS) if a<=t<b),len(BEATS)-1))
-    col=PALETTES[i]
-    # brief, clean palette transitions rather than one continuous dark treatment
-    a,b=BEATS[i]
-    if t-a<.22 and i>0:
-        col=mix(PALETTES[i-1],col,ease((t-a)/.22))
-    im=Image.new('RGB',(W,H),col)
-    return im,i
+def color_at(t):
+    i=scene_at(t); a,b=BEATS[i]; c=PALETTES[i]
+    if i and t-a<.18: c=mix(PALETTES[i-1],c,ease((t-a)/.18))
+    return c,i
+
+def orbit(d,cx,cy,r,color,w=2):
+    d.ellipse((cx-r,cy-r,cx+r,cy+r),outline=color,width=w)
+
+def draw_vector_portrait(im,t,alpha):
+    # Original graphic silhouette, intentionally anonymous; softly rounded jacket/head,
+    # animated into the portrait reveal rather than reusing the reference creator's footage.
+    lay=Image.new('RGBA',(W,H),(0,0,0,0));d=ImageDraw.Draw(lay)
+    a=alpha; bob=int(5*math.sin(t*4)); x=360; y=800+bob
+    # shoulders/coat silhouette, overlap ellipses create a naturally curved shoulder line
+    d.ellipse((x-154,y+90,x+154,y+420),fill=(18,19,21,a))
+    d.polygon([(x-84,y+34),(x+85,y+34),(x+128,y+145),(x+154,y+340),(x-154,y+340),(x-128,y+145)],fill=(18,19,21,a))
+    # neck, ears and head
+    d.rounded_rectangle((x-29,y-5,x+29,y+99),radius=15,fill=(18,19,21,a))
+    d.ellipse((x-65,y-142,x+65,y+32),fill=(18,19,21,a))
+    d.ellipse((x-76,y-76,x-51,y-28),fill=(18,19,21,a));d.ellipse((x+51,y-76,x+76,y-28),fill=(18,19,21,a))
+    # hairline/side-swept top: separate silhouette masses keep the portrait graphic.
+    d.ellipse((x-70,y-158,x+66,y-77),fill=(18,19,21,a))
+    d.polygon([(x-67,y-107),(x-22,y-149),(x+55,y-145),(x+67,y-95),(x+27,y-119),(x-4,y-100)],fill=(18,19,21,a))
+    im.alpha_composite(lay)
+
+def make_tilted_card(t):
+    # Draw original Adil identity card and perspective, inspired by the reference's 3D card beat.
+    card=Image.new('RGBA',(500,310),(0,0,0,0)); d=ImageDraw.Draw(card)
+    d.rounded_rectangle((15,15,485,295),radius=7,fill=(235,137,83,255))
+    d.rectangle((15,15,485,55),fill=(252,205,164,255))
+    for x,y,r in [(95,105,22),(410,104,20),(405,230,19)]: d.ellipse((x-r,y-r,x+r,y+r),fill=(15,16,19,255))
+    d.text((80,133),'Adil Chandio',font=font(42,bold=True),fill=(18,19,21,255))
+    d.text((82,190),'AI  /  CREATOR  /  DEVELOPER',font=font(13,mono=True),fill=(50,42,37,255))
+    d.text((82,242),'MONARCH • CREATIVE SYSTEMS',font=font(12,mono=True),fill=(79,57,43,255))
+    # A restrained perspective skew plus rotation and ground shadow make a real card stage.
+    skew=card.transform((560,330),Image.Transform.AFFINE,(1,-.15,40,.08,1,0),resample=Image.Resampling.BICUBIC)
+    shadow=Image.new('RGBA',skew.size,(0,0,0,0)); shadow.alpha_composite(skew); shadow=shadow.getchannel('A').filter(ImageFilter.GaussianBlur(18))
+    sh=Image.new('RGBA',skew.size,(0,0,0,105));sh.putalpha(shadow.point(lambda q:int(q*.52)))
+    angle=-5+2*math.sin(t*2.2)
+    sk=skew.rotate(angle,resample=Image.Resampling.BICUBIC,expand=True)
+    ss=sh.rotate(angle,resample=Image.Resampling.BICUBIC,expand=True)
+    x=int(84+24*math.sin(t*2)); y=int(406-18*math.sin(t*1.6))
+    return sk,ss,x,y
 
 def render_frame(t):
-    im,scene=background(t); d=ImageDraw.Draw(im,'RGBA')
-    start,end=BEATS[scene]; local=t-start; duration=end-start
-    enter=ease(local/.32); leave=ease((duration-local)/.26); alpha=int(255*min(enter,leave))
-    cream=scene in (1,3,5); blue=scene in (4,6,7)
-    ink=(18,20,24,alpha) if cream else (245,246,248,alpha)
-    soft=(72,76,81,alpha) if cream else (238,241,247,alpha)
-    accent=(221,116,67,alpha) if cream or scene==5 else (255,157,91,alpha)
+    scene=scene_at(t); start,end=BEATS[scene]; local=t-start; dur=end-start
+    enter=ease(local/.20); leave=ease((dur-local)/.20); alpha=int(255*min(enter,leave))
+    bg,_=color_at(t); im=Image.new('RGBA',(W,H),(*bg,255));d=ImageDraw.Draw(im,'RGBA')
+    cream=scene in (1,4,8,9); blue=scene in (3,5,6,7,10)
+    ink=(20,21,23,alpha) if cream else (246,246,244,alpha)
+    muted=(105,106,106,alpha) if cream else (214,227,235,alpha)
+    orange=(231,137,85,alpha)
     cx,cy=W//2,H//2
-    drift=int((t*22)%120)
+    drift=int((t*18)%140)
 
-    if scene in (0,2,8):
-        # Architectural grid and editor registration marks; final settles into a quiet title plate.
-        grid_alpha=36 if scene==8 else 28
-        for x in range(-120+drift,W+120,120): d.line((x,0,x,H),fill=(180,189,197,grid_alpha),width=1)
-        for y in range(-120+drift,H+120,120): d.line((0,y,W,y),fill=(180,189,197,grid_alpha),width=1)
-        for x in (140,340,580):
-            d.line((x,0,x,H),fill=(210,215,219,26),width=1)
-        d.line((0,cy,W,cy),fill=(210,215,219,28),width=1)
-        if scene==0:
-            # Type-on greeting with editorial cursor and small alignment ticks.
-            reveal=min(5,int(local*5.1)); label='HELLO'
-            f=font(94,bold=True); shown=label[:reveal]
-            centered(d,shown,cy-78,f,(248,248,246,alpha))
-            if reveal<5:
-                x=(W-d.textlength(label,font=f))/2+d.textlength(shown,font=f)+3
-                d.rounded_rectangle((x,cy-72,x+7,cy+16),radius=3,fill=(242,151,92,alpha))
-            else:
-                x=(W+d.textlength(label,font=f))/2+17
-                d.ellipse((x,cy+22,x+12,cy+34),fill=(242,151,92,alpha))
-            d.text((46,77),'MONARCH / 01',font=font(14,mono=True),fill=(154,164,176,alpha))
-            d.text((W-165,77),'INTRODUCING',font=font(14,mono=True),fill=(154,164,176,alpha))
-            d.line((138,cy-9,582,cy-9),fill=(170,178,184,58),width=1)
-            d.line((140,300,140,980),fill=(170,178,184,45),width=1)
-        elif scene==2:
-            # Dark role card echoes the reference's simple, confident type-only reveal.
-            words=['AI LEARNER','CONTENT CREATOR','YOUTUBE AUTOMATION','DEVELOPER']
-            row=int(local*1.45)%len(words); sub=(local*1.45)%1
-            y=cy-22-int(34*(1-ease(sub)))
-            d.text((54,92),'WHAT I DO',font=font(15,mono=True),fill=(132,143,157,alpha))
-            centered(d,words[row],y,fit_font(d,words[row],48,W-68),(247,247,246,alpha))
-            d.rounded_rectangle((W//2-32,cy+71,W//2+32,cy+76),radius=2,fill=(242,151,92,alpha))
-            centered(d,'LEARN  /  CREATE  /  AUTOMATE  /  BUILD',H-176,font(13,mono=True),(143,152,163,alpha),1)
+    if scene in (0,1,2,3,4,11,12,13):
+        # Reference's fine editing-grid system; shifts positions per frame and resolves into clean title card.
+        ga=28 if scene in (0,11,12) else 24
+        for x in range(-140+drift,W+140,140):d.line((x,0,x,H),fill=(115,127,136,ga),width=1)
+        for y in range(-140+drift,H+140,140):d.line((0,y,W,y),fill=(115,127,136,ga),width=1)
+        d.line((140,0,140,H),fill=(135,145,151,23),width=1);d.line((W//2,0,W//2,H),fill=(135,145,151,20),width=1)
+        d.line((0,cy,W,cy),fill=(130,143,151,26),width=1)
+        for x in (140,cx,W-140):
+            for y in (cy-14,cy+14):
+                d.ellipse((x-4,y-4,x+4,y+4),outline=(174,185,190,83),width=1)
+
+    if scene==0:
+        # Original reference's typewriter hello with center guides and orange cursor dot.
+        n=min(5,int(local*6.0)); label='Hello'; f=font(77,bold=True); shown=label[:n]
+        centered(d,shown,cy-55,f,(244,244,242,alpha))
+        if n<len(label):
+            x=(W-d.textlength(label,font=f))/2+d.textlength(shown,font=f)+2
+            d.rounded_rectangle((x,cy-50,x+6,cy+20),radius=3,fill=(239,147,91,alpha))
         else:
-            # End card: quiet measured scale-up, cut to near-black logo-like wordmark.
-            p=ease(local/.75); f=font(int(54+12*p),bold=True)
-            centered(d,'Adil Chandio',cy-56,f,(239,240,241,alpha))
-            centered(d,'AI  •  CONTENT  •  AUTOMATION  •  DEVELOPMENT',cy+31,font(13,mono=True),(130,137,145,alpha),1)
-            if local<2.0:
-                d.line((W//2-75,cy+82,W//2+75,cy+82),fill=(225,130,82,alpha),width=2)
-            d.text((54,H-80),'MONARCH STUDIO',font=font(13,mono=True),fill=(114,124,137,alpha))
-            d.text((W-149,H-80),'ADIL / 01',font=font(13,mono=True),fill=(114,124,137,alpha))
+            x=(W+d.textlength(label,font=f))/2+12;d.ellipse((x,cy+13,x+10,cy+23),fill=(239,147,91,alpha))
+        d.text((48,72),'01 / MONARCH',font=font(13,mono=True),fill=(145,153,160,alpha))
+        d.text((W-164,72),'INTRODUCING',font=font(13,mono=True),fill=(145,153,160,alpha))
 
     elif scene==1:
-        # Warm-paper nameplate with custom editorial silhouette / portrait mark.
-        d.text((54,72),'AI LEARNER   /   CREATOR   /   DEVELOPER',font=font(13,mono=True),fill=(92,96,98,alpha))
-        d.line((54,108,W-54,108),fill=(38,43,45,55),width=1)
-        d.text((130,cy-208),'I’m',font=font(42),fill=(29,31,33,alpha))
-        centered(d,'Adil Chandio',cy-150,fit_font(d,'Adil Chandio',64,W-92),(18,19,21,alpha))
-        centered(d,'AI LEARNING  &  CONTENT CREATION',cy-73,font(14,mono=True),(84,87,90,alpha),1)
-        # Original abstract silhouette (not a stock photo or copied creator portrait).
-        bob=int(8*math.sin(local*3)); headx,heady=367,cy+148+bob
-        d.ellipse((headx-62,heady-85,headx+62,heady+45),fill=(19,20,22,alpha))
-        d.polygon([(headx-49,heady+15),(headx+48,heady+15),(headx+73,heady+57),(headx+146,heady+187),(headx-150,heady+187),(headx-78,heady+58)],fill=(19,20,22,alpha))
-        d.line((56,H-93,W-56,H-93),fill=(52,56,58,60),width=1)
-        d.text((56,H-71),'CURIOUS BY NATURE. BUILDER BY CHOICE.',font=font(13,mono=True),fill=(83,87,90,alpha))
+        d.text((49,65),'AI LEARNER     CONTENT CREATOR     DEVELOPER',font=font(12,mono=True),fill=(94,98,99,alpha))
+        d.line((50,100,W-50,100),fill=(44,48,49,54),width=1)
+        d.text((130,cy-208),'I’m',font=font(39),fill=(31,32,33,alpha))
+        centered(d,'Adil Chandio',cy-150,fit_font(d,'Adil Chandio',56,W-90),(20,21,22,alpha))
+        centered(d,'AI LEARNING  /  CONTENT CREATION',cy-88,font(13,mono=True),(91,93,93,alpha),1)
+        draw_vector_portrait(im,t,alpha); d=ImageDraw.Draw(im,'RGBA')
+        d.line((52,H-96,W-52,H-96),fill=(49,52,53,55),width=1)
+        d.text((53,H-75),'LEARNING OUT LOUD. BUILDING WHAT’S NEXT.',font=font(12,mono=True),fill=(82,85,86,alpha))
 
-    elif scene==3:
-        # Short sliding wordmark—name resolves with typographic hierarchy.
-        offset=int((1-enter)*100)
-        d.text((65,cy-40-offset),'Adil',font=font(48),fill=(41,43,44,alpha))
-        d.text((184,cy-44+int((1-enter)*72)),'Chandio',font=font(55,bold=True),fill=(20,21,23,alpha))
-        d.text((68,cy+29),'LEARNING AI  /  MAKING CONTENT  /  BUILDING SOFTWARE',font=font(12,mono=True),fill=(100,101,99,alpha))
-        d.line((66,cy+68,654,cy+68),fill=(47,49,50,54),width=1)
+    elif scene in (2,3):
+        labels={2:'AI LEARNER',3:'CONTENT CREATOR'}
+        f=fit_font(d,labels[scene],46,W-70)
+        # One-beat role card; slight vertical settle instead of an unmoving caption.
+        y=cy-25+int((1-enter)*28)
+        centered(d,labels[scene],y,f,(246,247,245,alpha))
+        d.rounded_rectangle((cx-28,cy+50,cx+28,cy+55),radius=2,fill=orange)
+        small='CURIOUS BY DESIGN' if scene==2 else 'IDEAS INTO STORIES'
+        centered(d,small,H-168,font(12,mono=True),(148,157,166,alpha),1)
+        d.text((W-159,74),f'0{scene+1} / 04',font=font(12,mono=True),fill=(142,151,161,alpha))
 
     elif scene==4:
-        # Bright blue kinetic concept: sweeping orbital rings, dot, and changing headline.
-        # Rings scale out in a deliberate, slow loop, with one marker moving around the orbit.
-        pulse=.5+.5*math.sin(local*1.5)
-        for r in (94,167,241):
-            rr=int(r*(.93+.06*pulse)); stroke_circle(d,cx,cy+16,rr,(220,241,250,41 if r<200 else 25),1)
-        ang=local*1.9; px=cx+int(167*math.cos(ang)); py=cy+16+int(167*math.sin(ang))
-        d.ellipse((px-7,py-7,px+7,py+7),fill=(245,153,83,255))
-        if local<2.25:
-            centered(d,'Creativity is',cy-66,font(40),(244,248,250,alpha))
-            centered(d,'like a game,',cy-16,font(40),(244,248,250,alpha))
-            # Simple illustrated game symbols orbit through the open space.
-            qx=int(cx+205*math.cos(local*1.4+1)); qy=int(cy-195+32*math.sin(local*2))
-            d.ellipse((qx-15,qy-15,qx+15,qy+15),outline=(244,248,250,alpha),width=2)
-            d.line((qx-8,qy,qx+8,qy),fill=(244,248,250,alpha),width=3); d.line((qx,qy-8,qx,qy+8),fill=(244,248,250,alpha),width=3)
-        else:
-            centered(d,'Ideas are',cy-46,font(42),(244,248,250,alpha))
-            centered(d,'made to play.',cy+6,font(42),(244,248,250,alpha))
-        d.text((54,H-118),'ADIL CHANDIO',font=font(15,bold=True),fill=(244,248,250,alpha))
-        d.text((W-210,H-118),'AI × CREATIVITY',font=font(12,mono=True),fill=(207,228,239,alpha))
+        # Clean name reveal between role cards and the main blue motion sequence.
+        off=int((1-enter)*85)
+        d.text((69,cy-29-off),'Adil',font=font(45),fill=(45,47,48,alpha))
+        d.text((171,cy-37+int((1-enter)*50)),'Chandio',font=font(51,bold=True),fill=(20,21,22,alpha))
+        d.text((71,cy+27),'AI LEARNER  •  CONTENT CREATOR  •  DEVELOPER',font=font(11,mono=True),fill=(91,93,93,alpha))
+        d.line((68,cy+67,652,cy+67),fill=(60,64,65,54),width=1)
 
     elif scene==5:
-        # Warm punchy beat, quick split alignment and contrasting orange focal line.
-        centered(d,'AND YES,',cy-123,font(30,mono=True),(43,39,36,alpha),2)
-        x=54+int(150*(1-enter))
-        d.text((x,cy-59),'WE LIKE',font=fit_font(d,'WE LIKE',77,W-105),fill=(22,22,22,alpha))
-        centered(d,'TO PLAY.',cy+39,fit_font(d,'TO PLAY.',81,W-80),(255,248,236,alpha))
-        d.rounded_rectangle((W-94,cy+55,W-82,cy+67),radius=5,fill=(44,42,39,alpha))
-        d.text((54,80),'THE WORK IS SERIOUS.',font=font(14,mono=True),fill=(69,57,49,alpha))
-        d.text((54,106),'THE PROCESS SHOULD FEEL ALIVE.',font=font(14,mono=True),fill=(69,57,49,alpha))
+        # Blue manifesto. Three concentric rings, tiny orbiting point and icon-like geometric marks.
+        for r,op in ((117,49),(195,31),(269,19)):orbit(d,cx,cy,r,(213,238,248,op),1)
+        d.line((cx,188,cx,H-180),fill=(216,239,248,23),width=1)
+        phase=local
+        if phase<2.5:
+            centered(d,'Creativity is',cy-40,font(34),(245,248,249,alpha))
+            centered(d,'like a game,',cy+4,font(34),(245,248,249,alpha))
+        elif phase<4.0:
+            # Symbols swap/morph in four positions, matching original's little design-tool icon parade.
+            glyphs=['✦','◇','↗','□','✎','⌘','◈','↔']
+            for k in range(4):
+                x=cx-102+k*68; y=cy-10+int(9*math.sin(phase*7+k))
+                g=glyphs[(int((phase-2.2)*4)+k)%len(glyphs)]
+                d.text((x,y),g,font=font(29,bold=True),fill=(247,249,250,alpha))
+            centered(d,'like',cy+47,font(30),(245,248,249,alpha))
+        else:
+            centered(d,'and yes, we',cy-31,font(31),(245,248,249,alpha))
+            centered(d,'like to play.',cy+11,font(31,bold=True),(245,248,249,alpha))
+        ang=local*2.1; px=cx+int(195*math.cos(ang)); py=cy+int(195*math.sin(ang))
+        d.ellipse((px-5,py-5,px+5,py+5),fill=(243,154,91,alpha))
+        d.text((50,H-108),'ADIL CHANDIO',font=font(12,bold=True),fill=(247,249,250,alpha))
+        d.text((51,H-88),'@ADIL CHANDIO',font=font(10,mono=True),fill=(199,222,233,alpha))
 
     elif scene==6:
-        # Skill board inspired by reference's moving portfolio word cloud, but true to Adil.
-        d.text((49,74),'WHAT I’M BUILDING',font=font(14,mono=True),fill=(197,225,239,alpha))
-        d.text((W-170,74),'CAPABILITIES',font=font(13,mono=True),fill=(197,225,239,alpha))
-        d.line((50,110,W-50,110),fill=(229,242,249,61),width=1)
-        items=[('01','AI LEARNING','Curiosity → capability'),('02','CONTENT CREATION','Ideas made clear'),('03','YOUTUBE AUTOMATION','Repeatable creative systems'),('04','DEVELOPMENT','From prompt to product')]
-        for j,(num,title,desc) in enumerate(items):
-            y=cy-237+j*126
-            progress=ease((local-(.16+j*.19))/.42)
-            shift=int((1-progress)*80)
-            y+=int(15*math.sin(local*2.3+j))
-            d.text((54+shift,y),num,font=font(14,mono=True),fill=(241,159,99,alpha))
-            d.text((112+shift,y-13),title,font=fit_font(d,title,28,W-176),fill=(245,248,250,alpha))
-            d.text((113+shift,y+29),desc,font=font(15),fill=(193,220,233,alpha))
-            d.line((112+shift,y+70,W-54,y+70),fill=(223,239,246,39),width=1)
-        # Floating status mark, scanning softly across rows
-        scan=cy-228+int((local%1.8)/1.8*500)
-        d.ellipse((W-72,scan-4,W-64,scan+4),fill=(255,169,105,alpha))
-        d.text((54,H-104),'LEARNING IN PUBLIC. BUILDING IN REAL TIME.',font=font(13,mono=True),fill=(198,222,234,alpha))
+        # Exact reference structure: phrase anchors left; portfolio skills stream through center.
+        orbit(d,cx,cy+8,184,(215,239,248,36),1);d.line((cx,300,cx,H-200),fill=(215,239,248,22),width=1)
+        centered(d,'and yes, we',cy-29,font(28),(246,249,250,alpha))
+        centered(d,'like to play.',cy+10,font(28,bold=True),(246,249,250,alpha))
+        d.ellipse((cx+135,cy+5,cx+144,cy+14),fill=(245,153,88,alpha))
 
     elif scene==7:
-        # Orbit rings gather into a name lock-up, using the same blue/circle vocabulary as reference.
-        pulse=ease(local/1.0); radii=[int(128*(1-.14*pulse)),int(128*(1-.14*pulse)),int(128*(1-.14*pulse))]
-        centers=[(cx,cy-127),(cx-112,cy+90),(cx+112,cy+90)]
-        for k,((ox,oy),r) in enumerate(zip(centers,radii)):
-            stroke_circle(d,ox,oy,r,(220,241,250,112),2)
-            th=local*2+k*2.1; dotx=ox+int(r*math.cos(th)); doty=oy+int(r*math.sin(th))
-            d.ellipse((dotx-5,doty-5,dotx+5,doty+5),fill=(255,160,91,alpha))
-        # dissolve circles toward a sharp typographic centre
-        centered(d,'Adil Chandio',cy-25,fit_font(d,'Adil Chandio',39,W-90),(250,251,252,alpha))
-        centered(d,'AI  /  CREATOR  /  AUTOMATION  /  DEVELOPER',cy+28,font(11,mono=True),(202,227,239,alpha),1)
-        d.ellipse((cx-4,cy-4,cx+4,cy+4),fill=(247,161,91,alpha))
+        # Continuous staggered skill conveyor; the bright selected capability travels upward
+        # while the surrounding words drift/fade like the reference's animated service cloud.
+        d.line((cx,220,cx,H-155),fill=(219,239,247,22),width=1)
+        d.text((52,cy-8),'to',font=font(17),fill=(240,246,249,alpha))
+        d.text((52,cy+18),'build',font=font(17,bold=True),fill=(240,246,249,alpha))
+        d.ellipse((118,cy+24,127,cy+33),fill=(245,153,88,alpha))
+        labels=[('AI Learning',0),('Content Creation',1),('YouTube Automation',2),('Developer / Product Builds',3),('Creative Workflows',4),('AI Education',5)]
+        offset=(local*1.1)%1; base=cy-145
+        for text,k in labels:
+            y=base+(k-offset)*84
+            if cy-235<y<cy+246:
+                dist=abs(y-cy); opacity=int(alpha*max(.18,1-dist/440))
+                fsize=25 if dist<45 else 19 if dist<120 else 16
+                if dist<45: color=(250,251,250,opacity)
+                else: color=(206,226,237,opacity)
+                x=193+int(16*math.sin(local*2.4+k))
+                d.text((x,int(y)),text,font=fit_font(d,text,fsize,470),fill=color)
+        d.text((W-167,78),'SKILLS / 01–06',font=font(11,mono=True),fill=(201,224,234,alpha))
+        d.text((50,H-105),'AI  •  CONTENT  •  SYSTEMS  •  SOFTWARE',font=font(11,mono=True),fill=(205,226,235,alpha))
+
+    elif scene==8:
+        # Four minimalist portfolio panels flash in like a typographic case-study board.
+        cards=[('AI LEARNING',(34,113,163)),('CREATOR SYSTEMS',(240,145,91)),('AUTOMATION',(236,233,224)),('DEVELOPMENT',(14,15,18))]
+        for j,(name,col) in enumerate(cards):
+            y=175+j*207+int(14*math.sin(local*8+j)); x=56+int((1-enter)*(-90 if j%2==0 else 90))
+            d.rounded_rectangle((x,y,W-56,y+177),radius=2,fill=(*col,255))
+            dark=j in (1,2); tc=(23,24,25,alpha) if dark else (245,247,247,alpha)
+            d.text((x+23,y+18),f'0{j+1} / MONARCH',font=font(10,mono=True),fill=tc)
+            d.text((x+23,y+87),name,font=fit_font(d,name,23,W-110),fill=tc)
+            d.line((x+23,y+143,W-79,y+143),fill=(*tc[:3],100),width=1)
+            d.ellipse((W-99,y+17,W-91,y+25),fill=(244,150,89,255))
+
+    elif scene==9:
+        # Hero 3-D name card showcase; unique artwork, layered stock-free vector geometry.
+        sk,sh,x,y=make_tilted_card(t)
+        im.alpha_composite(sh,(x+8,y+19)); im.alpha_composite(sk,(x,y))
+        d=ImageDraw.Draw(im,'RGBA')
+        # secondary paper stock peeking from underneath
+        d.polygon([(142,993),(568,910),(626,1004),(200,1094)],fill=(244,243,238,255))
+        d.polygon([(93,1014),(198,994),(232,1057),(123,1085)],fill=(17,19,22,255))
+        d.text((50,90),'IDENTITY / MONARCH',font=font(12,mono=True),fill=(87,90,91,alpha))
+
+    elif scene==10:
+        # Three orbit system collects around the name, as in the reference's blue brand transition.
+        positions=[(cx,cy-135),(cx-116,cy+76),(cx+116,cy+76)]
+        radius=int(128-13*ease(local/1.2))
+        for j,(ox,oy) in enumerate(positions):
+            orbit(d,ox,oy,radius,(223,242,250,99),2)
+            a=local*2.5+j*2.1; px=ox+int(radius*math.cos(a));py=oy+int(radius*math.sin(a))
+            d.ellipse((px-5,py-5,px+5,py+5),fill=(247,159,93,alpha))
+        centered(d,'Adil Chandio',cy-25,fit_font(d,'Adil Chandio',39,W-75),(246,249,251,alpha))
+        centered(d,'AI  •  CREATOR  •  AUTOMATION  •  DEVELOPER',cy+25,font(10,mono=True),(206,229,239,alpha),1)
+        d.ellipse((cx-4,cy-4,cx+4,cy+4),fill=(248,162,93,alpha))
+
+    elif scene in (11,12):
+        # Name lock-up grows from a clean type card into the final grid-guided signature.
+        if scene==11:
+            centered(d,'Adil Chandio',cy-30,fit_font(d,'Adil Chandio',40,W-84),(245,246,246,alpha))
+            d.text((51,H-126),'ADIL CHANDIO',font=font(12,bold=True),fill=(228,231,232,alpha))
+            d.text((51,H-104),'AI LEARNING  •  CREATOR  •  DEVELOPER',font=font(10,mono=True),fill=(141,151,160,alpha))
+        else:
+            # Double line wipe sweeps behind the signature, then settles to exact horizontal guides.
+            sweep=int((local%dur)/dur*W)
+            d.line((0,cy-23,W,cy-23),fill=(114,130,143,36),width=1)
+            d.line((0,cy+24,W,cy+24),fill=(114,130,143,36),width=1)
+            d.line((max(0,sweep-125),cy-23,sweep,cy-23),fill=(227,235,239,112),width=2)
+            f=font(44,bold=False); width=d.textlength('Adil Chandio',font=f)
+            x=(W-width)/2
+            d.text((x,cy-32),'Adil',font=f,fill=(235,237,239,alpha))
+            d.text((x+d.textlength('Adil ',font=f),cy-32),'Chandio',font=font(44,bold=True),fill=(235,237,239,alpha))
+            centered(d,'AI LEARNING  /  CONTENT  /  AUTOMATION',cy+39,font(10,mono=True),(131,142,151,alpha),1)
+            d.text((50,H-90),'ADIL CHANDIO',font=font(12,bold=True),fill=(235,237,239,alpha))
+
+    elif scene==13:
+        # Social-style closing icon reveal: replace creator handle with known personal name, no invented username.
+        # Icon is drawn as clean vector, animates in over the finished wordmark.
+        d.text((50,H-86),'ADIL CHANDIO',font=font(13,bold=True),fill=(165,170,176,alpha))
+        d.text((W-153,H-86),'MONARCH / 01',font=font(11,mono=True),fill=(102,108,116,alpha))
+        pulse=.5+.5*math.sin(local*3.3)
+        r=int(42+4*pulse); ix,iy=cx,cy-5
+        d.rounded_rectangle((ix-r,iy-r,ix+r,iy+r),radius=20,outline=(243,245,248,alpha),width=5)
+        d.ellipse((ix-17,iy-17,ix+17,iy+17),outline=(243,245,248,alpha),width=5)
+        d.ellipse((ix+23,iy-25,ix+31,iy-17),fill=(234,92,190,alpha))
+        d.text((cx-142,cy+82),'Adil Chandio',font=font(30,bold=False),fill=(137,142,149,alpha))
+        centered(d,'LEARN  /  CREATE  /  BUILD',cy+128,font(10,mono=True),(102,109,117,alpha),2)
 
     return im.convert('RGB')
 
