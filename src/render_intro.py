@@ -108,6 +108,38 @@ def make_tilted_card(t):
     x=int(84+24*math.sin(t*2)); y=int(406-18*math.sin(t*1.6))
     return sk,ss,x,y
 
+def draw_tool_icon(d,x,y,kind,scale,alpha):
+    """Compact hand-drawn vector icon; avoids font-dependent symbol glyphs."""
+    s=scale; c=(247,249,250,alpha); w=max(2,int(2.4*s))
+    def p(points): return [(int(x+u*s),int(y+v*s)) for u,v in points]
+    if kind==0: # cursor
+        d.polygon(p([(-12,-15),(13,3),(2,5),(8,16),(2,19),(-4,7),(-10,14)]),outline=c,fill=(0,0,0,0))
+        d.line(p([(-12,-15),(-10,14)]),fill=c,width=w)
+    elif kind==1: # pen nib
+        d.polygon(p([(0,-17),(13,0),(0,16),(-13,0)]),outline=c,width=w)
+        d.ellipse((int(x-3*s),int(y-3*s),int(x+3*s),int(y+3*s)),outline=c,width=w)
+        d.line(p([(0,16),(0,4)]),fill=c,width=w)
+    elif kind==2: # frame/shape
+        d.rectangle((int(x-13*s),int(y-13*s),int(x+13*s),int(y+13*s)),outline=c,width=w)
+        for u,v in [(-13,-13),(13,-13),(-13,13),(13,13)]:
+            d.ellipse((int(x+(u-2)*s),int(y+(v-2)*s),int(x+(u+2)*s),int(y+(v+2)*s)),fill=c)
+    elif kind==3: # brush
+        d.line(p([(-12,11),(7,-8)]),fill=c,width=max(3,int(4*s)))
+        d.ellipse((int(x+4*s),int(y-14*s),int(x+16*s),int(y-2*s)),outline=c,width=w)
+        d.line(p([(-16,15),(-6,5)]),fill=c,width=w)
+    elif kind==4: # nodes / automation flow
+        d.line(p([(-13,0),(0,-10),(13,1),(0,12),(-13,0)]),fill=c,width=w)
+        for u,v in [(-13,0),(0,-10),(13,1),(0,12)]: d.ellipse((int(x+(u-3)*s),int(y+(v-3)*s),int(x+(u+3)*s),int(y+(v+3)*s)),fill=(35,112,164,255),outline=c,width=w)
+    elif kind==5: # spark
+        d.polygon(p([(0,-17),(4,-4),(17,0),(4,4),(0,17),(-4,4),(-17,0),(-4,-4)]),outline=c,width=w)
+    elif kind==6: # undo/loop
+        box=(int(x-14*s),int(y-14*s),int(x+14*s),int(y+14*s))
+        d.arc(box,start=45,end=315,fill=c,width=w)
+        d.polygon(p([(-15,-3),(-15,-14),(-4,-11)]),fill=c)
+    else: # media/layout card
+        d.rounded_rectangle((int(x-16*s),int(y-12*s),int(x+16*s),int(y+12*s)),radius=int(3*s),outline=c,width=w)
+        d.line(p([(-7,-11),(-7,11)]),fill=c,width=w);d.line(p([(-4,-4),(13,-4)]),fill=c,width=w);d.line(p([(-4,3),(8,3)]),fill=c,width=w)
+
 def render_frame(t):
     scene=scene_at(t); start,end=BEATS[scene]; local=t-start; dur=end-start
     enter=ease(local/.20); leave=ease((dur-local)/.20); alpha=int(255*min(enter,leave))
@@ -178,59 +210,96 @@ def render_frame(t):
         d.line((68,cy+67,652,cy+67),fill=(60,64,65,54),width=1)
 
     elif scene==5:
-        # Blue manifesto. Three concentric rings, tiny orbiting point and icon-like geometric marks.
-        for r,op in ((117,49),(195,31),(269,19)):orbit(d,cx,cy,r,(213,238,248,op),1)
-        d.line((cx,188,cx,H-180),fill=(216,239,248,23),width=1)
-        phase=local
-        if phase<2.5:
-            centered(d,'Creativity is',cy-40,font(34),(245,248,249,alpha))
-            centered(d,'like a game,',cy+4,font(34),(245,248,249,alpha))
-        elif phase<4.0:
-            # Symbols swap/morph in four positions, matching original's little design-tool icon parade.
-            glyphs=['✦','◇','↗','□','✎','⌘','◈','↔']
-            for k in range(4):
-                x=cx-102+k*68; y=cy-10+int(9*math.sin(phase*7+k))
-                g=glyphs[(int((phase-2.2)*4)+k)%len(glyphs)]
-                d.text((x,y),g,font=font(29,bold=True),fill=(247,249,250,alpha))
-            centered(d,'like',cy+47,font(30),(245,248,249,alpha))
+        # Six-second motion-design playground: phrase changes, tool glyphs orbit, multiple
+        # markers sweep different rings, and the phrase resolves before the next shot.
+        for k,(r,op) in enumerate(((117,48),(195,31),(269,18))):
+            orbit(d,cx,cy,r,(213,238,248,op),1)
+            startang=int((local*62+k*108)%360)
+            d.arc((cx-r,cy-r,cx+r,cy+r),start=startang,end=startang+84,fill=(232,244,249,min(alpha,92-k*15)),width=2)
+        d.line((cx,188,cx,H-180),fill=(216,239,248,24),width=1)
+        # Three independent orbiting points replace the single slow dot.
+        for k,r in enumerate((117,195,269)):
+            ang=local*(1.25+.17*k)+k*2.18
+            px=cx+int(r*math.cos(ang));py=cy+int(r*math.sin(ang))
+            if k==1: halo(im,px,py,(243,154,91),5,92);d=ImageDraw.Draw(im,'RGBA')
+            marker=(243,154,91,alpha) if k==1 else (222,240,248,alpha)
+            d.ellipse((px-4-k,py-4-k,px+4+k,py+4+k),fill=marker)
+        if local<1.25:
+            # First hook: one bold short phrase, with a different entrance on each line.
+            q=ease(local/.34)
+            centered(d,'Creativity is',cy-34+int(25*(1-q)),font(39,bold=True),(245,248,249,alpha))
+            d.line((cx-68,cy+27,cx-68+int(136*q),cy+27),fill=(245,153,91,alpha),width=2)
+        elif local<2.45:
+            q=ease((local-1.25)/.28)
+            centered(d,'like a game,',cy-20+int(26*(1-q)),font(42,bold=True),(245,248,249,alpha))
+            centered(d,'CREATIVITY IN PLAY',cy+42,font(12,mono=True),(203,225,235,alpha),1)
+        elif local<4.0:
+            # Eight bespoke vector tools travel around the orbit. No missing-font glyphs.
+            p=local-2.45
+            for k in range(8):
+                ang=2*math.pi*k/8 + p*.86
+                ix=cx+int(153*math.cos(ang));iy=cy+int(153*math.sin(ang))
+                pulse=.82+.18*(.5+.5*math.sin(p*8+k))
+                draw_tool_icon(d,ix,iy,int(p*2.8+k)%8,pulse,alpha)
+            centered(d,'like',cy-20,font(37,bold=True),(246,249,250,alpha))
+            centered(d,'TOOLS  /  IDEAS  /  PLAY',cy+34,font(11,mono=True),(208,228,237,alpha),1)
         else:
-            centered(d,'and yes, we',cy-31,font(31),(245,248,249,alpha))
-            centered(d,'like to play.',cy+11,font(31,bold=True),(245,248,249,alpha))
-        ang=local*2.1; px=cx+int(195*math.cos(ang)); py=cy+int(195*math.sin(ang))
-        halo(im,px,py,(243,154,91),5,110);d=ImageDraw.Draw(im,'RGBA')
-        d.ellipse((px-5,py-5,px+5,py+5),fill=(243,154,91,alpha))
+            p=ease((local-4.0)/.32)
+            centered(d,'and yes, we',cy-51+int(16*(1-p)),font(29),(246,248,249,alpha))
+            centered(d,'like to',cy-7,font(30),(246,248,249,alpha))
+            centered(d,'play.',cy+37,font(46,bold=True),(255,255,255,alpha))
+            d.line((cx-56,cy+94,cx-56+int(112*p),cy+94),fill=(246,153,91,alpha),width=3)
         d.text((50,H-108),'ADIL CHANDIO',font=font(12,bold=True),fill=(247,249,250,alpha))
-        d.text((51,H-88),'@ADIL CHANDIO',font=font(10,mono=True),fill=(199,222,233,alpha))
+        d.text((51,H-88),'AI  /  CREATOR  /  BUILDER',font=font(10,mono=True),fill=(199,222,233,alpha))
 
     elif scene==6:
-        # Exact reference structure: phrase anchors left; portfolio skills stream through center.
-        orbit(d,cx,cy+8,184,(215,239,248,36),1);d.line((cx,300,cx,H-200),fill=(215,239,248,22),width=1)
-        centered(d,'and yes, we',cy-29,font(28),(246,249,250,alpha))
-        centered(d,'like to play.',cy+10,font(28,bold=True),(246,249,250,alpha))
-        d.ellipse((cx+135,cy+5,cx+144,cy+14),fill=(245,153,88,alpha))
+        # Phrase gets a second, more energetic composition—not a 1.6-second frozen hold.
+        q=local/1.65
+        for k,r in enumerate((94,184,260)):
+            orbit(d,cx,cy,r,(215,239,248,30-k*7),1)
+            ang=int((local*85+k*130)%360)
+            d.arc((cx-r,cy-r,cx+r,cy+r),start=ang,end=ang+104,fill=(234,243,248,65-k*13),width=2)
+            px=cx+int(r*math.cos(math.radians(ang+104)));py=cy+int(r*math.sin(math.radians(ang+104)))
+            d.ellipse((px-3,py-3,px+3,py+3),fill=(244,151,90,alpha))
+        centered(d,'AND YES, WE',cy-77,font(16,mono=True),(207,227,237,alpha),2)
+        # Split words enter from opposite sides and snap to a strong, readable lockup.
+        left=int(-80*(1-ease(local/.34))); right=int(80*(1-ease(max(0,local-.12)/.34)))
+        d.text((119+left,cy-32),'LIKE TO',font=font(41,bold=True),fill=(245,248,250,alpha))
+        d.text((376+right,cy-32),'PLAY.',font=font(49,bold=True,extra=True),fill=(255,255,255,alpha))
+        d.rounded_rectangle((W//2-30,cy+44,W//2-30+int(60*ease(local/.5)),cy+50),radius=3,fill=(246,153,91,alpha))
+        d.text((50,H-108),'ADIL CHANDIO',font=font(12,bold=True),fill=(247,249,250,alpha))
+        d.text((51,H-88),'MAKE SOMETHING THAT MOVES.',font=font(10,mono=True),fill=(199,222,233,alpha))
 
     elif scene==7:
-        # Continuous staggered skill conveyor; the bright selected capability travels upward
-        # while the surrounding words drift/fade like the reference's animated service cloud.
-        d.line((cx,220,cx,H-155),fill=(219,239,247,22),width=1)
+        # Eight-item infinite capability conveyor. One selected line gets a clean highlight;
+        # neighbouring lines stay visible so the viewer sees the breadth, not just two choices.
+        d.line((cx,210,cx,H-143),fill=(219,239,247,24),width=1)
         d.text((52,cy-8),'to',font=font(17),fill=(240,246,249,alpha))
         d.text((52,cy+18),'build',font=font(17,bold=True),fill=(240,246,249,alpha))
         d.ellipse((118,cy+24,127,cy+33),fill=(245,153,88,alpha))
-        labels=[('AI Learning',0),('Content Creation',1),('YouTube Automation',2),('Developer / Product Builds',3),('Creative Workflows',4),('AI Education',5)]
-        offset=(local*1.1)%1; base=cy-200
-        for text,k in labels:
-            y=base+(k-offset)*100
-            if cy-255<y<cy+260:
-                dist=abs(y-cy); opacity=int(alpha*max(.16,1-dist/460))
-                fsize=34 if dist<50 else 24 if dist<135 else 17
-                color=(250,251,250,opacity) if dist<50 else (205,228,239,opacity)
-                x=191+int(13*math.sin(local*2.4+k))
-                if dist<50:
-                    d.rounded_rectangle((x-12,int(y)-8,W-42,int(y)+44),radius=4,fill=(13,73,115,int(alpha*.22)))
-                    d.line((x-12,int(y)+49,W-42,int(y)+49),fill=(247,159,93,opacity),width=2)
-                d.text((x,int(y)),text,font=fit_font(d,text,fsize,475),fill=color)
-        d.text((W-167,78),'SKILLS / 01–06',font=font(11,mono=True),fill=(201,224,234,alpha))
-        d.text((50,H-105),'AI  •  CONTENT  •  SYSTEMS  •  SOFTWARE',font=font(11,mono=True),fill=(205,226,235,alpha))
+        labels=['AI Learning','AI Content Creation','YouTube Automation','Workflow Automation','Software Development','Monarch Agent Builds','Creator Tools & Systems','Motion & Video Editing']
+        scroll=local*1.18; active=int(scroll)%len(labels); fraction=scroll%1
+        spacing=94
+        for slot in range(-3,5):
+            idx=(active+slot)%len(labels)
+            y=cy+int((slot-fraction)*spacing)
+            if cy-337<y<cy+405:
+                dist=abs(y-cy); opacity=int(alpha*max(.17,1-dist/490))
+                focused=(slot==0)
+                fsize=34 if focused else 23 if dist<210 else 17
+                color=(250,251,250,opacity) if focused else (205,228,239,opacity)
+                x=187+int(10*math.sin(local*2.2+slot))
+                d.text((146,int(y)+5),f'{idx+1:02d}',font=font(10,mono=True),fill=(245,159,99,opacity))
+                if focused:
+                    d.rounded_rectangle((x-12,int(y)-8,W-40,int(y)+45),radius=5,fill=(13,73,115,int(alpha*.28)))
+                    d.line((x-12,int(y)+49,W-40,int(y)+49),fill=(247,159,93,opacity),width=2)
+                d.text((x,int(y)),labels[idx],font=fit_font(d,labels[idx],fsize,490),fill=color)
+        d.text((W-174,78),f'SKILLS / {active+1:02d}–08',font=font(11,mono=True),fill=(201,224,234,alpha))
+        # Moving progress ticks make the 7-second list feel active between words too.
+        for k in range(8):
+            xx=50+k*18; tick=alpha if k==(active%8) else int(alpha*.32)
+            d.rounded_rectangle((xx,H-116,xx+10,H-113),radius=1,fill=(240,244,246,tick))
+        d.text((50,H-91),'AI  •  CONTENT  •  SYSTEMS  •  SOFTWARE',font=font(11,mono=True),fill=(205,226,235,alpha))
 
     elif scene==8:
         # Four minimalist portfolio panels flash in like a typographic case-study board.

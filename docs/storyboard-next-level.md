@@ -33,20 +33,20 @@ Frame numbers use **zero-based, half-open ranges** `[in, out)` at 30 fps. Approx
 | 05–06 | 150–179 | Hard dark card: **AI LEARNER**. | Short vertical type settle; one amber rule lands under the role, timed to the reference’s quick role change. |
 | 06–07 | 180–209 | Cobalt card: **CONTENT CREATOR**. | Graphic match-cut from the underline into the blue page; the word resolves in two stages rather than appearing as a static caption. |
 | 07–08 | 210–239 | Warm-paper name card: **Adil Chandio**. | “Adil” and “Chandio” slide into one baseline; a thin tracking line draws under the name. |
-| 08–09 | 240–269 | Blue field, orbital construction begins; “Creativity is”. | Concentric circles scale outward from center; an amber point starts its orbit. Headline enters on a soft vertical mask. |
-| 09–10 | 270–299 | “Creativity is / like a game,” becomes the central phrase. | Second line rises into place; the rings breathe subtly, not pulse aggressively. |
-| 10–11 | 300–329 | Phrase holds; crosshair and orbit point continue. | Micro-movement keeps the still moment alive; no competing copy. |
-| 11–12 | 330–359 | Design/game symbol sequence begins; “like” anchors the center. | Four custom vector symbols cycle/morph on the musical phrase; each changes once, with shape-matched swaps. |
-| 12–13 | 360–389 | Symbol row resolves; “like” becomes the hinge to the next line. | Symbols drift toward the orbit and hand off to the amber point. Maintain clean blue negative space. |
-| 13–14 | 390–419 | **“and yes, we like to play.”** | Two-line phrase enters with a small emphasis on “play”; visual accent lands near the reference’s strong late-13-sec hit. |
-| 14–15 | 420–449 | Phrase and orbit linger, then begin handing off. | The orbit contracts into a vertical guide; lower-left identity tag remains small and unobtrusive. |
-| 15–16 | 450–479 | Blue skill-conveyor begins; left anchor: **to build**. | The capability list enters as a moving editorial word-cloud, not as a boxed bullet list. First highlighted item: AI learning. |
-| 16–17 | 480–509 | **AI Learning / Content Creation** pass through the focus line. | Active phrase enlarges and brightens briefly; adjacent phrases drift/fade. |
-| 17–18 | 510–539 | **YouTube Automation** becomes the focal line. | Amber marker tracks the active phrase; list advances continuously at a readable pace. |
-| 18–19 | 540–569 | **Developer / Product Builds** takes focus. | Focus bar travels with the selected phrase; surrounding rows stay legible but lower contrast. |
-| 19–20 | 570–599 | **Creative Workflows / AI Education** move through. | Build momentum with staggered word entries; avoid running copy beyond vertical safe margins. |
-| 20–21 | 600–629 | Skill cloud reaches its strongest, cleanest layout. | Selection changes land around measured audio accents; line/ring geometry prepares the portfolio reveal. |
-| 21–22 | 630–659 | Final capabilities pass; list compresses toward center. | Amber marker pulls toward the next page; short color lift into the montage. |
+| 08–09 | 240–269 | Blue field, orbital construction begins; **“Creativity is”**. | Multiple concentric arcs draw on at staggered speeds; amber and pale-cyan markers travel separate radii. Headline enters on a short mask. |
+| 09–10 | 270–299 | **“Creativity is”** gets a one-beat, clean hold. | Underline writes on; the orbit arcs continue moving, so the page never freezes. |
+| 10–11 | 300–329 | **“like a game,”** replaces the first phrase. | Phrase slides in and the rings keep rotating; the scale changes emphasize the new line. |
+| 11–12 | 330–359 | Eight hand-drawn vector design/tool icons enter around the ring; **“like”** anchors center. | Icons orbit and subtly pulse with staggered movement; no missing-font glyphs or static single-dot hold. |
+| 12–13 | 360–389 | Tool icons hand off into **“and yes, we / like to play.”** | Word layers rise one by one; “play” lands with a short amber underline. |
+| 13–14 | 390–419 | The phrase shifts into a new three-line composition. | Several orbit arcs/markers continue moving while the key phrase settles near the reference’s late-13-sec accent. |
+| 14–15 | 420–449 | **“LIKE TO / PLAY.”** resolves in split directions. | “LIKE TO” and “PLAY” slide from opposite sides, then snap to a shared baseline; the cobalt page hands off to the skill conveyor. |
+| 15–16 | 450–479 | Blue capability conveyor opens with **to build**; first active line. | A looping 8-item carousel begins; several adjacent skills remain on screen at once. |
+| 16–17 | 480–509 | **AI Learning → AI Content Creation** move through the focus position. | Selection scales/highlights as the surrounding list continues scrolling; top counter updates. |
+| 17–18 | 510–539 | **YouTube Automation / Workflow Automation** pass through. | Continuous vertical drift plus a changing focus rail; no hold on only two phrases. |
+| 18–19 | 540–569 | **Software Development / Monarch Agent Builds** take focus. | Active phrase lands large, neighbouring capability names remain readable. |
+| 19–20 | 570–599 | **Creator Tools & Systems / Motion & Video Editing** pass through. | Eight distinct items complete the carousel loop; progress ticks move with selection. |
+| 20–21 | 600–629 | Loop returns to **AI Learning / AI Content Creation**. | Keep the scroll active and the label order circular—no list-empty moment at the end. |
+| 21–22 | 630–659 | Final skill pair moves toward the portfolio montage. | The active rail and progress ticks pull the eye into the next warm-paper color change. |
 | 22–23 | 660–689 | Four portfolio/proof panels: **6M+ VIEWS**, **4+ CHANNELS**, **AI × CREATIVITY**, **MONARCH / BUILDS**. | Panels enter in an offset stagger, using cobalt/orange/paper/black as four crisp full-width bands. These profile figures must remain current/approved. |
 | 23–24 | 690–719 | Warm-paper dimensional showcase; **Adil Chandio** identity card. | The custom orange card floats in with perspective, rotation, soft cast shadow, and a small parallax settle. Secondary paper layers fan behind it. |
 | 24–25 | 720–749 | Cobalt field returns; three orbital circles assemble. | Circles draw on at staggered timings; amber markers travel along separate paths. Name appears at the first convergence. |
