@@ -1,0 +1,6 @@
+# Private source media and generated renders
+reference_media/
+google_drive/
+deliverables/*.mp4
+__pycache__/
+.venv/
