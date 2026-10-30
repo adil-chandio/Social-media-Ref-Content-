@@ -154,10 +154,16 @@ def render_frame(t):
 
     elif scene in (2,3):
         labels={2:'AI LEARNER',3:'CONTENT CREATOR'}
-        f=fit_font(d,labels[scene],46,W-70)
-        # One-beat role card; slight vertical settle instead of an unmoving caption.
+        label=labels[scene]
+        # Letter-by-letter mask reveal over the cut, with a moving amber cursor.
+        count=min(len(label),int(max(0,local)*len(label)/.42))
+        shown=label[:count]
+        f=fit_font(d,label,46,W-70)
         y=cy-25+int((1-enter)*28)
-        centered(d,labels[scene],y,f,(246,247,245,alpha))
+        centered(d,shown,y,f,(246,247,245,alpha))
+        if count<len(label):
+            x=(W-d.textlength(label,font=f))/2+d.textlength(shown,font=f)+2
+            d.rounded_rectangle((x,cy-17,x+4,cy+31),radius=2,fill=orange)
         d.rounded_rectangle((cx-28,cy+50,cx+28,cy+55),radius=2,fill=orange)
         small='CURIOUS BY DESIGN' if scene==2 else 'IDEAS INTO STORIES'
         centered(d,small,H-168,font(12,mono=True),(148,157,166,alpha),1)
