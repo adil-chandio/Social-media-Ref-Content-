@@ -35,9 +35,39 @@ def center_text(draw, text, y, f, fill, tracking=0):
 def text_width(d, text, f):
     b=d.textbbox((0,0),text,font=f); return b[2]-b[0]
 
-# Carefully timed to the reference's 34-second sequence. Palette and composition shifts
-# follow its actual cuts; typography, portrait, brand and portfolio panels are rebuilt for Adil.
-BEATS=[(0.00,1.55),(1.55,5.35),(5.35,6.40),(6.40,7.55),(7.55,8.65),(8.65,13.90),(13.90,15.55),(15.55,22.20),(22.20,23.10),(23.10,24.35),(24.35,26.25),(26.25,28.20),(28.20,31.05),(31.05,34.05)]
+class AlphaDraw:
+    """ImageDraw proxy that correctly honors RGBA alpha for text on an RGB frame."""
+    def __init__(self, image):
+        self.image=image
+        self.draw=ImageDraw.Draw(image,'RGBA')
+    def __getattr__(self,name):
+        return getattr(self.draw,name)
+    def text(self,xy,text,*args,**kwargs):
+        fill=kwargs.get('fill')
+        if not isinstance(fill,(tuple,list)) or len(fill)<4 or fill[3]>=255:
+            return self.draw.text(xy,text,*args,**kwargs)
+        opacity=max(0,min(255,int(fill[3])))
+        if opacity==0:return
+        bbox=self.draw.textbbox(xy,text,font=kwargs.get('font'),anchor=kwargs.get('anchor'),stroke_width=kwargs.get('stroke_width',0))
+        pad=3; left=max(0,int(math.floor(bbox[0]-pad))); top=max(0,int(math.floor(bbox[1]-pad)))
+        right=min(self.image.width,int(math.ceil(bbox[2]+pad))); bottom=min(self.image.height,int(math.ceil(bbox[3]+pad)))
+        if right<=left or bottom<=top:return
+        layer=Image.new('RGBA',(right-left,bottom-top),(0,0,0,0)); ld=ImageDraw.Draw(layer)
+        opt=dict(kwargs); opt['fill']=(*fill[:3],255)
+        ld.text((xy[0]-left,xy[1]-top),text,*args,**opt)
+        layer.putalpha(layer.getchannel('A').point(lambda a:a*opacity//255))
+        self.image.paste(layer,(left,top),layer.getchannel('A'))
+
+# Scene boundaries are snapped to audible attacks measured from the untouched source track.
+# The source has a steady ~1.067 s accent cycle from 0.988 to 27.15 s, plus two closing hits.
+# At 30 fps, cuts land on the nearest frame to those attacks; visual elements use the same clock.
+AUDIO_GRID_START=0.988
+AUDIO_GRID_PERIOD=1.067
+AUDIO_GRID_END=27.15
+AUDIO_HITS=(0.190,0.399,0.988,1.397,1.796,2.055,2.325,2.594,2.794,3.123,3.392,3.662,3.981,4.190,4.460,4.859,5.258,5.657,6.056,6.326,6.595,6.854,7.124,7.393,7.663,8.191,8.461,8.730,9.129,9.528,9.927,10.327,10.596,10.865,11.125,11.394,11.663,11.923,12.462,12.731,12.990,13.260,13.529,13.789,14.198,14.597,14.856,15.126,15.395,15.664,15.924,16.193,16.592,16.991,17.261,17.790,18.059,18.458,18.857,19.127,19.396,19.795,20.194,21.262,21.790,22.060,22.329,22.589,22.858,23.127,23.397,23.926,24.325,24.724,24.993,25.392,25.702,26.061,26.240,27.258,30.391,30.890,31.079)
+ACCENT_HITS=(0.190,0.988,1.397,2.055,3.123,4.190,5.258,6.595,7.663,8.730,9.528,10.596,11.125,12.990,13.789,15.126,16.991,18.059,19.127,20.194,21.262,22.329,22.858,23.127,23.926,24.993,26.061,30.391,30.890,31.079)
+# Ordered scene map, frame-accurately locked to the audible accent around every cut.
+BEATS=[(0.00,1.397),(1.397,5.258),(5.258,6.595),(6.595,7.663),(7.663,8.730),(8.730,13.789),(13.789,15.395),(15.395,22.329),(22.329,23.127),(23.127,24.464),(24.464,26.061),(26.061,28.20),(28.20,30.391),(30.391,34.05)]
 PALETTES=[(17,18,21),(239,237,230),(15,16,19),(35,111,162),(239,237,230),(35,111,162),(35,111,162),(35,111,162),(239,237,230),(239,237,230),(35,111,162),(14,15,18),(14,15,18),(4,5,7)]
 
 def centered(d,text,y,f,color,tracking=0):
@@ -55,9 +85,19 @@ def fit_font(d,text,size,maxwidth,bold=True,extra=False):
 def scene_at(t):
     return max(0,next((k for k,(a,b) in enumerate(BEATS) if a<=t<b),len(BEATS)-1))
 
+def beat_phase(t):
+    """Phase-lock continuous motion to the measured 1.067-second accent cycle."""
+    return 2*math.pi*(t-AUDIO_GRID_START)/AUDIO_GRID_PERIOD
+
+def hit_pulse(t):
+    """Short visual accents on strong source-audio attacks; ignore speech-level micro-transients."""
+    nearest=min(ACCENT_HITS,key=lambda onset:abs(t-onset))
+    dt=abs(t-nearest)
+    return math.exp(-.5*(dt/.045)**2) if dt<.11 else 0.0
+
 def color_at(t):
     i=scene_at(t); a,b=BEATS[i]; c=PALETTES[i]
-    if i and t-a<.18: c=mix(PALETTES[i-1],c,ease((t-a)/.18))
+    if i and t-a<.08: c=mix(PALETTES[i-1],c,ease((t-a)/.08))
     return c,i
 
 def orbit(d,cx,cy,r,color,w=2):
@@ -100,17 +140,18 @@ def make_tilted_card(t):
     d.text((82,242),'MONARCH • CREATIVE SYSTEMS',font=font(12,mono=True),fill=(79,57,43,255))
     # A soft traveling specular sweep makes the printed surface feel tactile, not flat.
     shine=Image.new('RGBA',card.size,(0,0,0,0)); sd=ImageDraw.Draw(shine)
-    sweep=int(((t-23.10)/1.25)*560)-65
+    sweep=int(((t-23.127)/1.067)*560)-65
     sd.polygon([(sweep-34,58),(sweep-8,58),(sweep+84,290),(sweep+58,290)],fill=(255,247,234,34))
     card=Image.alpha_composite(card,shine)
     # A restrained perspective skew plus rotation and ground shadow make a real card stage.
     skew=card.transform((560,330),Image.Transform.AFFINE,(1,-.15,40,.08,1,0),resample=Image.Resampling.BICUBIC)
     shadow=Image.new('RGBA',skew.size,(0,0,0,0)); shadow.alpha_composite(skew); shadow=shadow.getchannel('A').filter(ImageFilter.GaussianBlur(18))
     sh=Image.new('RGBA',skew.size,(0,0,0,105));sh.putalpha(shadow.point(lambda q:int(q*.52)))
-    angle=-7+3.5*math.sin(t*2.8)
+    card_phase=2*math.pi*(t-23.127)/1.067
+    angle=-7+3.5*math.sin(card_phase)
     sk=skew.rotate(angle,resample=Image.Resampling.BICUBIC,expand=True)
     ss=sh.rotate(angle,resample=Image.Resampling.BICUBIC,expand=True)
-    x=int(78+16*math.sin(t*2.7)); y=int(397-21*math.sin(t*2.1))
+    x=int(78+16*math.sin(card_phase)); y=int(397-21*math.sin(card_phase+.62))
     return sk,ss,x,y
 
 def draw_tool_icon(d,x,y,kind,scale,alpha):
@@ -147,8 +188,9 @@ def draw_tool_icon(d,x,y,kind,scale,alpha):
 
 def render_frame(t):
     scene=scene_at(t); start,end=BEATS[scene]; local=t-start; dur=end-start
-    enter=ease(local/.20); leave=ease((dur-local)/.20); alpha=int(255*min(enter,leave))
-    bg,_=color_at(t); im=Image.new('RGB',(W,H),bg);d=ImageDraw.Draw(im,'RGBA')
+    # 80 ms attack/release keeps each visual landing on its source-audio transient.
+    enter=ease(local/.08); leave=ease((dur-local)/.055); alpha=int(255*min(enter,leave))
+    bg,_=color_at(t); im=Image.new('RGB',(W,H),bg);d=AlphaDraw(im)
     cream=scene in (1,4,8,9); blue=scene in (3,5,6,7,10)
     ink=(20,21,23,alpha) if cream else (246,246,244,alpha)
     muted=(105,106,106,alpha) if cream else (214,227,235,alpha)
@@ -159,9 +201,11 @@ def render_frame(t):
     if local<.16:
         runner=ease(local/.16)
         endx=50+int((W-100)*runner)
-        d.line((50,128,endx,128),fill=(239,150,91,int(alpha*.78)),width=2)
-        halo(im,endx,128,(239,150,91),4,int(70*alpha/255))
-        d=ImageDraw.Draw(im,'RGBA')
+        # The runner's first pixel lands on the audio hit even while the new title is fading up.
+        run_alpha=255 if local<.10 else int(255*max(0,(.16-local)/.06))
+        d.line((50,128,endx,128),fill=(239,150,91,int(run_alpha*.86)),width=2)
+        halo(im,endx,128,(239,150,91),4,int(70*run_alpha/255))
+        d=AlphaDraw(im)
 
     if scene in (0,1,2,3,4,11,12,13):
         # Reference's fine editing-grid system; shifts positions per frame and resolves into clean title card.
@@ -176,7 +220,8 @@ def render_frame(t):
 
     if scene==0:
         # Original reference's typewriter hello with center guides and orange cursor dot.
-        n=min(5,int(local*6.0)); label='Hello'; f=font(77,bold=True,extra=True); shown=label[:n]
+        # Begin on the opening hit, then reveal one glyph per 267 ms subdivision.
+        n=min(5,max(0,int(max(0,local-.190)/.267)+1)); label='Hello'; f=font(77,bold=True,extra=True); shown=label[:n]
         centered(d,shown,cy-55,f,(244,244,242,alpha))
         if n<len(label):
             x=(W-d.textlength(label,font=f))/2+d.textlength(shown,font=f)+2
@@ -192,7 +237,7 @@ def render_frame(t):
         d.text((130,cy-208),'I’m',font=font(39),fill=(31,32,33,alpha))
         centered(d,'Adil Chandio',cy-150,fit_font(d,'Adil Chandio',56,W-90,extra=True),(20,21,22,alpha))
         centered(d,'AI LEARNING  /  CONTENT CREATION',cy-88,font(13,mono=True),(91,93,93,alpha),1)
-        draw_black_silhouette(im,t,alpha); d=ImageDraw.Draw(im,'RGBA')
+        draw_black_silhouette(im,t,alpha); d=AlphaDraw(im)
         d.line((52,H-96,W-52,H-96),fill=(49,52,53,55),width=1)
         d.text((53,H-75),'LEARNING OUT LOUD. BUILDING WHAT’S NEXT.',font=font(12,mono=True),fill=(82,85,86,alpha))
 
@@ -226,14 +271,14 @@ def render_frame(t):
         # markers sweep different rings, and the phrase resolves before the next shot.
         for k,(r,op) in enumerate(((117,48),(195,31),(269,18))):
             orbit(d,cx,cy,r,(213,238,248,op),1)
-            startang=int((local*62+k*108)%360)
+            startang=int((beat_phase(t)*.184*180/math.pi+k*108)%360)
             d.arc((cx-r,cy-r,cx+r,cy+r),start=startang,end=startang+84,fill=(232,244,249,min(alpha,92-k*15)),width=2)
         d.line((cx,188,cx,H-180),fill=(216,239,248,24),width=1)
         # Three independent orbiting points replace the single slow dot.
         for k,r in enumerate((117,195,269)):
-            ang=local*(1.25+.17*k)+k*2.18
+            ang=beat_phase(t)*(.212+.029*k)+k*2.18
             px=cx+int(r*math.cos(ang));py=cy+int(r*math.sin(ang))
-            if k==1: halo(im,px,py,(243,154,91),5,92);d=ImageDraw.Draw(im,'RGBA')
+            if k==1: halo(im,px,py,(243,154,91),5,92);d=AlphaDraw(im)
             marker=(243,154,91,alpha) if k==1 else (222,240,248,alpha)
             d.ellipse((px-4-k,py-4-k,px+4+k,py+4+k),fill=marker)
         if local<1.25:
@@ -249,10 +294,12 @@ def render_frame(t):
             # Eight bespoke vector tools travel around the orbit. No missing-font glyphs.
             p=local-2.45
             for k in range(8):
-                ang=2*math.pi*k/8 + p*.86
+                icon_phase=2*math.pi*(t-11.125)/1.067
+                ang=2*math.pi*k/8 + icon_phase*.146
                 ix=cx+int(153*math.cos(ang));iy=cy+int(153*math.sin(ang))
-                pulse=.82+.18*(.5+.5*math.sin(p*8+k))
-                draw_tool_icon(d,ix,iy,int(p*2.8+k)%8,pulse,alpha)
+                pulse=.82+.18*(.5+.5*math.sin(icon_phase*4+k))
+                icon_kind=int(max(0,t-11.125)/.267+k)%8
+                draw_tool_icon(d,ix,iy,icon_kind,pulse,alpha)
             centered(d,'like',cy-20,font(37,bold=True),(246,249,250,alpha))
             centered(d,'TOOLS  /  IDEAS  /  PLAY',cy+34,font(11,mono=True),(208,228,237,alpha),1)
         else:
@@ -269,7 +316,7 @@ def render_frame(t):
         q=local/1.65
         for k,r in enumerate((94,184,260)):
             orbit(d,cx,cy,r,(215,239,248,30-k*7),1)
-            ang=int((local*85+k*130)%360)
+            ang=int((beat_phase(t)*.25*180/math.pi+k*130)%360)
             d.arc((cx-r,cy-r,cx+r,cy+r),start=ang,end=ang+104,fill=(234,243,248,65-k*13),width=2)
             px=cx+int(r*math.cos(math.radians(ang+104)));py=cy+int(r*math.sin(math.radians(ang+104)))
             d.ellipse((px-3,py-3,px+3,py+3),fill=(244,151,90,alpha))
@@ -290,7 +337,8 @@ def render_frame(t):
         d.text((52,cy+18),'build',font=font(17,bold=True),fill=(240,246,249,alpha))
         d.ellipse((118,cy+24,127,cy+33),fill=(245,153,88,alpha))
         labels=['AI Learning','AI Content Creation','YouTube Automation','Workflow Automation','Software Development','Monarch Agent Builds','Creator Tools & Systems','Motion & Video Editing']
-        scroll=local*1.18; active=int(scroll)%len(labels); fraction=scroll%1
+        # One capability advances every 1.5 measured beats (0.800 s), anchored to the first skill hit.
+        scroll=max(0,(t-15.395)/.800); active=int(scroll)%len(labels); fraction=scroll%1
         spacing=94
         for slot in range(-3,5):
             idx=(active+slot)%len(labels)
@@ -300,7 +348,7 @@ def render_frame(t):
                 focused=(slot==0)
                 fsize=34 if focused else 23 if dist<210 else 17
                 color=(250,251,250,opacity) if focused else (205,228,239,opacity)
-                x=187+int(10*math.sin(local*2.2+slot))
+                x=187+int(10*math.sin(beat_phase(t)*.25+slot))
                 d.text((146,int(y)+5),f'{idx+1:02d}',font=font(10,mono=True),fill=(245,159,99,opacity))
                 if focused:
                     d.rounded_rectangle((x-12,int(y)-8,W-40,int(y)+45),radius=5,fill=(13,73,115,int(alpha*.28)))
@@ -317,14 +365,16 @@ def render_frame(t):
         # Four minimalist portfolio panels flash in like a typographic case-study board.
         cards=[('6M+ VIEWS','CREATOR REACH',(35,112,164)),('4+ CHANNELS','YOUTUBE AUTOMATION',(238,145,92)),('AI × CREATIVITY','LEARNING IN PUBLIC',(235,232,223)),('MONARCH / BUILDS','DEVELOPMENT',(13,15,18))]
         for j,(headline,caption,col) in enumerate(cards):
-            cp=ease((local-j*.13)/.28)
-            y=91+j*275+int(9*math.sin(local*10+j))+int((1-cp)*20)
+            # Four panel landings use the source's half-beat subdivisions; count-ups resolve on the next hit.
+            cp=ease((local-j*.134)/.267)
+            panel_alpha=int(alpha*ease((local-j*.134)/.08))
+            y=91+j*275+int(5*math.sin(beat_phase(t)*.5+j))+int((1-cp)*20)
             x=49+int((1-cp)*(-48 if j%2==0 else 48))
-            # Soft offset shadow and staggered entry give each proof panel a separate landing.
+            # Each panel opacity/landing is staggered on successive audible subdivisions.
             d.rectangle((x+7,y+8,W-42,y+261),fill=(20,27,34,int(28*cp)))
-            d.rectangle((x,y,W-49,y+253),fill=(*col,255))
-            dark=j in (1,2); tc=(23,24,25,alpha) if dark else (245,247,247,alpha)
-            accent=(246,161,99,255)
+            d.rectangle((x,y,W-49,y+253),fill=(*col,panel_alpha))
+            dark=j in (1,2); tc=(23,24,25,panel_alpha) if dark else (245,247,247,panel_alpha)
+            accent=(246,161,99,panel_alpha)
             d.text((x+25,y+21),f'0{j+1} / ADIL CHANDIO',font=font(11,mono=True),fill=tc)
             d.ellipse((W-88,y+24,W-76,y+36),fill=accent)
             stat=headline
@@ -346,7 +396,7 @@ def render_frame(t):
         im.paste(sh,(x+10,y+22),sh)
         edge=Image.new('RGBA',sk.size,(102,57,39,0));edge.putalpha(sk.getchannel('A').point(lambda q:int(q*.86)))
         im.paste(edge,(x+3,y+7),edge); im.paste(sk,(x,y),sk)
-        d=ImageDraw.Draw(im,'RGBA')
+        d=AlphaDraw(im)
         # Secondary paper stock drifts by a few pixels for a tactile parallax stack.
         dy=int(5*math.sin(t*2.6))
         d.polygon([(142,993+dy),(568,910+dy),(626,1004+dy),(200,1094+dy)],fill=(244,243,238,255))
@@ -359,8 +409,8 @@ def render_frame(t):
         radius=int(128-13*ease(local/1.2))
         for j,(ox,oy) in enumerate(positions):
             orbit(d,ox,oy,radius,(223,242,250,99),2)
-            a=local*2.5+j*2.1; px=ox+int(radius*math.cos(a));py=oy+int(radius*math.sin(a))
-            halo(im,px,py,(247,159,93),4,105);d=ImageDraw.Draw(im,'RGBA')
+            a=beat_phase(t)*.424+j*2.1; px=ox+int(radius*math.cos(a));py=oy+int(radius*math.sin(a))
+            halo(im,px,py,(247,159,93),4,105);d=AlphaDraw(im)
             d.ellipse((px-5,py-5,px+5,py+5),fill=(247,159,93,alpha))
         centered(d,'Adil Chandio',cy-25,fit_font(d,'Adil Chandio',39,W-75),(246,249,251,alpha))
         centered(d,'AI  •  CREATOR  •  AUTOMATION  •  DEVELOPER',cy+25,font(10,mono=True),(206,229,239,alpha),1)
@@ -380,10 +430,11 @@ def render_frame(t):
             d.text((51,H-104),'AI LEARNING  •  CREATOR  •  DEVELOPER',font=font(10,mono=True),fill=(141,151,160,alpha))
         else:
             # Double line wipe sweeps behind the signature, then settles to exact horizontal guides.
-            sweep=int((local%dur)/dur*W)
+            # One soft sweep resolves on entry; the long source-audio pause becomes a deliberate visual hold.
+            sweep=int(ease(local/.40)*W)
             d.line((0,cy-23,W,cy-23),fill=(114,130,143,36),width=1)
             d.line((0,cy+24,W,cy+24),fill=(114,130,143,36),width=1)
-            d.line((max(0,sweep-125),cy-23,sweep,cy-23),fill=(227,235,239,112),width=2)
+            if sweep>0: d.line((max(0,sweep-125),cy-23,sweep,cy-23),fill=(227,235,239,112),width=2)
             f=font(44,bold=False); width=d.textlength('Adil Chandio',font=f)
             x=(W-width)/2
             d.text((x,cy-32),'Adil',font=f,fill=(235,237,239,alpha))
@@ -396,11 +447,12 @@ def render_frame(t):
         # Icon is drawn as clean vector, animates in over the finished wordmark.
         d.text((50,H-86),'ADIL CHANDIO',font=font(13,bold=True),fill=(165,170,176,alpha))
         d.text((W-153,H-86),'MONARCH / 01',font=font(11,mono=True),fill=(102,108,116,alpha))
-        pulse=.5+.5*math.sin(local*3.3)
-        r=int(42+4*pulse); ix,iy=cx,cy-5
-        d.rounded_rectangle((ix-r,iy-r,ix+r,iy+r),radius=20,outline=(243,245,248,alpha),width=5)
-        d.ellipse((ix-17,iy-17,ix+17,iy+17),outline=(243,245,248,alpha),width=5)
-        d.ellipse((ix+23,iy-25,ix+31,iy-17),fill=(234,92,190,alpha))
+        # Logo impact swells exactly on the paired 30.391/30.890 s audio hits, then holds.
+        pulse=max(.20,hit_pulse(t)); ring_alpha=max(alpha,int(245*hit_pulse(t)))
+        r=int(42+7*pulse); ix,iy=cx,cy-5
+        d.rounded_rectangle((ix-r,iy-r,ix+r,iy+r),radius=20,outline=(243,245,248,ring_alpha),width=5)
+        d.ellipse((ix-17,iy-17,ix+17,iy+17),outline=(243,245,248,ring_alpha),width=5)
+        d.ellipse((ix+23,iy-25,ix+31,iy-17),fill=(239,150,91,ring_alpha))
         d.text((cx-142,cy+82),'Adil Chandio',font=font(30,bold=False),fill=(137,142,149,alpha))
         centered(d,'LEARN  /  CREATE  /  BUILD',cy+128,font(10,mono=True),(102,109,117,alpha),2)
 

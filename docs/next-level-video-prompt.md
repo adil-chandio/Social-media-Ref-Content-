@@ -32,7 +32,7 @@ Build one coherent visual story around **SIGNAL → IDENTITY → CAPABILITY → 
 
 ### Audio and edit rules
 
-Use the supplied source clip's audio **exactly as provided**. Do not regenerate, replace, remix, time-stretch, denoise, or add music/SFX. Align visual accents to the existing sound without changing the audio. In the final mux, stream-copy the original audio track and verify that the extracted audio packet stream is byte-identical to the source.
+Use the supplied source clip's audio **exactly as provided**. Do not regenerate, replace, remix, time-stretch, denoise, or add music/SFX. Analyze its transient/onset map first; place scene cuts, type reveals, carousel selection changes, card motion, and final logo impact directly on audible hits, not just at approximate whole-second timestamps. Use short, controlled visual accents on strong attacks and phrase changes; lock recurring motion to the measured pulse without making every tiny speech transient flash. Respect the long quiet gap as a deliberate visual hold, then land the final mark on the closing hit. In the final mux, stream-copy the original audio track and verify that the extracted audio packet stream is byte-identical to the source.
 
 ### Quality bar / reject if
 

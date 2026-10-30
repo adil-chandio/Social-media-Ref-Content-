@@ -8,7 +8,7 @@ A personal intro for **Adil Chandio** that follows the supplied reference’s ac
 ## Technical lock
 
 - **Master:** 9:16 vertical, 720 × 1280, 30 fps; reference runtime ~34.05 sec, about 1,022 frame slots (final frame count to be conformed to source audio/video timestamps).
-- **Audio:** keep the supplied reference audio stream untouched; all visual accents are timed around it, with no new music or SFX layered on top.
+- **Audio:** keep the supplied reference audio stream untouched; all visual accents are timed around it, with no new music or SFX layered on top. The render is now cue-mapped to analyzed source transients: scene cuts land on nearby attacks, the greeting uses ~267 ms character steps, skill focus advances every ~800 ms, card/orbit motion follows the measured pulse, and the closing mark hits the 30.391/30.890 sec accents. The long audio pause is treated as an intentional quiet hold.
 - **Palette:** blueprint cobalt `#2373A8`, warm paper `#F0EEE7`, near-black `#111215`, high-contrast white, Monarch amber `#EF965B` as the one recurring signal.
 - **Type:** Manrope for large words and IBM Plex Mono for micro-labels; avoid tiny essential copy and keep mobile safe zones clear.
 - **Silhouette:** use Adil’s supplied AI silhouette PNG with its checkerboard removed to real transparency. Keep it one connected, solid-black shape—no face, clothing detail, glow on the body, or visible source background.
