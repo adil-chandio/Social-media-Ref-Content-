@@ -2,6 +2,7 @@
 """Reference-faithful Adil edit: retain the supplied reference frames and soundtrack,
 then surgically replace creator-specific identity, cutout and skills text."""
 import argparse, math, os, statistics, subprocess
+from bisect import bisect_right
 from PIL import Image, ImageDraw, ImageFont
 import imageio_ffmpeg
 import cv2
@@ -9,6 +10,9 @@ import numpy as np
 
 W,H,FPS=720,1280,30
 DURATION=33.9
+# Measured source-audio accents inside the skill-scroll scene, prefixed by the
+# scene cut. Each skill's focus lands exactly on the next impact (18.059 s included).
+SKILL_SCROLL_ANCHORS=(15.0,15.126,16.991,18.059,19.127,20.194,21.262,22.329)
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
 SIL_PATH=os.path.join(ROOT,'assets','adil-silhouette.png')
 FONT=os.path.join(ROOT,'assets','fonts','Manrope-400.ttf')
@@ -197,14 +201,24 @@ def draw_adil_skills_carousel(im,t):
     d.text((43,202),'DISCIPLINES',font=fnt(12,'mono'),fill=(177,204,224))
     d.text((654,202),'11',font=fnt(12,'mono'),fill=(177,204,224))
     d.text((44,624),'to play',font=fnt(39,'bold'),fill=(240,243,245))
-    d.ellipse((189,635,202,648),fill=(239,148,87))
     labels=['AI Learning','AI Content Creation','YouTube Automation','Workflow Automation',
             'Software Development','Monarch Agent Builds','Creator Tools & Systems','Motion & Video Editing']
-    scroll=max(0,(t-15.395)/.800);active=int(scroll)%len(labels);fraction=scroll%1
+    # Scroll phase follows the analyzed source hits rather than a guessed fixed-rate timer.
+    # Each interval eases into the next skill so its focus lands exactly on the next impact.
+    hit_index=max(0,min(len(SKILL_SCROLL_ANCHORS)-2,bisect_right(SKILL_SCROLL_ANCHORS,t)-1))
+    hit0,hit1=SKILL_SCROLL_ANCHORS[hit_index:hit_index+2]
+    beat_fraction=max(0.0,min(1.0,(t-hit0)/(hit1-hit0)))
+    beat_fraction=beat_fraction*beat_fraction*(3-2*beat_fraction)
+    scroll=float(hit_index)+beat_fraction
+    active=int(math.floor(scroll))%len(labels);fraction=scroll-math.floor(scroll)
+    accents=SKILL_SCROLL_ANCHORS[1:-1]
+    pulse=max((math.exp(-.5*((t-hit)/.055)**2) for hit in accents),default=0.0)
+    dot_r=6+round(2*pulse)
+    d.ellipse((195-dot_r,641-dot_r,195+dot_r,641+dot_r),fill=(239,148,87))
     for slot in range(-3,5):
         pos=slot-fraction;y=640+round(pos*57);dist=abs(pos)
         if not 390<=y<=890:continue
-        if dist<.58:size,ink=31,(237,243,247)
+        if dist<.58:size,ink=31+round(2*pulse),(237,243,247)
         elif dist<1.55:size,ink=25,(190,220,238)
         else:size,ink=19,(133,181,209)
         # The slight angle/scale falloff echoes the reference's curved text plane.
@@ -217,14 +231,14 @@ def draw_adil_skills_carousel(im,t):
 def render_reference_frame(frame_bytes,t):
     im=Image.frombytes('RGB',(W,H),frame_bytes)
     # Instagram marks are removed wherever the reference placed them; no replacement icon is added.
-    if .90<=t<9.6 or 22.0<=t<26.0:
+    if 0.0<=t<9.6 or 22.0<=t<26.0:
         im=remove_instagram_icon(im,(620,298,675,360))
     if 8.8<=t<15.0 or 22.0<=t<29.95:
         im=remove_instagram_icon(im,(80,838,138,897))
     if 15.0<=t<22.0:
         im=draw_adil_skills_carousel(im,t)
     # Replace source creator handles in place, retaining per-row colors and exact shot timing.
-    if .90<=t<9.6 or 22.0<=t<26.0:
+    if 0.0<=t<9.6 or 22.0<=t<26.0:
         paint_row_patch(im,(520,369,683,412))
     if 8.8<=t<15.0 or 22.0<=t<30.0:
         paint_row_patch(im,(82,914,262,949))
