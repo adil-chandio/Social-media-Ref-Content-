@@ -98,6 +98,11 @@ def make_tilted_card(t):
     d.text((80,133),'Adil Chandio',font=font(42,bold=True),fill=(18,19,21,255))
     d.text((82,190),'AI  /  CREATOR  /  DEVELOPER',font=font(13,mono=True),fill=(50,42,37,255))
     d.text((82,242),'MONARCH • CREATIVE SYSTEMS',font=font(12,mono=True),fill=(79,57,43,255))
+    # A soft traveling specular sweep makes the printed surface feel tactile, not flat.
+    shine=Image.new('RGBA',card.size,(0,0,0,0)); sd=ImageDraw.Draw(shine)
+    sweep=int(((t-23.10)/1.25)*560)-65
+    sd.polygon([(sweep-34,58),(sweep-8,58),(sweep+84,290),(sweep+58,290)],fill=(255,247,234,34))
+    card=Image.alpha_composite(card,shine)
     # A restrained perspective skew plus rotation and ground shadow make a real card stage.
     skew=card.transform((560,330),Image.Transform.AFFINE,(1,-.15,40,.08,1,0),resample=Image.Resampling.BICUBIC)
     shadow=Image.new('RGBA',skew.size,(0,0,0,0)); shadow.alpha_composite(skew); shadow=shadow.getchannel('A').filter(ImageFilter.GaussianBlur(18))
@@ -294,7 +299,7 @@ def render_frame(t):
                     d.rounded_rectangle((x-12,int(y)-8,W-40,int(y)+45),radius=5,fill=(13,73,115,int(alpha*.28)))
                     d.line((x-12,int(y)+49,W-40,int(y)+49),fill=(247,159,93,opacity),width=2)
                 d.text((x,int(y)),labels[idx],font=fit_font(d,labels[idx],fsize,490),fill=color)
-        d.text((W-174,78),f'SKILLS / {active+1:02d}–08',font=font(11,mono=True),fill=(201,224,234,alpha))
+        d.text((W-174,78),f'SKILLS / {active+1:02d} / 08',font=font(11,mono=True),fill=(201,224,234,alpha))
         # Moving progress ticks make the 7-second list feel active between words too.
         for k in range(8):
             xx=50+k*18; tick=alpha if k==(active%8) else int(alpha*.32)
@@ -305,16 +310,27 @@ def render_frame(t):
         # Four minimalist portfolio panels flash in like a typographic case-study board.
         cards=[('6M+ VIEWS','CREATOR REACH',(35,112,164)),('4+ CHANNELS','YOUTUBE AUTOMATION',(238,145,92)),('AI × CREATIVITY','LEARNING IN PUBLIC',(235,232,223)),('MONARCH / BUILDS','DEVELOPMENT',(13,15,18))]
         for j,(headline,caption,col) in enumerate(cards):
-            y=91+j*275+int(9*math.sin(local*10+j)); x=49+int((1-enter)*(-110 if j%2==0 else 110))
+            cp=ease((local-j*.13)/.28)
+            y=91+j*275+int(9*math.sin(local*10+j))+int((1-cp)*20)
+            x=49+int((1-cp)*(-48 if j%2==0 else 48))
+            # Soft offset shadow and staggered entry give each proof panel a separate landing.
+            d.rectangle((x+7,y+8,W-42,y+261),fill=(20,27,34,int(28*cp)))
             d.rectangle((x,y,W-49,y+253),fill=(*col,255))
             dark=j in (1,2); tc=(23,24,25,alpha) if dark else (245,247,247,alpha)
             accent=(246,161,99,255)
             d.text((x+25,y+21),f'0{j+1} / ADIL CHANDIO',font=font(11,mono=True),fill=tc)
             d.ellipse((W-88,y+24,W-76,y+36),fill=accent)
-            f=fit_font(d,headline,43,W-100,extra=True)
-            d.text((x+25,y+93),headline,font=f,fill=tc)
+            stat=headline
+            if j==0:
+                count=int(6*ease((local)/.48))
+                stat=f'{count}M+ VIEWS' if count>=6 else f'{count}M VIEWS' if count else 'CREATOR REACH'
+            elif j==1:
+                count=int(4*ease((local-.12)/.48))
+                stat=f'{count}+ CHANNELS' if count>=4 else f'{count} CHANNELS' if count else 'YOUTUBE AUTOMATION'
+            f=fit_font(d,stat,43,W-100,extra=True)
+            d.text((x+25,y+93),stat,font=f,fill=tc)
             d.text((x+27,y+158),caption,font=font(13,mono=True),fill=tc)
-            d.line((x+25,y+205,W-74,y+205),fill=(*tc[:3],112),width=1)
+            d.line((x+25,y+205,x+25+int((W-123)*cp),y+205),fill=(*tc[:3],160),width=2)
             d.text((x+25,y+221),'MONARCH  /  CREATIVE SYSTEMS',font=font(10,mono=True),fill=tc)
 
     elif scene==9:
