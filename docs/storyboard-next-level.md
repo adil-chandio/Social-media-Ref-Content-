@@ -3,7 +3,7 @@
 ## Goal
 A personal intro for **Adil Chandio** that follows the supplied reference’s actual visual choreography—not a generic AI montage. The sequence moves from a designed “Hello” grid, to the supplied pure-black silhouette reveal, to fast role cards, a blue motion-design playground, skills, creator proof, a dimensional identity card, orbiting wordmark, and a deliberate social close.
 
-**This is the structure/approval document, not the next render.** No further video edit should start until Adil approves or corrects this plan.
+**Status:** this storyboard documents the delivered motion-design pass and its timing. The render is complete; use `docs/next-level-video-prompt.md` as the reusable creative brief for any future revision.
 
 ## Technical lock
 
@@ -69,11 +69,6 @@ Frame numbers use **zero-based, half-open ranges** `[in, out)` at 30 fps. Approx
 5. **Premium compositing:** controlled paper/ink/cobalt transitions, soft card shadow, subtle parallax, clean antialiasing, and intentional hold frames.
 6. **No unsupported personal claims:** use only Adil’s stated roles and profile figures already present in the source profile; omit extra handles or metrics unless confirmed.
 
-## Approval checkpoint
+## Delivery / future revision notes
 
-Before the next render, review these four choices:
-
-- Keep both profile figures (**6M+ views**, **4+ channels**) or remove them?
-- Keep the final Instagram-style icon but no handle, or replace it with a Monarch mark?
-- Keep the title copy exactly as written, or change any role wording?
-- Approve this shot order and timings for the next video pass?
+The current video render is delivered at `deliverables/adil-chandio-monarch-intro.mp4`. Treat the metrics (**6M+ views**, **4+ channels**) and role copy as approved only while they remain accurate; confirm them before republishing. The reusable production brief is `docs/next-level-video-prompt.md`.

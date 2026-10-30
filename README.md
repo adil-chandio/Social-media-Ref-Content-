@@ -1,6 +1,6 @@
 # Adil Chandio — Monarch Portfolio Intro
 
-See [`docs/storyboard-next-level.md`](docs/storyboard-next-level.md) for the proposed frame-accurate structure for the next pass. That shot map is an approval checkpoint; it is not rendered into a new video yet.
+See [`docs/storyboard-next-level.md`](docs/storyboard-next-level.md) for the frame-accurate structure of the delivered video, and [`docs/next-level-video-prompt.md`](docs/next-level-video-prompt.md) for the full reusable creative prompt and QA brief.
 
 A 9:16 portfolio intro adapted to the supplied reference's timed sequence: type-on greeting, paper-white identity reveal, quick role cards, blue orbital manifesto, moving skills list, portfolio/stat panels, a floating 3-D identity card, and the final grid signature. Original audio is stream-copied from the supplied clip; all visuals are rebuilt for Adil and the reference creator's watermark is not reused.
 
