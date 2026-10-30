@@ -1,6 +1,7 @@
 # Private source media and generated renders
 reference_media/
 google_drive/
+assets/adil-portrait.jpg
 deliverables/*.mp4
 __pycache__/
 .venv/

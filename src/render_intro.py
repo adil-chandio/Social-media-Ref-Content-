@@ -71,32 +71,19 @@ def halo(im,x,y,color,radius=5,strength=120):
     layer=layer.filter(ImageFilter.GaussianBlur(17))
     im.paste(layer,(int(x-q),int(y-q)),layer)
 
-PORTRAIT_PATH=os.path.abspath(os.path.join(os.path.dirname(__file__),'..','assets','adil-portrait.jpg'))
-PORTRAIT=Image.open(PORTRAIT_PATH).convert('RGB')
+SILHOUETTE_PATH=os.path.abspath(os.path.join(os.path.dirname(__file__),'..','assets','adil-silhouette.png'))
+SILHOUETTE=Image.open(SILHOUETTE_PATH).convert('RGBA')
 
-def draw_portrait_photo(im,t,alpha):
-    # Use Adil's supplied portrait where the reference introduces its silhouette.
-    # A gentle scale-up, rounded print edge and soft cast shadow make it feel designed-in,
-    # while keeping the actual face/photo untouched.
-    progress=ease((t-1.92)/.90)
-    size=int(444*(.93+.07*progress))
-    x=(W-size)//2; y=1145-size+int(38*(1-progress))
-    # soft grounding shadow on the paper background
-    vis=max(0,min(255,int(alpha*progress)))
-    shadow=Image.new('RGBA',(size+64,size+64),(0,0,0,0));sd=ImageDraw.Draw(shadow)
-    sd.rounded_rectangle((28,28,size+36,size+36),radius=14,fill=(0,0,0,int(95*vis/255)))
-    shadow=shadow.filter(ImageFilter.GaussianBlur(18))
-    im.paste(shadow,(x-32,y-18),shadow)
-    # Thin warm paper mount and crisp rounded photo crop
-    d=ImageDraw.Draw(im,'RGBA')
-    d.rounded_rectangle((x-6,y-6,x+size+6,y+size+6),radius=15,fill=(249,248,244,vis),outline=(255,255,255,vis),width=2)
-    photo=PORTRAIT.resize((size,size),Image.Resampling.LANCZOS)
-    mask=Image.new('L',(size,size),0);md=ImageDraw.Draw(mask);md.rounded_rectangle((0,0,size-1,size-1),radius=11,fill=255)
+def draw_black_silhouette(im,t,alpha):
+    # Reveal the photo-derived cutout where the reference introduces its person shape.
+    # The RGB of the cutout is pure black: the face, suit detail, and source background are absent.
+    progress=ease((t-2.08)/.78)
+    size=int(465+35*progress)
+    x=(W-size)//2; y=1142-size+int(30*(1-progress))
+    mask=SILHOUETTE.resize((size,size),Image.Resampling.LANCZOS).getchannel('A')
     opacity=max(0,min(255,int(alpha*progress)))
     mask=mask.point(lambda q:q*opacity//255)
-    im.paste(photo,(x,y),mask)
-    d=ImageDraw.Draw(im,'RGBA')
-    d.rounded_rectangle((x-6,y-6,x+size+6,y+size+6),radius=15,outline=(255,255,255,alpha),width=2)
+    im.paste((0,0,0),(x,y,x+size,y+size),mask)
 
 def make_tilted_card(t):
     # Draw original Adil identity card and perspective, inspired by the reference's 3D card beat.
@@ -157,7 +144,7 @@ def render_frame(t):
         d.text((130,cy-208),'I’m',font=font(39),fill=(31,32,33,alpha))
         centered(d,'Adil Chandio',cy-150,fit_font(d,'Adil Chandio',56,W-90,extra=True),(20,21,22,alpha))
         centered(d,'AI LEARNING  /  CONTENT CREATION',cy-88,font(13,mono=True),(91,93,93,alpha),1)
-        draw_portrait_photo(im,t,alpha); d=ImageDraw.Draw(im,'RGBA')
+        draw_black_silhouette(im,t,alpha); d=ImageDraw.Draw(im,'RGBA')
         d.line((52,H-96,W-52,H-96),fill=(49,52,53,55),width=1)
         d.text((53,H-75),'LEARNING OUT LOUD. BUILDING WHAT’S NEXT.',font=font(12,mono=True),fill=(82,85,86,alpha))
 
