@@ -210,8 +210,7 @@ def draw_adil_skills_carousel(im,t):
         # The slight angle/scale falloff echoes the reference's curved text plane.
         angle=max(-7,min(7,-pos*1.8))
         draw_rotated_skill(im,labels[(active+slot)%len(labels)],422,y,size,ink,angle)
-    d=ImageDraw.Draw(im)
-    d.text((87,918),'ADIL CHANDIO',font=fnt(16,'extra'),fill=(245,247,248))
+    # Keep this footer clear: no personal or creator handle beside the removed social mark.
     return im
 
 def render_reference_frame(frame_bytes,t):
@@ -225,13 +224,9 @@ def render_reference_frame(frame_bytes,t):
         im=draw_adil_skills_carousel(im,t)
     # Replace source creator handles in place, retaining per-row colors and exact shot timing.
     if .90<=t<9.6 or 22.0<=t<26.0:
-        bg=paint_row_patch(im,(520,369,683,412));d=ImageDraw.Draw(im)
-        ink=(22,22,25) if sum(bg)>380 else (242,242,240)
-        ff=fit(d,'ADIL CHANDIO',18,156,'extra');d.text((525,379),'ADIL CHANDIO',font=ff,fill=ink)
+        paint_row_patch(im,(520,369,683,412))
     if 9.6<=t<15.0 or 26.0<=t<30.0:
-        bg=paint_row_patch(im,(82,914,262,949));d=ImageDraw.Draw(im)
-        ink=(22,22,25) if sum(bg)>380 else (242,242,240)
-        ff=fit(d,'ADIL CHANDIO',17,171,'extra');d.text((87,920),'ADIL CHANDIO',font=ff,fill=ink)
+        paint_row_patch(im,(82,914,262,949))
     # Replace the source creator's centered name in-place, retaining source background, cut and type motion.
     name_window=(100,560,620,690)
     if 2.68<=t<4.94 or 7.82<=t<8.88 or 22.0<=t<26.12 or 25.85<=t<34.05:
@@ -268,9 +263,9 @@ def render_reference_frame(frame_bytes,t):
         replace_small_copy(im,(175,704,545,750),'AI LEARNER • CONTENT CREATOR • DEVELOPER',color=(35,35,37),size=12,tracking=0)
     if 26.25<=t<30.0:
         replace_small_copy(im,(145,674,575,730),'AI LEARNER • CONTENT CREATOR • DEVELOPER',color=(177,177,178),size=12,tracking=0)
-    # Closing social mark is intentionally omitted; keep the wordmark and Adil name only.
+    # No social handle or name is shown in the closing lock-up; use only Adil's role line.
     if 29.95<=t<34.05:
-        replace_small_copy(im,(246,686,474,755),'ADIL CHANDIO',color=(235,235,235),size=19,tracking=2)
+        replace_small_copy(im,(246,686,474,755),'AI LEARNER • CONTENT CREATOR • DEVELOPER',color=(155,155,158),size=8,tracking=0)
     return im
 
 def main():
