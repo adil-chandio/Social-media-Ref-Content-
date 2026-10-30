@@ -3,7 +3,7 @@
 then surgically replace creator-specific identity, cutout and skills text."""
 import argparse, math, os, statistics, subprocess
 from bisect import bisect_right
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import imageio_ffmpeg
 import cv2
 import numpy as np
@@ -14,12 +14,12 @@ DURATION=33.9
 # scene cut. Each skill's focus lands exactly on the next impact (18.059 s included).
 SKILL_SCROLL_ANCHORS=(15.0,15.126,16.991,18.059,19.127,20.194,21.262,22.329)
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
-SIL_PATH=os.path.join(ROOT,'assets','adil-silhouette.png')
+PHOTO_PATH=os.path.join(ROOT,'assets','adil-photo-cutout.png')
 FONT=os.path.join(ROOT,'assets','fonts','Manrope-400.ttf')
 BOLD=os.path.join(ROOT,'assets','fonts','Manrope-700.ttf')
 EXTRA=os.path.join(ROOT,'assets','fonts','Manrope-800.ttf')
 MONO=os.path.join(ROOT,'assets','fonts','IBMPlexMono-400.ttf')
-SIL=Image.open(SIL_PATH).convert('RGBA')
+PHOTO=Image.open(PHOTO_PATH).convert('RGBA')
 
 
 def fnt(size,kind='regular'):
@@ -161,13 +161,19 @@ def row_background(im,x0,x1,y0,y1):
 def replace_silhouette(im,t):
     if not 3.83<=t<5.82:return
     row_background(im,145,575,770,1280)
-    # The supplied cutout replaces the reference figure at the same lower-center scale.
-    h=480;w=round(h*SIL.width/SIL.height);sil=SIL.resize((w,h),Image.Resampling.LANCZOS)
-    alpha=sil.getchannel('A')
+    # Adil's supplied portrait cutout replaces the reference figure at the same
+    # lower-center placement and fade timing as the earlier silhouette beat.
+    h=500;w=round(h*PHOTO.width/PHOTO.height);ph=PHOTO.resize((w,h),Image.Resampling.LANCZOS)
     q=max(0,min(1,(t-3.90)/.28))
     if t>5.54:q*=max(0,min(1,(5.82-t)/.28))
-    alpha=alpha.point(lambda a:int(a*q));sil.putalpha(alpha)
-    im.paste(sil,((W-w)//2,800),sil)
+    alpha=ph.getchannel('A').point(lambda a:int(a*q))
+    ph.putalpha(alpha)
+    x=(W-w)//2;y=H-h
+    # Soft editorial drop shadow grounds the portrait on the paper background.
+    sh=alpha.filter(ImageFilter.GaussianBlur(7)).point(lambda a:int(a*.42))
+    base=Image.new('RGBA',(w,h),(54,52,48,255));base.putalpha(sh)
+    im.paste(base,(x+2,y+9),base)
+    im.paste(ph,(x,y),ph)
 
 def draw_orbits(d):
     c=(71,143,193)
