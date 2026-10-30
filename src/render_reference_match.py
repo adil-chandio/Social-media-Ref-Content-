@@ -232,11 +232,19 @@ def render_reference_frame(frame_bytes,t):
     name_window=(100,560,620,690)
     if 2.68<=t<4.94 or 7.82<=t<8.88 or 22.0<=t<26.12 or 25.85<=t<34.05:
         if t>=29.95:
-            # The original closing Instagram mark and both names occupy this lock-up; clear it entirely.
+            # Keep Adil's main signature title; the Instagram icon and social handle remain absent.
             patch(im,(120,535,600,665),color=(4,3,6))
+            meta={'bbox':(200,600,520,650),'color':(43,43,45),'angle':0,'height':50}
+            draw_replacement(im,'Adil Chandio',meta)
         else:
-            # Remove the creator/adapted name only; leave the underlying shot and all other graphics intact.
-            im,_=erase_text(im,name_window,threshold=4)
+            # Replace the source creator's main title with Adil's, without restoring any social badges.
+            im,meta=erase_text(im,name_window,threshold=4)
+            if meta:
+                progress=1.0
+                if 2.68<=t<4.94:
+                    if t<3.58:progress=max(0,min(1,(t-2.68)/.90))
+                    elif t>4.56:progress=max(0,min(1,(4.94-t)/.34))
+                draw_replacement(im,'Adil Chandio',meta,progress=progress)
     if 22.0<=t<22.98:
         d=ImageDraw.Draw(im)
         spaced_center(d,'6M+ VIEWS  •  4+ CHANNELS',360,703,fnt(13,'mono'),(69,69,69),1)

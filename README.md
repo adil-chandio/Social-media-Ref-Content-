@@ -1,6 +1,6 @@
 # Adil Chandio — Portfolio Intro
 
-This repository contains two video treatments based on the supplied vertical reference. The reference-based edit retains the reference's scene flow, underlying footage, and soundtrack, while adding Adil's roles, eight skills, and approved proof points (6M+ views and 4+ channels). Instagram marks, social handles, and creator-name text are removed throughout. It is a close reference-based edit, not a claim of pixel-perfect recreation; review the rendered file before publication.
+This repository contains two video treatments based on the supplied vertical reference. The reference-based edit retains the reference's scene flow, underlying footage, and soundtrack, while adding Adil's roles, eight skills, and approved proof points (6M+ views and 4+ channels). Instagram marks and the social handles beside them are removed; Adil's main title cards remain. It is a close reference-based edit, not a claim of pixel-perfect recreation; review the rendered file before publication.
 
 The reference-based render is `deliverables/adil-chandio-reference-match.mp4`. Its audio is stream-copied from the source. Run:
 
