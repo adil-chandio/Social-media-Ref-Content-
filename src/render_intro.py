@@ -111,23 +111,23 @@ def halo(im,x,y,color,radius=5,strength=120):
     layer=layer.filter(ImageFilter.GaussianBlur(17))
     im.paste(layer,(int(x-q),int(y-q)),layer)
 
-SILHOUETTE_PATH=os.path.abspath(os.path.join(os.path.dirname(__file__),'..','assets','adil-silhouette.png'))
-SILHOUETTE=Image.open(SILHOUETTE_PATH).convert('RGBA')
+CUTOUT_PATH=os.path.abspath(os.path.join(os.path.dirname(__file__),'..','assets','adil-photo-cutout-intro.png'))
+CUTOUT=Image.open(CUTOUT_PATH).convert('RGBA')
 
 def draw_black_silhouette(im,t,alpha):
-    # Reveal the photo-derived cutout where the reference introduces its person shape.
-    # The RGB of the cutout is pure black: the face, suit detail, and source background are absent.
+    # Adil's supplied photo cutout replaces the earlier pure-black silhouette shape.
+    # Same reveal timing, placement and scale behaviour as the silhouette beat.
     progress=ease((t-2.08)/.78)
     if progress<=0:return
     height=int(470+50*progress)
-    width=round(height*SILHOUETTE.width/SILHOUETTE.height)
+    width=round(height*CUTOUT.width/CUTOUT.height)
     x=(W-width)//2; settle=int(7*math.sin(progress*math.pi)*(1-progress))
     y=1142-height+int(30*(1-progress))-settle
-    mask=SILHOUETTE.resize((width,height),Image.Resampling.LANCZOS).getchannel('A')
+    cut=CUTOUT.resize((width,height),Image.Resampling.LANCZOS)
     # Whole-shape opacity + scale reveal; no hard crop line crosses the head or shoulders.
     opacity=max(0,min(255,int(alpha*progress)))
-    mask=mask.point(lambda q:q*opacity//255)
-    im.paste((0,0,0),(x,y,x+width,y+height),mask)
+    cut.putalpha(cut.getchannel('A').point(lambda q:q*opacity//255))
+    im.paste(cut,(x,y),cut)
 
 def make_tilted_card(t):
     # Draw original Adil identity card and perspective, inspired by the reference's 3D card beat.
