@@ -1,16 +1,14 @@
-# Adil Chandio — Monarch Portfolio Intro
+# Adil Chandio — Portfolio Intro
 
-See [`docs/storyboard-next-level.md`](docs/storyboard-next-level.md) for the frame-accurate structure of the delivered video, and [`docs/next-level-video-prompt.md`](docs/next-level-video-prompt.md) for the full reusable creative prompt and QA brief.
+This repository contains two video treatments based on the supplied vertical reference. The reference-based edit retains the reference's scene flow, underlying footage, and soundtrack, while adding Adil's roles, eight skills, and approved proof points (6M+ views and 4+ channels). Instagram icons are removed. It is a close reference-based edit, not a claim of pixel-perfect recreation; review the rendered file before publication.
 
-A 9:16 portfolio intro adapted to the supplied reference's timed sequence: type-on greeting, paper-white identity reveal, quick role cards, blue orbital manifesto, moving skills list, portfolio/stat panels, a floating 3-D identity card, and the final grid signature. Original audio is stream-copied from the supplied clip; all visuals are rebuilt for Adil and the reference creator's watermark is not reused.
-
-The opening identity reveal uses the supplied AI-generated silhouette with the checkerboard removed to real transparency; the person remains a pure-black cutout with no face or clothing detail visible. `tools/make_silhouette.py INPUT.png OUTPUT.png` extracts a clean antialiased alpha cutout from a black silhouette on a light checkerboard. The project also uses bundled Manrope and IBM Plex Mono fonts (OFL licenses in `assets/fonts/`). Public profile figures shown in the portfolio panels (6M+ views and 4+ channels) come from Adil Chandio's GitHub profile.
-
-## Render
+The reference-based render is `deliverables/adil-chandio-reference-match.mp4`. Its audio is stream-copied from the source. Run:
 
 ```bash
 python -m pip install -r requirements.txt
-python src/render_intro.py path/to/reference.mp4 deliverables/adil-chandio-monarch-intro.mp4
+python src/render_reference_match.py path/to/reference.mp4 deliverables/adil-chandio-reference-match.mp4
 ```
 
-The source video is not included. Put it in `reference_media/` (ignored by Git), or pass another source path. Output is 720×1280, 30 fps, AAC audio.
+The earlier redesigned treatment can still be rendered with `src/render_intro.py` to `deliverables/adil-chandio-monarch-intro.mp4`. See [`docs/storyboard-next-level.md`](docs/storyboard-next-level.md) and [`docs/next-level-video-prompt.md`](docs/next-level-video-prompt.md) for its storyboard and creative prompt.
+
+The opening identity reveal uses the supplied black silhouette with transparent background. `tools/make_silhouette.py INPUT.png OUTPUT.png` extracts a clean antialiased alpha cutout from a black silhouette on a light checkerboard. Bundled Manrope and IBM Plex Mono fonts are in `assets/fonts/` (OFL licenses included). The source video is not committed; place it under `reference_media/` or pass its path directly. Output is 720×1280 at 30 fps.
