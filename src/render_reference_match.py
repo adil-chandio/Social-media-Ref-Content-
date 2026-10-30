@@ -14,7 +14,7 @@ DURATION=33.9
 # scene cut. Each skill's focus lands exactly on the next impact (18.059 s included).
 SKILL_SCROLL_ANCHORS=(15.0,15.126,16.991,18.059,19.127,20.194,21.262,22.329)
 ROOT=os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
-PHOTO_PATH=os.path.join(ROOT,'assets','adil-photo-cutout-hd.png')
+PHOTO_PATH=os.path.join(ROOT,'assets','adil-photo-cutout-mask.png')
 FONT=os.path.join(ROOT,'assets','fonts','Manrope-400.ttf')
 BOLD=os.path.join(ROOT,'assets','fonts','Manrope-700.ttf')
 EXTRA=os.path.join(ROOT,'assets','fonts','Manrope-800.ttf')
