@@ -2,6 +2,7 @@
 reference_media/
 google_drive/
 assets/adil-portrait.jpg
+assets/user-silhouette-input.png
 deliverables/*.mp4
 __pycache__/
 .venv/

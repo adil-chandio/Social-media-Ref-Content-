@@ -79,14 +79,15 @@ def draw_black_silhouette(im,t,alpha):
     # The RGB of the cutout is pure black: the face, suit detail, and source background are absent.
     progress=ease((t-2.08)/.78)
     if progress<=0:return
-    size=int(465+35*progress)
-    x=(W-size)//2; settle=int(7*math.sin(progress*math.pi)*(1-progress))
-    y=1142-size+int(30*(1-progress))-settle
-    mask=SILHOUETTE.resize((size,size),Image.Resampling.LANCZOS).getchannel('A')
+    height=int(470+50*progress)
+    width=round(height*SILHOUETTE.width/SILHOUETTE.height)
+    x=(W-width)//2; settle=int(7*math.sin(progress*math.pi)*(1-progress))
+    y=1142-height+int(30*(1-progress))-settle
+    mask=SILHOUETTE.resize((width,height),Image.Resampling.LANCZOS).getchannel('A')
     # Whole-shape opacity + scale reveal; no hard crop line crosses the head or shoulders.
     opacity=max(0,min(255,int(alpha*progress)))
     mask=mask.point(lambda q:q*opacity//255)
-    im.paste((0,0,0),(x,y,x+size,y+size),mask)
+    im.paste((0,0,0),(x,y,x+width,y+height),mask)
 
 def make_tilted_card(t):
     # Draw original Adil identity card and perspective, inspired by the reference's 3D card beat.
