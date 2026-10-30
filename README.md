@@ -1,6 +1,8 @@
 # Adil Chandio — Monarch Portfolio Intro
 
-Original 9:16 motion-graphics intro based on the supplied reference's restrained typography, graphic grid and orbit motif. The reference's original audio track is retained; the visuals are newly generated and the reference creator's watermark/visuals are not reused.
+A 9:16 portfolio intro adapted to the supplied reference's timed sequence: type-on greeting, paper-white identity reveal, quick role cards, blue orbital manifesto, moving skills list, portfolio/stat panels, a floating 3-D identity card, and the final grid signature. Original audio is stream-copied from the supplied clip; all visuals are rebuilt for Adil and the reference creator's watermark is not reused.
+
+The project uses bundled Manrope and IBM Plex Mono fonts (OFL licenses in `assets/fonts/`). Public profile figures shown in the portfolio panels (6M+ views and 4+ channels) come from Adil Chandio's GitHub profile.
 
 ## Render
 

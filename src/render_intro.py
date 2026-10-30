@@ -4,7 +4,6 @@ Uses the supplied reference's audio track only; all visuals are original typogra
 """
 import argparse, math, os, subprocess, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-import numpy as np
 import imageio_ffmpeg
 
 W, H, FPS = 720, 1280, 30
@@ -14,12 +13,15 @@ WHITE = (242, 246, 255)
 MUTED = (132, 149, 173)
 CYAN = (66, 224, 255)
 AMBER = (255, 155, 76)
-FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
-BOLD = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
-MONO = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
+FONT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets', 'fonts'))
+FONT = os.path.join(FONT_DIR, 'Manrope-400.ttf')
+BOLD = os.path.join(FONT_DIR, 'Manrope-700.ttf')
+EXTRA_BOLD = os.path.join(FONT_DIR, 'Manrope-800.ttf')
+MONO = os.path.join(FONT_DIR, 'IBMPlexMono-400.ttf')
 
-def font(size, bold=False, mono=False):
-    return ImageFont.truetype(MONO if mono else (BOLD if bold else FONT), size)
+def font(size, bold=False, mono=False, extra=False):
+    path = MONO if mono else (EXTRA_BOLD if extra else (BOLD if bold else FONT))
+    return ImageFont.truetype(path, size)
 def ease(x):
     x=max(0,min(1,x)); return x*x*(3-2*x)
 def mix(a,b,t): return tuple(int(x+(y-x)*t) for x,y in zip(a,b))
@@ -44,10 +46,10 @@ def centered(d,text,y,f,color,tracking=0):
     for c,ww in zip(text,widths):
         d.text((int(x),int(y)),c,font=f,fill=color); x+=ww+tracking
 
-def fit_font(d,text,size,maxwidth,bold=True):
-    f=font(size,bold=bold)
+def fit_font(d,text,size,maxwidth,bold=True,extra=False):
+    f=font(size,bold=bold,extra=extra)
     while d.textlength(text,font=f)>maxwidth and size>18:
-        size-=2; f=font(size,bold=bold)
+        size-=2; f=font(size,bold=bold,extra=extra)
     return f
 
 def scene_at(t):
@@ -60,6 +62,14 @@ def color_at(t):
 
 def orbit(d,cx,cy,r,color,w=2):
     d.ellipse((cx-r,cy-r,cx+r,cy+r),outline=color,width=w)
+
+def halo(im,x,y,color,radius=5,strength=120):
+    # Small, restrained optical bloom on accent markers; keep the typography crisp.
+    size=76; layer=Image.new('RGBA',(size,size),(0,0,0,0)); ld=ImageDraw.Draw(layer)
+    q=size//2
+    ld.ellipse((q-radius,q-radius,q+radius,q+radius),fill=(*color,strength))
+    layer=layer.filter(ImageFilter.GaussianBlur(17))
+    im.paste(layer,(int(x-q),int(y-q)),layer)
 
 def draw_vector_portrait(im,t,alpha):
     # Original graphic silhouette, intentionally anonymous; softly rounded jacket/head,
@@ -76,7 +86,7 @@ def draw_vector_portrait(im,t,alpha):
     # hairline/side-swept top: separate silhouette masses keep the portrait graphic.
     d.ellipse((x-70,y-158,x+66,y-77),fill=(18,19,21,a))
     d.polygon([(x-67,y-107),(x-22,y-149),(x+55,y-145),(x+67,y-95),(x+27,y-119),(x-4,y-100)],fill=(18,19,21,a))
-    im.alpha_composite(lay)
+    im.paste(lay,(0,0),lay)
 
 def make_tilted_card(t):
     # Draw original Adil identity card and perspective, inspired by the reference's 3D card beat.
@@ -100,7 +110,7 @@ def make_tilted_card(t):
 def render_frame(t):
     scene=scene_at(t); start,end=BEATS[scene]; local=t-start; dur=end-start
     enter=ease(local/.20); leave=ease((dur-local)/.20); alpha=int(255*min(enter,leave))
-    bg,_=color_at(t); im=Image.new('RGBA',(W,H),(*bg,255));d=ImageDraw.Draw(im,'RGBA')
+    bg,_=color_at(t); im=Image.new('RGB',(W,H),bg);d=ImageDraw.Draw(im,'RGBA')
     cream=scene in (1,4,8,9); blue=scene in (3,5,6,7,10)
     ink=(20,21,23,alpha) if cream else (246,246,244,alpha)
     muted=(105,106,106,alpha) if cream else (214,227,235,alpha)
@@ -121,7 +131,7 @@ def render_frame(t):
 
     if scene==0:
         # Original reference's typewriter hello with center guides and orange cursor dot.
-        n=min(5,int(local*6.0)); label='Hello'; f=font(77,bold=True); shown=label[:n]
+        n=min(5,int(local*6.0)); label='Hello'; f=font(77,bold=True,extra=True); shown=label[:n]
         centered(d,shown,cy-55,f,(244,244,242,alpha))
         if n<len(label):
             x=(W-d.textlength(label,font=f))/2+d.textlength(shown,font=f)+2
@@ -135,7 +145,7 @@ def render_frame(t):
         d.text((49,65),'AI LEARNER     CONTENT CREATOR     DEVELOPER',font=font(12,mono=True),fill=(94,98,99,alpha))
         d.line((50,100,W-50,100),fill=(44,48,49,54),width=1)
         d.text((130,cy-208),'I’m',font=font(39),fill=(31,32,33,alpha))
-        centered(d,'Adil Chandio',cy-150,fit_font(d,'Adil Chandio',56,W-90),(20,21,22,alpha))
+        centered(d,'Adil Chandio',cy-150,fit_font(d,'Adil Chandio',56,W-90,extra=True),(20,21,22,alpha))
         centered(d,'AI LEARNING  /  CONTENT CREATION',cy-88,font(13,mono=True),(91,93,93,alpha),1)
         draw_vector_portrait(im,t,alpha); d=ImageDraw.Draw(im,'RGBA')
         d.line((52,H-96,W-52,H-96),fill=(49,52,53,55),width=1)
@@ -180,6 +190,7 @@ def render_frame(t):
             centered(d,'and yes, we',cy-31,font(31),(245,248,249,alpha))
             centered(d,'like to play.',cy+11,font(31,bold=True),(245,248,249,alpha))
         ang=local*2.1; px=cx+int(195*math.cos(ang)); py=cy+int(195*math.sin(ang))
+        halo(im,px,py,(243,154,91),5,110);d=ImageDraw.Draw(im,'RGBA')
         d.ellipse((px-5,py-5,px+5,py+5),fill=(243,154,91,alpha))
         d.text((50,H-108),'ADIL CHANDIO',font=font(12,bold=True),fill=(247,249,250,alpha))
         d.text((51,H-88),'@ADIL CHANDIO',font=font(10,mono=True),fill=(199,222,233,alpha))
@@ -199,35 +210,41 @@ def render_frame(t):
         d.text((52,cy+18),'build',font=font(17,bold=True),fill=(240,246,249,alpha))
         d.ellipse((118,cy+24,127,cy+33),fill=(245,153,88,alpha))
         labels=[('AI Learning',0),('Content Creation',1),('YouTube Automation',2),('Developer / Product Builds',3),('Creative Workflows',4),('AI Education',5)]
-        offset=(local*1.1)%1; base=cy-145
+        offset=(local*1.1)%1; base=cy-200
         for text,k in labels:
-            y=base+(k-offset)*84
-            if cy-235<y<cy+246:
-                dist=abs(y-cy); opacity=int(alpha*max(.18,1-dist/440))
-                fsize=25 if dist<45 else 19 if dist<120 else 16
-                if dist<45: color=(250,251,250,opacity)
-                else: color=(206,226,237,opacity)
-                x=193+int(16*math.sin(local*2.4+k))
-                d.text((x,int(y)),text,font=fit_font(d,text,fsize,470),fill=color)
+            y=base+(k-offset)*100
+            if cy-255<y<cy+260:
+                dist=abs(y-cy); opacity=int(alpha*max(.16,1-dist/460))
+                fsize=34 if dist<50 else 24 if dist<135 else 17
+                color=(250,251,250,opacity) if dist<50 else (205,228,239,opacity)
+                x=191+int(13*math.sin(local*2.4+k))
+                if dist<50:
+                    d.rounded_rectangle((x-12,int(y)-8,W-42,int(y)+44),radius=4,fill=(13,73,115,int(alpha*.22)))
+                    d.line((x-12,int(y)+49,W-42,int(y)+49),fill=(247,159,93,opacity),width=2)
+                d.text((x,int(y)),text,font=fit_font(d,text,fsize,475),fill=color)
         d.text((W-167,78),'SKILLS / 01–06',font=font(11,mono=True),fill=(201,224,234,alpha))
         d.text((50,H-105),'AI  •  CONTENT  •  SYSTEMS  •  SOFTWARE',font=font(11,mono=True),fill=(205,226,235,alpha))
 
     elif scene==8:
         # Four minimalist portfolio panels flash in like a typographic case-study board.
-        cards=[('AI LEARNING',(34,113,163)),('CREATOR SYSTEMS',(240,145,91)),('AUTOMATION',(236,233,224)),('DEVELOPMENT',(14,15,18))]
-        for j,(name,col) in enumerate(cards):
-            y=175+j*207+int(14*math.sin(local*8+j)); x=56+int((1-enter)*(-90 if j%2==0 else 90))
-            d.rounded_rectangle((x,y,W-56,y+177),radius=2,fill=(*col,255))
+        cards=[('6M+ VIEWS','CREATOR REACH',(35,112,164)),('4+ CHANNELS','YOUTUBE AUTOMATION',(238,145,92)),('AI × CREATIVITY','LEARNING IN PUBLIC',(235,232,223)),('MONARCH / BUILDS','DEVELOPMENT',(13,15,18))]
+        for j,(headline,caption,col) in enumerate(cards):
+            y=91+j*275+int(9*math.sin(local*10+j)); x=49+int((1-enter)*(-110 if j%2==0 else 110))
+            d.rectangle((x,y,W-49,y+253),fill=(*col,255))
             dark=j in (1,2); tc=(23,24,25,alpha) if dark else (245,247,247,alpha)
-            d.text((x+23,y+18),f'0{j+1} / MONARCH',font=font(10,mono=True),fill=tc)
-            d.text((x+23,y+87),name,font=fit_font(d,name,23,W-110),fill=tc)
-            d.line((x+23,y+143,W-79,y+143),fill=(*tc[:3],100),width=1)
-            d.ellipse((W-99,y+17,W-91,y+25),fill=(244,150,89,255))
+            accent=(246,161,99,255)
+            d.text((x+25,y+21),f'0{j+1} / ADIL CHANDIO',font=font(11,mono=True),fill=tc)
+            d.ellipse((W-88,y+24,W-76,y+36),fill=accent)
+            f=fit_font(d,headline,43,W-100,extra=True)
+            d.text((x+25,y+93),headline,font=f,fill=tc)
+            d.text((x+27,y+158),caption,font=font(13,mono=True),fill=tc)
+            d.line((x+25,y+205,W-74,y+205),fill=(*tc[:3],112),width=1)
+            d.text((x+25,y+221),'MONARCH  /  CREATIVE SYSTEMS',font=font(10,mono=True),fill=tc)
 
     elif scene==9:
         # Hero 3-D name card showcase; unique artwork, layered stock-free vector geometry.
         sk,sh,x,y=make_tilted_card(t)
-        im.alpha_composite(sh,(x+8,y+19)); im.alpha_composite(sk,(x,y))
+        im.paste(sh,(x+8,y+19),sh); im.paste(sk,(x,y),sk)
         d=ImageDraw.Draw(im,'RGBA')
         # secondary paper stock peeking from underneath
         d.polygon([(142,993),(568,910),(626,1004),(200,1094)],fill=(244,243,238,255))
@@ -241,6 +258,7 @@ def render_frame(t):
         for j,(ox,oy) in enumerate(positions):
             orbit(d,ox,oy,radius,(223,242,250,99),2)
             a=local*2.5+j*2.1; px=ox+int(radius*math.cos(a));py=oy+int(radius*math.sin(a))
+            halo(im,px,py,(247,159,93),4,105);d=ImageDraw.Draw(im,'RGBA')
             d.ellipse((px-5,py-5,px+5,py+5),fill=(247,159,93,alpha))
         centered(d,'Adil Chandio',cy-25,fit_font(d,'Adil Chandio',39,W-75),(246,249,251,alpha))
         centered(d,'AI  •  CREATOR  •  AUTOMATION  •  DEVELOPER',cy+25,font(10,mono=True),(206,229,239,alpha),1)
@@ -284,7 +302,7 @@ def render_frame(t):
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('reference'); ap.add_argument('output'); args=ap.parse_args()
     ff=imageio_ffmpeg.get_ffmpeg_exe(); total=round(DURATION*FPS)
-    cmd=[ff,'-y','-loglevel','error','-f','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','-','-i',args.reference,'-map','0:v:0','-map','1:a:0','-t',str(DURATION),'-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-c:a','copy','-shortest','-movflags','+faststart',args.output]
+    cmd=[ff,'-y','-loglevel','error','-f','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','-','-i',args.reference,'-map','0:v:0','-map','1:a:0','-t',str(DURATION),'-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-c:a','copy','-movflags','+faststart',args.output]
     proc=subprocess.Popen(cmd,stdin=subprocess.PIPE)
     try:
         for i in range(total):
