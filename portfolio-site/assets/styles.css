@@ -576,8 +576,8 @@ body{overscroll-behavior-y:auto}
 @media(prefers-reduced-motion:reduce){.sig-img{animation:none!important;clip-path:none!important}}
 
 /* ══ v19 M4 LAYER + FREE PALESTINE ════════════════════════ */
-.hero-car{position:absolute;left:50%;bottom:-3%;transform:translateX(-50%);width:min(1150px,132%);z-index:0;pointer-events:none;mix-blend-mode:screen;opacity:.66;-webkit-mask-image:linear-gradient(to top,#000 30%,rgba(0,0,0,.55) 60%,transparent 86%);mask-image:linear-gradient(to top,#000 30%,rgba(0,0,0,.55) 60%,transparent 86%)}
-.hero-car img{width:100%;display:block}
+.hero-car{position:absolute;left:50%;bottom:-2%;transform:translateX(-50%);width:min(1250px,142%);z-index:0;pointer-events:none;opacity:.95;-webkit-mask-image:linear-gradient(to top,#000 44%,rgba(0,0,0,.7) 70%,transparent 92%);mask-image:linear-gradient(to top,#000 44%,rgba(0,0,0,.7) 70%,transparent 92%)}
+.hero-car img{width:100%;display:block;filter:brightness(1.4) contrast(1.12) saturate(1.06)}
 .hero-eye,.hero-type,.hero-row{position:relative;z-index:1}
 .hl{position:absolute;width:17%;height:12%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,244,214,.95),rgba(255,176,97,.5) 42%,rgba(210,31,43,.2) 66%,transparent 76%);filter:blur(1px);opacity:0;animation:hlBurn 7.5s ease-in-out infinite}
 .hl-l{left:36.1%;top:53.3%}
