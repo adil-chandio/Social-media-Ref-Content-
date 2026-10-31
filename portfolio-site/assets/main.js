@@ -1,5 +1,6 @@
-/* Adil Chandio — portfolio v2: intro film gate + motion layer (cursor, parallax,
-   magnetic buttons, tilt, scramble, counters, reveals, nav hide, progress). */
+/* Adil Chandio — portfolio v3: single-rAF motion engine.
+   One ticker drives cursor, parallax, tilt, glare, magnets, nav + progress.
+   No scroll handlers, no competing transforms, no layout thrash → zero jerk. */
 'use strict';
 const CONFIG = {
   // Wire your real inbox here; until then the form points visitors to GitHub.
@@ -12,6 +13,7 @@ const $$ = (s) => Array.from(document.querySelectorAll(s));
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fine = matchMedia('(pointer: fine)').matches;
 const gate = $('#gate'), splash = $('#splash'), film = $('#film'), pct = $('#filmPct');
+const nav = $('#nav'), prog = $('#prog'), cursor = $('#cursor'), ring = $('#cursorRing');
 const toastEl = $('#toast');
 let toastT;
 
@@ -23,8 +25,8 @@ function toast(msg) {
 }
 
 /* ── Intro film flow ─────────────────────────────────────────── */
-function unlockScroll() { document.body.classList.remove('locked'); }
-function lockScroll() { document.body.classList.add('locked'); }
+const unlockScroll = () => document.body.classList.remove('locked');
+const lockScroll = () => document.body.classList.add('locked');
 
 function endIntro() {
   film.pause();
@@ -32,29 +34,29 @@ function endIntro() {
   unlockScroll();
   sessionStorage.setItem(KEY, '1');
 }
-
 function playSplash() {
   gate.classList.add('hidden');
   splash.classList.remove('hidden', 'done');
   lockScroll();
   film.currentTime = 0;
   const p = film.play();
-  if (p && p.then) p.then(() => splash.classList.add('open')).catch(() => {
-    splash.classList.add('open');
-    toast('Tap SKIP to enter the site');
-  });
+  const open = () => splash.classList.add('open');
+  if (p && p.then) p.then(open).catch(() => { open(); toast('Tap SKIP to enter the site'); });
+  else open();
 }
-
 function boot() {
-  if (sessionStorage.getItem(KEY)) {          // same session → straight to the site
+  if (sessionStorage.getItem(KEY)) {
     gate.classList.add('hidden');
     splash.classList.add('hidden', 'done');
     unlockScroll();
   } else {
-    requestAnimationFrame(() => gate.querySelector('.gate-name').classList.add('in'));
+    requestAnimationFrame(() => {
+      gate.querySelector('.gate-name').classList.add('in');
+      const k = gate.querySelector('[data-scramble]');
+      if (k && !reduced) setTimeout(() => scramble(k), 350);
+    });
   }
 }
-
 $('#enterBtn').addEventListener('click', playSplash);
 $('#skipBtn').addEventListener('click', endIntro);
 $('#replayBtn').addEventListener('click', () => {
@@ -66,135 +68,133 @@ film.addEventListener('ended', endIntro);
 film.addEventListener('timeupdate', () => {
   if (film.duration) pct.textContent = Math.round((film.currentTime / film.duration) * 100) + '%';
 });
-film.addEventListener('click', endIntro);     // tap the film itself to skip (mobile)
+film.addEventListener('click', endIntro);
 
-/* ── Scroll reveals + counters + scramble ────────────────────── */
+/* ── Scramble + counters + reveals ───────────────────────────── */
 const GLYPHS = '█▓▒░<>/\\|=+*·01';
 function scramble(el) {
+  if (el.dataset.busy) return;
+  el.dataset.busy = '1';
   const final = el.dataset.txt || (el.dataset.txt = el.textContent);
   let f = 0;
-  const total = 18;
+  const total = 16;
   const id = setInterval(() => {
     f++;
-    el.textContent = final.split('').map((ch, i) => {
-      if (ch === ' ' || i < (f / total) * final.length) return ch;
-      return GLYPHS[(Math.random() * GLYPHS.length) | 0];
-    }).join('');
+    el.textContent = final.split('').map((ch, i) =>
+      (ch === ' ' || i < (f / total) * final.length) ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0]
+    ).join('');
     if (f >= total) { clearInterval(id); el.textContent = final; }
   }, 34);
 }
 function countUp(el) {
+  if (el.dataset.done) return;
+  el.dataset.done = '1';
   const target = +el.dataset.count, pad = +(el.dataset.pad || 0);
   const t0 = performance.now(), dur = 1100;
-  const fmt = (v) => String(v).padStart(pad, '0');
   (function step(t) {
     const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-    el.textContent = fmt(Math.round(target * e));
+    el.textContent = String(Math.round(target * e)).padStart(pad, '0');
     if (k < 1) requestAnimationFrame(step);
   })(t0);
 }
-const io = new IntersectionObserver((es) => {
-  es.forEach((e) => {
-    if (!e.isIntersecting) return;
-    e.target.classList.add('in');
-    if (e.target.hasAttribute('data-scramble') && !reduced) scramble(e.target);
-    e.target.querySelectorAll?.('[data-count]') ;
-    if (e.target.matches('[data-count]')) countUp(e.target);
-    e.target.querySelectorAll('[data-count]').forEach((c) => { if (!c.dataset.done) { c.dataset.done = 1; countUp(c); } });
-    io.unobserve(e.target);
-  });
-}, { threshold: 0.18 });
-$$('[data-rv],[data-count]').forEach((el) => io.observe(el));
+const ioRv = new IntersectionObserver((es) => es.forEach((e) => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  if (e.target.hasAttribute('data-scramble') && !reduced) scramble(e.target);
+  ioRv.unobserve(e.target);
+}), { threshold: 0.18 });
+$$('[data-rv]').forEach((el) => ioRv.observe(el));
+const ioCt = new IntersectionObserver((es) => es.forEach((e) => {
+  if (e.isIntersecting) { countUp(e.target); ioCt.unobserve(e.target); }
+}), { threshold: 0.5 });
+$$('[data-count]').forEach((el) => ioCt.observe(el));
 
-/* ── Motion loop: cursor lerp, parallax, progress, nav hide ──── */
-const cursor = $('#cursor'), ring = $('#cursorRing'), prog = $('#prog'), nav = $('#nav');
-const px = $$('[data-px]');
-let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, lastY = scrollY, ticking = false;
+/* ── Motion engine: one ticker, lerped writes, batched reads ─── */
+let mx = innerWidth / 2, my = innerHeight / 2, cx = mx, cy = my, curOn = false;
+const P = $$('[data-px]').map((el) => ({ el, sp: parseFloat(el.dataset.px) || 0, base: el.dataset.base || '', y: 0, ty: 0 }));
+const T = $$('[data-tilt]').map((el) => ({ el, st: parseFloat(el.dataset.tilt) || 7, rx: 0, ry: 0, trx: 0, try_: 0 }));
+const M = $$('.magnet').map((el) => ({ el, dx: 0, dy: 0, tx: 0, ty: 0 }));
 
-addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; }, { passive: true });
+addEventListener('mousemove', (e) => {
+  mx = e.clientX; my = e.clientY;
+  if (!curOn && fine && !reduced) { curOn = true; document.body.classList.add('cur'); }
+}, { passive: true });
+
+M.forEach((m) => {
+  m.el.addEventListener('mousemove', (e) => {
+    const r = m.el.getBoundingClientRect();
+    m.tx = (e.clientX - r.left - r.width / 2) * 0.26;
+    m.ty = (e.clientY - r.top - r.height / 2) * 0.32;
+  }, { passive: true });
+  m.el.addEventListener('mouseleave', () => { m.tx = 0; m.ty = 0; }, { passive: true });
+});
+T.forEach((t) => {
+  t.el.addEventListener('mousemove', (e) => {
+    const r = t.el.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width - 0.5;
+    const ny = (e.clientY - r.top) / r.height - 0.5;
+    t.trx = -ny * t.st; t.try_ = nx * t.st;
+    t.el.style.setProperty('--gx', ((nx + 0.5) * 100).toFixed(1) + '%');
+    t.el.style.setProperty('--gy', ((ny + 0.5) * 100).toFixed(1) + '%');
+  }, { passive: true });
+  t.el.addEventListener('mouseleave', () => { t.trx = 0; t.try_ = 0; }, { passive: true });
+});
 $$('a,button,.work-card,.sk').forEach((el) => {
-  el.addEventListener('mouseenter', () => document.body.classList.add('cur-hot'));
-  el.addEventListener('mouseleave', () => document.body.classList.remove('cur-hot'));
+  el.addEventListener('mouseenter', () => document.body.classList.add('cur-hot'), { passive: true });
+  el.addEventListener('mouseleave', () => document.body.classList.remove('cur-hot'), { passive: true });
 });
 
-function loop() {
-  rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
-  if (cursor) { cursor.style.transform = `translate(${mx}px,${my}px)`; }
-  if (ring) { ring.style.transform = `translate(${rx}px,${ry}px)`; }
-  requestAnimationFrame(loop);
-}
-
-function onScroll() {
-  const y = scrollY;
-  const max = document.documentElement.scrollHeight - innerHeight;
-  prog.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
-  if (y > 240 && y > lastY + 4) nav.classList.add('hide');
-  else if (y < lastY - 4) nav.classList.remove('hide');
-  lastY = y;
-  if (!reduced) {
-    const mid = innerHeight / 2;
-    px.forEach((el) => {
-      const r = el.getBoundingClientRect();
-      const off = (r.top + r.height / 2 - mid) * parseFloat(el.dataset.px);
-      el.style.transform = `translate3d(0,${off.toFixed(1)}px,0)` + (el.classList.contains('portrait-clip') ? '' : '');
-    });
+const L = (c, t, k) => c + (t - c) * k;
+function ticker() {
+  /* reads */
+  const vh = innerHeight, mid = vh / 2, y = scrollY;
+  P.forEach((p) => {
+    const r = p.el.getBoundingClientRect();
+    p.ty = (r.top + r.height / 2 - mid) * p.sp;
+  });
+  /* writes */
+  if (curOn) {
+    cx = L(cx, mx, 0.22); cy = L(cy, my, 0.22);
+    cursor.style.transform = `translate3d(${mx}px,${my}px,0)`;
+    ring.style.transform = `translate3d(${cx}px,${cy}px,0)`;
   }
-  ticking = false;
-}
-addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
-
-/* portrait img keeps its zoom scale while parallaxing */
-(function patchPortrait() {
-  const img = document.querySelector('.portrait img[data-px]');
-  if (!img) return;
-  const base = 'scale(1.12) ';
-  const obs = new MutationObserver(() => {});
-  obs.disconnect();
-  const set = () => {
-    const r = img.getBoundingClientRect();
-    const off = (r.top + r.height / 2 - innerHeight / 2) * parseFloat(img.dataset.px);
-    img.style.transform = base + `translate3d(0,${off.toFixed(1)}px,0)`;
-  };
-  addEventListener('scroll', () => requestAnimationFrame(set), { passive: true });
-  set();
-  img.removeAttribute('data-px');
-})();
-
-/* ── Magnetic buttons ────────────────────────────────────────── */
-if (fine && !reduced) {
-  $$('.magnet').forEach((el) => {
-    el.addEventListener('mousemove', (e) => {
-      const r = el.getBoundingClientRect();
-      const dx = (e.clientX - r.left - r.width / 2) * 0.28;
-      const dy = (e.clientY - r.top - r.height / 2) * 0.34;
-      el.style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`;
-    });
-    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+  P.forEach((p) => {
+    p.y = L(p.y, p.ty, 0.12);
+    p.el.style.transform = `${p.base}translate3d(0,${p.y.toFixed(2)}px,0)`;
   });
-}
-
-/* ── Skill hover glow + work card tilt ───────────────────────── */
-if (fine) {
-  $$('.sk').forEach((li) => li.addEventListener('mousemove', (e) => {
-    const r = li.getBoundingClientRect();
-    li.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-    li.style.setProperty('--my', (e.clientY - r.top) + 'px');
-  }));
-  $$('[data-tilt]').forEach((card) => {
-    const fig = card.querySelector('figure');
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      const pxr = (e.clientX - r.left) / r.width - 0.5;
-      const pyr = (e.clientY - r.top) / r.height - 0.5;
-      fig.style.setProperty('--ry', (pxr * 7).toFixed(2) + 'deg');
-      fig.style.setProperty('--rx', (-pyr * 7).toFixed(2) + 'deg');
-    });
-    card.addEventListener('mouseleave', () => {
-      fig.style.setProperty('--ry', '0deg'); fig.style.setProperty('--rx', '0deg');
-    });
+  T.forEach((t) => {
+    t.rx = L(t.rx, t.trx, 0.14); t.ry = L(t.ry, t.try_, 0.14);
+    t.el.style.transform = `perspective(900px) rotateX(${t.rx.toFixed(2)}deg) rotateY(${t.ry.toFixed(2)}deg)`;
   });
+  M.forEach((m) => {
+    m.dx = L(m.dx, m.tx, 0.18); m.dy = L(m.dy, m.ty, 0.18);
+    m.el.style.transform = `translate3d(${m.dx.toFixed(1)}px,${m.dy.toFixed(1)}px,0)`;
+  });
+  const max = document.documentElement.scrollHeight - vh;
+  prog.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`;
+  if (y > 240 && y > (ticker.y ?? 0) + 4) nav.classList.add('hide');
+  else if (y < (ticker.y ?? 0) - 4) nav.classList.remove('hide');
+  ticker.y = y;
+  requestAnimationFrame(ticker);
 }
+if (!reduced) requestAnimationFrame(ticker);
+else addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  prog.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
+}, { passive: true });
 
-if (fine && !reduced) { document.body.classList.add('cur'); requestAnimationFrame(loop); }
-onScroll();
+/* ── Contact ────────────────────────────────────────────────── */
+$('#contactForm').addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const f = ev.target;
+  if (CONFIG.email) {
+    const body = encodeURIComponent(`Name: ${f.name.value}\nEmail: ${f.email.value}\n\n${f.project.value}`);
+    location.href = `mailto:${CONFIG.email}?subject=${encodeURIComponent('Project — ' + f.name.value)}&body=${body}`;
+  } else {
+    toast('Inbox wiring soon — grabbing you to GitHub meanwhile ↗');
+    setTimeout(() => window.open(CONFIG.github, '_blank'), 900);
+  }
+  f.reset();
+});
+
 boot();
