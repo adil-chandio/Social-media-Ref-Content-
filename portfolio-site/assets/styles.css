@@ -297,3 +297,61 @@ button.work-card{background:none;border:0;text-align:left;cursor:pointer;font:in
 #plFrame iframe{border:0;border-radius:12px;box-shadow:0 50px 120px -40px rgba(0,0,0,.9);background:#000}
 .yt-v{aspect-ratio:9/16;height:min(76vh,620px);max-width:92vw}
 .yt-h{aspect-ratio:16/9;width:min(94vw,1040px);max-height:76vh}
+
+/* ══ v6 CINEMA PASS ═══════════════════════════════════════ */
+/* section kickers + title underline draw */
+.sec-kick{color:var(--red);letter-spacing:.26em;margin-bottom:14px}
+.sec-title{position:relative}
+.sec-title::after{content:'';display:block;width:0;height:2px;background:var(--red);margin-top:12px;transition:width 1s var(--ease) .25s}
+.sec-title.in::after{width:clamp(64px,12vw,170px)}
+/* per-char title reveal */
+[data-rv="chars"]{opacity:1;transform:none;clip-path:none}
+.ch{display:inline-block;opacity:0;transform:translateY(105%) rotate(7deg);transition:transform .7s var(--ease),opacity .45s ease}
+[data-rv="chars"].in .ch{opacity:1;transform:none}
+/* contact title colour sweep */
+.sweep{background:linear-gradient(90deg,var(--paper) 42%,var(--red) 58%);background-size:230% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;transition:background-position .7s var(--ease)}
+.sweep:hover{background-position:0% 0}
+/* cursor tag */
+#cursorRing{display:flex;align-items:center;justify-content:center}
+#cursorTag{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.14em;color:var(--paper);opacity:0;transition:opacity .2s}
+body.cur-tag #cursorTag{opacity:1}
+body.cur-tag #cursorRing{width:64px;height:64px;margin:-32px 0 0 -32px;background:rgba(210,31,43,.92);border-color:transparent}
+body.cur-tag #cursor{opacity:0}
+/* hero: line stagger, breathing portrait, scroll cue */
+.hero{position:relative}
+[data-rv="lines"] .ln:nth-child(2) i{transition-delay:.12s}
+.portrait{animation:breathe 7s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.cue{position:absolute;right:var(--pad);bottom:22px;width:1px;height:68px;background:#c9c5bb;overflow:hidden}
+.cue::after{content:'';position:absolute;inset:0;background:var(--red);transform:translateY(-100%);animation:cue 1.7s var(--ease) infinite}
+@keyframes cue{0%{transform:translateY(-100%)}55%,100%{transform:translateY(100%)}}
+/* films: editorial offsets + index numbers */
+.work-grid{counter-reset:wc;align-items:start}
+.work-card figure::before{counter-increment:wc;content:'0' counter(wc);position:absolute;top:12px;right:14px;z-index:3;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;color:rgba(236,233,226,.9);text-shadow:0 1px 10px rgba(0,0,0,.7)}
+@media(min-width:1001px){.work-grid>.work-card:nth-child(2),.work-grid>.work-card:nth-child(5){margin-top:54px}}
+/* proof retention curve draw */
+.curve-wrap{margin-top:22px}
+.curve{width:min(320px,80%);display:block}
+.curve path{fill:none;stroke:var(--red);stroke-width:2;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;transition:stroke-dashoffset 1.8s var(--ease) .3s}
+.curve circle{fill:var(--red);opacity:0;transition:opacity .4s 1.9s}
+.curve-wrap.in .curve path{stroke-dashoffset:0}
+.curve-wrap.in .curve circle{opacity:1}
+.curve-lbl{display:block;color:#77746e;margin-top:8px}
+/* marquees: pause on hover, reverse + outline rows */
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee.rev .marquee-track{animation-direction:reverse}
+.marquee.outline span{color:transparent;-webkit-text-stroke:1px #3a3a3f}
+/* nav active link */
+.nav-links a{transition:color .25s}
+.nav-links a.on{color:var(--red)}
+/* form focus glow */
+#contactForm input,#contactForm textarea{transition:border-color .25s,box-shadow .25s}
+#contactForm input:focus,#contactForm textarea:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(210,31,43,.18)}
+/* focus-visible everywhere */
+a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:3px;border-radius:4px}
+/* reduced motion: kill new anims too */
+@media(prefers-reduced-motion:reduce){
+  .ch{transition:none!important;opacity:1!important;transform:none!important}
+  .marquee-track,.cue::after,.portrait{animation:none!important}
+  .curve path{transition:none!important;stroke-dashoffset:0!important}
+}

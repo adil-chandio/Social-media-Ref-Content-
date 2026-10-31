@@ -265,4 +265,40 @@ addEventListener('keydown', (e) => {
   if (rcM.classList.contains('on')) rcClose();
 });
 
+/* ── v6 cinema pass ─────────────────────────────────────── */
+/* per-char split for titles */
+$$('[data-rv="chars"]').forEach((el) => {
+  const txt = el.textContent; el.textContent = '';
+  let i = 0;
+  for (const ch of txt) {
+    const sp = document.createElement('span');
+    sp.className = 'ch'; sp.style.transitionDelay = (i * 26) + 'ms';
+    if (ch === ' ') sp.innerHTML = '&nbsp;'; else sp.textContent = ch;
+    el.appendChild(sp); i++;
+  }
+});
+/* cursor context tags */
+const cTag = $('#cursorTag');
+if (cTag && fine) {
+  document.addEventListener('mouseover', (e) => {
+    const el = e.target.closest('[data-cursor]');
+    if (el) { cTag.textContent = el.dataset.cursor; document.body.classList.add('cur-tag'); }
+    else if (document.body.classList.contains('cur-tag')) document.body.classList.remove('cur-tag');
+  }, { passive: true });
+}
+/* live Karachi clock */
+const clk = $('#clk');
+if (clk) {
+  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Karachi', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  const tick = () => { clk.textContent = fmt.format(new Date()); };
+  tick(); setInterval(tick, 1000);
+}
+/* nav section spotlight */
+const navAs = $$('.nav-links a');
+const secIO = new IntersectionObserver((es) => es.forEach((en) => {
+  if (en.isIntersecting) navAs.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + en.target.id));
+}), { rootMargin: '-42% 0px -52% 0px' });
+$$('main section[id]').forEach((sec) => secIO.observe(sec));
+
+
 boot();
