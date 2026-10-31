@@ -707,10 +707,10 @@ body{overscroll-behavior-y:auto}
 .hero{display:flex;flex-direction:column}
 .hero-eye{order:1}
 .hero-wm{order:2}
-.hero-car{order:3;container-type:inline-size;perspective:900px}
+.hero-car{order:3;container-type:inline-size;perspective:900px;align-self:center;margin:0}
 .hero-meta{order:4}
 .hero .marquee{order:5}
-.wm{top:16%;white-space:nowrap;font-size:clamp(15px,7.6vw,96px);font-size:min(8.2cqw,96px)}
+.wm{top:16%;white-space:nowrap;font-size:clamp(15px,7.6vw,96px);font-size:min(8.2cqw,8.3vw,96px)}
 .wm-l{left:2.5%;right:56%;text-align:right;transform-origin:right center;transform:rotateY(16deg);
   animation:wmInL 1.1s var(--ease) both,wmGlow 7.5s ease-in-out 1.2s infinite}
 .wm-r{left:56%;right:2.5%;text-align:left;transform-origin:left center;transform:rotateY(-16deg);
