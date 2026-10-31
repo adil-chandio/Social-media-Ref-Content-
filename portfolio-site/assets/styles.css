@@ -394,3 +394,31 @@ body.fab-on .fab{opacity:1;visibility:visible;transform:none}
   .pulse{animation:none!important}
   .dots a{transition:none!important}
 }
+
+/* ══ v8 ABSOLUTE CINEMA ═══════════════════════════════════ */
+#leader{position:fixed;inset:0;z-index:75;background:#050506;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+#leader.on{opacity:1;visibility:visible}
+.lead-ring{width:172px;height:172px;border-radius:50%;border:1px solid #2c2c31;display:grid;place-items:center;position:relative}
+.lead-ring::before{content:'';position:absolute;inset:-2px;border-radius:50%;border:2px solid transparent;border-top-color:var(--red);animation:spin .45s linear infinite}
+#leadN{font-family:'Manrope';font-weight:800;font-size:64px;color:var(--paper)}
+.lead-lbl{color:#77746e;margin-top:20px;letter-spacing:.3em}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lb{transition:height .55s var(--ease)}
+#splash.closing .lb-t{height:50%!important}
+#splash.closing .lb-b{height:50%!important}
+.spin-badge{position:absolute;top:-30px;right:-30px;width:112px;height:112px;animation:spin 16s linear infinite;z-index:4;pointer-events:none}
+.spin-badge text{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.24em;fill:#1c1c1e}
+.spin-badge .bd{fill:var(--red)}
+@media(max-width:760px){.spin-badge{width:86px;height:86px;top:-16px;right:-12px}}
+.wm{position:absolute;top:6%;right:3%;font-family:'Manrope';font-weight:800;font-size:clamp(90px,17vw,230px);line-height:1;color:transparent;-webkit-text-stroke:1px #26262a;pointer-events:none;user-select:none;z-index:0}
+#proof .proof-grid,#proof .rc-stack{position:relative;z-index:1}
+.trailer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .45s ease;z-index:1;pointer-events:none}
+.trailer.playing{opacity:1}
+.work-card figure img{position:relative;z-index:0}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:#0d0d0f}
+::-webkit-scrollbar-thumb{background:#2e2e33;border-radius:8px;border:2px solid #0d0d0f}
+::-webkit-scrollbar-thumb:hover{background:var(--red)}
+html{scrollbar-width:thin;scrollbar-color:#2e2e33 #0d0d0f}
+.about-lede{position:sticky;top:96px;align-self:start}
+@media(prefers-reduced-motion:reduce){.spin-badge,.lead-ring::before{animation:none!important}}

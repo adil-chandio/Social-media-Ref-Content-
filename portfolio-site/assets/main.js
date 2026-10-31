@@ -30,9 +30,13 @@ const lockScroll = () => document.body.classList.add('locked');
 
 function endIntro() {
   film.pause();
-  splash.classList.add('done');
-  unlockScroll();
-  sessionStorage.setItem(KEY, '1');
+  splash.classList.add('closing');
+  setTimeout(() => {
+    splash.classList.add('done');
+    splash.classList.remove('closing');
+    unlockScroll();
+    sessionStorage.setItem(KEY, '1');
+  }, reduced ? 0 : 480);
 }
 function playSplash() {
   gate.classList.add('hidden');
@@ -57,11 +61,11 @@ function boot() {
     });
   }
 }
-$('#enterBtn').addEventListener('click', playSplash);
+$('#enterBtn').addEventListener('click', startSplash);
 $('#skipBtn').addEventListener('click', endIntro);
 $('#replayBtn').addEventListener('click', () => {
   sessionStorage.removeItem(KEY);
-  playSplash();
+  startSplash();
   window.scrollTo({ top: 0, behavior: 'auto' });
 });
 film.addEventListener('ended', endIntro);
@@ -199,7 +203,7 @@ $('#contactForm').addEventListener('submit', (ev) => {
 
 /* ── Film player modal (v5.2): local files + YouTube embeds ── */
 const pl = $('#player'), plV = $('#plVideo'), plF = $('#plFrame'), plT = $('#plTitle'), plC = $('#plClose');
-function plShow() { pl.classList.add('on'); pl.setAttribute('aria-hidden', 'false'); document.body.classList.add('locked'); }
+function plShow() { $$('.trailer').forEach((v) => { v.pause(); v.classList.remove('playing'); }); pl.classList.add('on'); pl.setAttribute('aria-hidden', 'false'); document.body.classList.add('locked'); }
 function plHide() { pl.classList.remove('on'); pl.setAttribute('aria-hidden', 'true'); document.body.classList.remove('locked'); }
 function plOpen(src, title) {
   plF.innerHTML = ''; plV.style.display = '';
@@ -299,6 +303,30 @@ const secIO = new IntersectionObserver((es) => es.forEach((en) => {
   if (en.isIntersecting) navAs.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + en.target.id));
 }), { rootMargin: '-42% 0px -52% 0px' });
 $$('main section[id]').forEach((sec) => secIO.observe(sec));
+
+
+/* ── v8 absolute cinema ─────────────────────────────────── */
+function startSplash() {
+  if (reduced) { playSplash(); return; }
+  const L = $('#leader'), N = $('#leadN');
+  L.classList.add('on');
+  let n = 3; N.textContent = n;
+  const iv = setInterval(() => {
+    n--;
+    if (n < 1) { clearInterval(iv); L.classList.remove('on'); playSplash(); }
+    else N.textContent = n;
+  }, 450);
+}
+$$('.work-card[data-src]').forEach((c) => {
+  const v = c.querySelector('.trailer');
+  if (!v || !fine) return;
+  c.addEventListener('mouseenter', () => {
+    if (!v.getAttribute('src')) v.src = c.dataset.src;
+    v.play().then(() => v.classList.add('playing')).catch(() => {});
+  });
+  c.addEventListener('mouseleave', () => { v.pause(); v.classList.remove('playing'); });
+});
+if (!reduced) $$('.nav-links a, .foot-bar a').forEach((a) => a.addEventListener('mouseenter', () => scramble(a)));
 
 
 /* ── v7 tabahi pass ─────────────────────────────────────── */
