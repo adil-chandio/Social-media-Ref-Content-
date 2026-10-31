@@ -738,3 +738,15 @@ body{overscroll-behavior-y:auto}
 .hero-stage .hero-car{width:100%;align-self:stretch;margin:0}
 .stage-tags{order:4;color:#ff5560;padding-inline:var(--pad);margin-top:clamp(14px,2.6vw,26px)}
 .wm{top:14%;letter-spacing:.03em;font-size:clamp(18px,12vw,160px);font-size:min(12cqw,12vw,160px)}
+
+
+/* ══ v33: mobile clean-up — eye/kicker/tags gone on phones;
+   lede moves below image (tags slot); desktop untouched ═════ */
+.car-wrap{position:relative;order:3}
+@media(max-width:760px){
+  .hero-stage{padding-top:36px;padding-bottom:40px}
+  .hero-stage .hero-eye,.hero-stage .hero-wm,.stage-tags{display:none}
+  .hero-lede-fly{position:static;width:auto;left:auto;bottom:auto;
+    margin-top:clamp(12px,3vw,20px);padding-inline:var(--pad);
+    font-size:12.5px;line-height:1.5;color:#f4f1ea;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+}
