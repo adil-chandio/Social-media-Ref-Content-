@@ -606,8 +606,8 @@ body{overscroll-behavior-y:auto}
 .hero-row{grid-template-columns:1fr}
 .hero-copy{max-width:760px}
 
-/* ══ v25: mobile hero — car band below copy, no overlap ═══ */
+/* ══ v25/26: mobile hero — car in flow below copy ═════════ */
 @media(max-width:760px){
-  .hero{padding-bottom:min(150vw,840px)}
-  .hero-car{width:150%;opacity:.9}
+  .hero{display:flex;flex-direction:column}
+  .hero-car{position:relative;left:0;bottom:auto;transform:none;width:100%;opacity:1;order:10;margin-top:clamp(18px,5vw,34px)}
 }
