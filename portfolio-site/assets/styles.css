@@ -576,13 +576,13 @@ body{overscroll-behavior-y:auto}
 @media(prefers-reduced-motion:reduce){.sig-img{animation:none!important;clip-path:none!important}}
 
 /* ══ v19 M4 LAYER + FREE PALESTINE ════════════════════════ */
-.hero-car{position:absolute;left:50%;bottom:-2%;transform:translateX(-50%);width:min(1250px,142%);z-index:0;pointer-events:none;opacity:.95;-webkit-mask-image:linear-gradient(to top,#000 44%,rgba(0,0,0,.7) 70%,transparent 92%);mask-image:linear-gradient(to top,#000 44%,rgba(0,0,0,.7) 70%,transparent 92%)}
+.hero-car{position:absolute;left:50%;bottom:-2%;transform:translateX(-50%);width:min(1250px,142%);z-index:0;pointer-events:none;opacity:.96}
 .hero-car img{width:100%;display:block;filter:brightness(1.4) contrast(1.12) saturate(1.06)}
 .hero-eye,.hero-type,.hero-row{position:relative;z-index:1}
-.hl{position:absolute;width:17%;height:12%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,244,214,.95),rgba(255,176,97,.5) 42%,rgba(210,31,43,.2) 66%,transparent 76%);filter:blur(1px);opacity:0;animation:hlBurn 7.5s ease-in-out infinite}
-.hl-l{left:36.1%;top:53.3%}
-.hl-r{left:64.4%;top:53.3%;animation-delay:.14s}
-.hl-gnd{position:absolute;left:50%;top:80%;transform:translateX(-50%);width:54%;height:15%;background:radial-gradient(closest-side,rgba(255,196,120,.26),transparent 70%);filter:blur(7px);opacity:0;animation:hlBurn 7.5s ease-in-out infinite}
+.hl{position:absolute;width:17%;height:12%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,82,92,.9),rgba(210,31,43,.55) 45%,rgba(210,31,43,.18) 68%,transparent 78%);filter:blur(1px);opacity:0;animation:hlBurn 7.5s ease-in-out infinite}
+.hl-l{left:12.8%;top:59.1%}
+.hl-r{left:37.5%;top:59.1%;animation-delay:.14s}
+.hl-gnd{position:absolute;left:26%;top:84%;transform:translateX(-50%);width:54%;height:15%;background:radial-gradient(closest-side,rgba(255,196,120,.26),transparent 70%);filter:blur(7px);opacity:0;animation:hlBurn 7.5s ease-in-out infinite}
 @keyframes hlBurn{0%{opacity:0}3%{opacity:.85}5%{opacity:.15}8%{opacity:1}12%{opacity:.92}38%{opacity:.85}58%{opacity:.26}66%{opacity:.08}70%{opacity:.72}82%{opacity:.45}100%{opacity:0}}
 .solidarity{background:var(--ink2);border-top:1px solid #202024;border-bottom:1px solid #202024;padding:clamp(48px,8vw,110px) var(--pad);display:flex;align-items:center;justify-content:center;gap:clamp(28px,6vw,90px);flex-wrap:wrap;overflow:hidden}
 .sol-flag canvas{width:min(430px,78vw);height:auto;display:block;filter:drop-shadow(0 18px 40px rgba(0,0,0,.55))}
@@ -593,8 +593,8 @@ body{overscroll-behavior-y:auto}
 
 /* ══ v20 M4 BEAMS + DEPTH + FLAG SWAY ═════════════════════ */
 .beam{position:absolute;top:57%;width:27%;height:36%;background:linear-gradient(to bottom,rgba(255,240,205,.34),rgba(255,196,120,.10) 55%,transparent 82%);clip-path:polygon(40% 0,60% 0,100% 100%,0 100%);filter:blur(7px);opacity:0;animation:hlBurn 7.5s ease-in-out infinite}
-.beam-l{left:22%;transform:rotate(4deg)}
-.beam-r{left:51%;transform:rotate(-4deg)}
+.beam-l{left:-1%;transform:rotate(4deg)}
+.beam-r{left:24%;transform:rotate(-4deg)}
 .hero-car{will-change:transform}
 .sol-flag{position:relative}
 .sol-flag::after{content:"";position:absolute;left:6%;right:4%;bottom:-7%;height:26px;background:radial-gradient(closest-side,rgba(0,0,0,.55),transparent 72%);filter:blur(5px)}
