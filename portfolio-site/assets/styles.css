@@ -519,3 +519,27 @@ section[id]{scroll-margin-top:96px}
 .socials a:hover{color:var(--red);border-color:var(--red);transform:translateY(-2px)}
 .foot-soc{display:flex;gap:18px;flex-wrap:wrap}
 .about-grid .quote{grid-column:1/-1}
+
+/* ══ v14 SOC LOGOS + BULLETPROOF REVEAL ═══════════════════ */
+.socials a.soc{border-bottom:0;display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:var(--ink);transform:none;animation:socIn .7s var(--ease) both;animation-delay:calc(.15s + var(--i)*.12s)}
+.socials a.soc:hover{transform:none;border-color:transparent;color:var(--ink)}
+.soc-tile{width:54px;height:54px;border:1px solid #2a2a2e;border-radius:16px;display:grid;place-items:center;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,0) 65%);position:relative;overflow:hidden;transition:transform .4s var(--ease),border-color .3s,box-shadow .4s}
+.soc-tile::after{content:"";position:absolute;inset:0;transform:translateX(-130%);background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.16) 50%,transparent 68%)}
+.soc-bob{display:grid;place-items:center;animation:socBob 3.6s ease-in-out infinite;animation-delay:calc(var(--i)*.5s)}
+.soc svg{width:22px;height:22px;fill:currentColor;transition:transform .4s var(--ease),fill .3s}
+.soc-lb{font-size:10px;letter-spacing:.16em;transition:color .25s}
+.soc:hover .soc-tile,.soc:focus-visible .soc-tile{transform:translateY(-7px) rotate(-6deg);border-color:var(--red);box-shadow:0 16px 34px -14px rgba(210,31,43,.55)}
+.soc:hover .soc-tile::after{animation:shine .7s var(--ease)}
+.soc:hover svg{transform:scale(1.18) rotate(6deg);fill:var(--red)}
+.soc:hover .soc-lb{color:var(--red)}
+.soc:active .soc-tile{transform:translateY(-2px) scale(.94)}
+@keyframes socIn{from{opacity:0;transform:translateY(20px) scale(.8)}to{opacity:1;transform:none}}
+@keyframes socBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes shine{to{transform:translateX(130%)}}
+.fs-ic{width:13px;height:13px;fill:currentColor;margin-right:7px;vertical-align:-2px;transition:transform .3s var(--ease),fill .25s}
+.foot-soc a:hover .fs-ic{fill:var(--red);transform:rotate(-10deg) scale(1.2)}
+/* quote: pure-CSS entrance — visible even with zero JS */
+.quote.urdu{animation:qIn 1s var(--ease) both,qPulse 4.5s ease-in-out 1.6s infinite}
+@keyframes qIn{from{opacity:0;clip-path:inset(0 0 100% 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes qPulse{0%,100%{border-left-color:var(--red)}50%{border-left-color:#ff5b64}}
+@media(prefers-reduced-motion:reduce){.soc,.soc-bob,.quote.urdu,.soc-tile::after,.fs-ic{animation:none!important}}

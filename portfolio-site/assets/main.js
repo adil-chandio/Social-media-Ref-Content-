@@ -408,3 +408,23 @@ if (clk && clk2) { const t2 = () => { clk2.textContent = clk.textContent; }; set
 
 
 boot();
+
+/* ── v14 reveal safety net (belt & braces over IO) ───────── */
+if (!('IntersectionObserver' in window)) {
+  $$('[data-rv]').forEach((el) => el.classList.add('in'));
+} else {
+  let rvRaf = 0;
+  const rvNet = () => {
+    rvRaf = 0;
+    const vh = window.innerHeight;
+    $$('[data-rv]:not(.in)').forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.top < vh * 0.92 && r.bottom > 0) { el.classList.add('in'); ioRv.unobserve(el); }
+    });
+  };
+  const rvQueue = () => { if (!rvRaf) rvRaf = requestAnimationFrame(rvNet); };
+  window.addEventListener('scroll', rvQueue, { passive: true });
+  window.addEventListener('resize', rvQueue, { passive: true });
+  setTimeout(rvNet, 1200);
+  setTimeout(rvNet, 3500);
+}
