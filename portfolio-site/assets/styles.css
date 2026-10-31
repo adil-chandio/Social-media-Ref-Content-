@@ -786,3 +786,19 @@ body{overscroll-behavior-y:auto}
   .work-plank i{position:absolute;left:0;top:0;bottom:0;width:22%;background:var(--red);border-radius:2px}
 }
 @media(prefers-reduced-motion:reduce){[data-rv="flip"]{opacity:1;transform:none}.work-card .play::after{animation:none;opacity:0}}
+
+
+/* ══ v36: BUTTER — no repaint masks, no transition-driven parallax,
+   compositor-only hints; hover zoom only where hover exists ═════ */
+.work-card img{transition:filter .4s}
+@media(pointer:fine){.work-card img{transition:transform .5s var(--ease),filter .4s}}
+@media(max-width:860px){
+  .work-grid{mask-image:none;-webkit-mask-image:none;overscroll-behavior-x:contain}
+  .work-card{will-change:transform;contain:layout style}
+  .work-card figure img{will-change:transform}
+  #work{position:relative}
+  #work::before,#work::after{content:'';position:absolute;top:0;bottom:0;width:26px;z-index:6;pointer-events:none}
+  #work::before{left:0;background:linear-gradient(90deg,var(--paper),rgba(236,233,226,0))}
+  #work::after{right:0;background:linear-gradient(270deg,var(--paper),rgba(236,233,226,0))}
+  .work-plank i{will-change:transform}
+}

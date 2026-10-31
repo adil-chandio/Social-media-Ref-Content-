@@ -509,48 +509,56 @@ $$('#fpTitle .ch').forEach((c, i) => c.style.setProperty('--wd', (i * 70) + 'ms'
 })();
 
 
-/* ── v35: films depth — thumb parallax + 3D snap carousel + plank ── */
+/* ── v36: films butter-smooth — batched reads, lerped writes, IO-gated loop ── */
 (function () {
   const grid = document.querySelector('.work-grid'); if (!grid) return;
   const cards = Array.prototype.slice.call(grid.children).filter(function (c) { return c.classList.contains('work-card'); });
   const plank = document.querySelector('.work-plank i');
   const mq = matchMedia('(max-width:860px)');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  let wasM = mq.matches;
-  const depth = () => {
-    if (reduced.matches) return;
-    for (const c of cards) {
-      const r = c.getBoundingClientRect();
-      if (r.bottom < -80 || r.top > innerHeight + 80) continue;
-      const d = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
-      c.style.setProperty('--py', (d * -26).toFixed(1) + 'px');
+  const st = cards.map(function (c) { return { c: c, py: 0, tpy: 0, px: 0, tpx: 0, rot: 0, trot: 0, sc: 1, tsc: 1 }; });
+  let visible = false, running = false, raf = 0, wasM = mq.matches;
+  function settle() {
+    if (wasM === mq.matches) return;
+    const toMob = mq.matches; wasM = toMob;
+    for (const s of st) { if (!toMob) { s.c.style.transform = ''; } s.px = s.tpx = 0; s.rot = s.trot = 0; s.sc = s.tsc = 1; }
+  }
+  function frame() {
+    if (!running) return;
+    settle();
+    const vh = innerHeight, mob = mq.matches;
+    let gx = 0;
+    if (mob) { const gr = grid.getBoundingClientRect(); gx = gr.left + gr.width / 2; }
+    /* READ phase — all rects first, no writes interleaved */
+    for (const s of st) {
+      const r = s.c.getBoundingClientRect();
+      if (mob) {
+        const off = Math.max(-1.5, Math.min(1.5, (r.left + r.width / 2 - gx) / (innerWidth * 0.76)));
+        s.trot = off * -7; s.tsc = 1 - Math.abs(off) * 0.05; s.tpx = off * 12; s.tpy = 0;
+      } else if (r.bottom > -80 && r.top < vh + 80) {
+        s.tpy = ((r.top + r.height / 2 - vh / 2) / vh) * -26;
+      }
     }
-  };
-  const carousel = () => {
-    if (!mq.matches) {
-      if (wasM) { wasM = false; for (const c of cards) { c.style.transform = ''; c.style.setProperty('--px', '0px'); } }
-      return;
+    let sp = -1;
+    if (mob) { const max = grid.scrollWidth - grid.clientWidth; sp = max > 0 ? grid.scrollLeft / max : 0; }
+    /* WRITE phase — lerped, transform+vars only (compositor-friendly) */
+    for (const s of st) {
+      s.py += (s.tpy - s.py) * 0.14; s.px += (s.tpx - s.px) * 0.16;
+      s.rot += (s.trot - s.rot) * 0.16; s.sc += (s.tsc - s.sc) * 0.16;
+      if (mob) s.c.style.transform = 'perspective(900px) rotateY(' + s.rot.toFixed(2) + 'deg) scale(' + s.sc.toFixed(3) + ')';
+      s.c.style.setProperty('--py', s.py.toFixed(1) + 'px');
+      s.c.style.setProperty('--px', s.px.toFixed(1) + 'px');
     }
-    wasM = true;
-    const gr = grid.getBoundingClientRect();
-    const cx = gr.left + gr.width / 2;
-    for (const c of cards) {
-      const r = c.getBoundingClientRect();
-      const off = Math.max(-1.4, Math.min(1.4, (r.left + r.width / 2 - cx) / (innerWidth * 0.76)));
-      c.style.transform = 'perspective(900px) rotateY(' + (off * -7).toFixed(2) + 'deg) scale(' + (1 - Math.abs(off) * 0.05).toFixed(3) + ')';
-      c.style.setProperty('--px', (off * 12).toFixed(1) + 'px');
-    }
-    if (plank) {
-      const max = grid.scrollWidth - grid.clientWidth;
-      const p = max > 0 ? grid.scrollLeft / max : 0;
-      plank.style.transform = 'translateX(' + (p * 354).toFixed(1) + '%)';
-    }
-  };
-  let q = 0;
-  const tick = () => { q = 0; depth(); carousel(); };
-  const req = () => { if (!q) q = requestAnimationFrame(tick); };
-  addEventListener('scroll', req, { passive: true });
-  addEventListener('resize', req);
-  grid.addEventListener('scroll', req, { passive: true });
-  req();
+    if (plank && sp >= 0) plank.style.transform = 'translateX(' + (sp * 354).toFixed(1) + '%)';
+    raf = requestAnimationFrame(frame);
+  }
+  function sync() {
+    const want = visible && !reduced.matches;
+    if (want && !running) { running = true; raf = requestAnimationFrame(frame); }
+    else if (!want && running) { running = false; cancelAnimationFrame(raf); }
+  }
+  new IntersectionObserver(function (en) { visible = en[0].isIntersecting; sync(); }, { rootMargin: '25% 0px' }).observe(grid);
+  addEventListener('resize', sync, { passive: true });
+  if (reduced.addEventListener) reduced.addEventListener('change', sync);
+  sync();
 })();
