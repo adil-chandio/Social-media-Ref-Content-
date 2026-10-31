@@ -571,6 +571,6 @@ body{overscroll-behavior-y:auto}
 @media(pointer:coarse){#grain{opacity:.035;animation-duration:3.2s}}
 
 /* ══ v17 AI SIGNATURE (approved) ═════════════════════════ */
-.sig-img{width:min(440px,74vw);height:auto;display:block;margin:10px 0 2px;animation:sigWipe 1.9s var(--ease) .25s both;filter:drop-shadow(0 8px 26px rgba(210,31,43,.18))}
+.sig-img{width:min(440px,74vw);height:auto;display:block;margin:14px auto 6px;animation:sigWipe 1.9s var(--ease) .25s both;filter:drop-shadow(0 10px 26px rgba(10,10,11,.14))}
 @keyframes sigWipe{from{clip-path:inset(0 100% 0 0);opacity:.35}to{clip-path:inset(0 0 0 0);opacity:1}}
 @media(prefers-reduced-motion:reduce){.sig-img{animation:none!important;clip-path:none!important}}
