@@ -7,3 +7,6 @@ deliverables/*.mp4
 __pycache__/
 .venv/
 portfolio/
+
+# reference video binaries (forensic sources)
+refs/
