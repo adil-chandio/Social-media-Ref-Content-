@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 
 W,H,FPS=720,1280,30
-DURATION=33.9
+DURATION=28.0
 # Measured source-audio accents inside the skill-scroll scene, prefixed by the
 # scene cut. Each skill's focus lands exactly on the next impact (18.059 s included).
 SKILL_SCROLL_ANCHORS=(15.0,15.126,16.991,18.059,19.127,20.194,21.262,22.329)
@@ -296,7 +296,7 @@ def main():
     ff=imageio_ffmpeg.get_ffmpeg_exe();frame_bytes=W*H*3
     dec=subprocess.Popen([ff,'-v','error','-i',args.reference,'-an','-f','rawvideo','-pix_fmt','rgb24','-vsync','0','-'],stdout=subprocess.PIPE)
     total=round(DURATION*FPS)
-    enc=subprocess.Popen([ff,'-y','-loglevel','error','-f','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','-','-i',args.reference,'-map','0:v:0','-map','1:a:0','-c:v','libx264','-preset','medium','-crf','14','-pix_fmt','yuv420p','-c:a','copy','-movflags','+faststart',args.output],stdin=subprocess.PIPE)
+    enc=subprocess.Popen([ff,'-y','-loglevel','error','-f','rawvideo','-pix_fmt','rgb24','-s',f'{W}x{H}','-r',str(FPS),'-i','-','-t',str(DURATION),'-i',args.reference,'-map','0:v:0','-map','1:a:0','-c:v','libx264','-preset','medium','-crf','14','-pix_fmt','yuv420p','-c:a','copy','-movflags','+faststart',args.output],stdin=subprocess.PIPE)
     try:
         for i in range(total):
             buf=dec.stdout.read(frame_bytes)
