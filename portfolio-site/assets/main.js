@@ -116,6 +116,7 @@ $$('[data-count]').forEach((el) => ioCt.observe(el));
 /* ── Motion engine: one ticker, lerped writes, batched reads ─── */
 let mx = innerWidth / 2, my = innerHeight / 2, cx = mx, cy = my, curOn = false;
 const P = $$('[data-px]').map((el) => ({ el, sp: parseFloat(el.dataset.px) || 0, base: el.dataset.base || '', y: 0, ty: 0 }));
+const mq860 = matchMedia('(max-width:860px)');
 const T = $$('[data-tilt]').map((el) => ({ el, st: parseFloat(el.dataset.tilt) || 7, rx: 0, ry: 0, trx: 0, try_: 0 }));
 const M = $$('.magnet').map((el) => ({ el, dx: 0, dy: 0, tx: 0, ty: 0 }));
 
@@ -168,7 +169,7 @@ function ticker() {
   });
   T.forEach((t) => {
     t.rx = L(t.rx, t.trx, 0.14); t.ry = L(t.ry, t.try_, 0.14);
-    t.el.style.transform = `perspective(900px) rotateX(${t.rx.toFixed(2)}deg) rotateY(${t.ry.toFixed(2)}deg)`;
+    if (!(mq860.matches && t.el.classList.contains('work-card'))) t.el.style.transform = `perspective(900px) rotateX(${t.rx.toFixed(2)}deg) rotateY(${t.ry.toFixed(2)}deg)`;
   });
   M.forEach((m) => {
     m.dx = L(m.dx, m.tx, 0.18); m.dy = L(m.dy, m.ty, 0.18);
@@ -505,4 +506,51 @@ $$('#fpTitle .ch').forEach((c, i) => c.style.setProperty('--wd', (i * 70) + 'ms'
   let q = 0;
   const mv = () => { q = 0; if (window.innerWidth <= 760) { car.style.transform = ''; return; } car.style.transform = 'translateY(' + Math.min(window.scrollY * 0.08, 150).toFixed(1) + 'px)'; };
   window.addEventListener('scroll', () => { if (!q) q = requestAnimationFrame(mv); }, { passive: true });
+})();
+
+
+/* ── v35: films depth — thumb parallax + 3D snap carousel + plank ── */
+(function () {
+  const grid = document.querySelector('.work-grid'); if (!grid) return;
+  const cards = Array.prototype.slice.call(grid.children).filter(function (c) { return c.classList.contains('work-card'); });
+  const plank = document.querySelector('.work-plank i');
+  const mq = matchMedia('(max-width:860px)');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let wasM = mq.matches;
+  const depth = () => {
+    if (reduced.matches) return;
+    for (const c of cards) {
+      const r = c.getBoundingClientRect();
+      if (r.bottom < -80 || r.top > innerHeight + 80) continue;
+      const d = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
+      c.style.setProperty('--py', (d * -26).toFixed(1) + 'px');
+    }
+  };
+  const carousel = () => {
+    if (!mq.matches) {
+      if (wasM) { wasM = false; for (const c of cards) { c.style.transform = ''; c.style.setProperty('--px', '0px'); } }
+      return;
+    }
+    wasM = true;
+    const gr = grid.getBoundingClientRect();
+    const cx = gr.left + gr.width / 2;
+    for (const c of cards) {
+      const r = c.getBoundingClientRect();
+      const off = Math.max(-1.4, Math.min(1.4, (r.left + r.width / 2 - cx) / (innerWidth * 0.76)));
+      c.style.transform = 'perspective(900px) rotateY(' + (off * -7).toFixed(2) + 'deg) scale(' + (1 - Math.abs(off) * 0.05).toFixed(3) + ')';
+      c.style.setProperty('--px', (off * 12).toFixed(1) + 'px');
+    }
+    if (plank) {
+      const max = grid.scrollWidth - grid.clientWidth;
+      const p = max > 0 ? grid.scrollLeft / max : 0;
+      plank.style.transform = 'translateX(' + (p * 354).toFixed(1) + '%)';
+    }
+  };
+  let q = 0;
+  const tick = () => { q = 0; depth(); carousel(); };
+  const req = () => { if (!q) q = requestAnimationFrame(tick); };
+  addEventListener('scroll', req, { passive: true });
+  addEventListener('resize', req);
+  grid.addEventListener('scroll', req, { passive: true });
+  req();
 })();

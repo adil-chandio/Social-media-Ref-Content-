@@ -759,3 +759,30 @@ body{overscroll-behavior-y:auto}
 .hl,.beam,.hl-gnd{animation-name:ignite}
 @keyframes ignite{0%,5%{opacity:0}8%{opacity:.45}10%{opacity:.1}14%{opacity:1}17%{opacity:.7}21%,60%{opacity:1}72%{opacity:.55}84%{opacity:.9}95%,100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.car-on{animation:none;opacity:1}}
+
+
+/* ══ v35: FILMS NEXT-LEVEL — 3D snap carousel (mobile) + depth parallax ══ */
+[data-rv="flip"]{opacity:0;transform:perspective(1000px) rotateX(10deg) translateY(52px)}
+[data-rv="flip"].in{opacity:1;transform:none}
+.work-card img{transform:translate3d(var(--px,0px),var(--py,0px),0) scale(var(--zs,1));transition:transform .45s var(--ease),filter .4s}
+.work-card:hover img{--zs:1.07}
+.work-card:hover figure{box-shadow:0 40px 80px -30px rgba(10,10,11,.65),0 0 0 1px rgba(210,31,43,.5),0 0 34px -6px rgba(210,31,43,.35)}
+.work-card.in figure::before{color:#ff5560;text-shadow:0 0 14px rgba(210,31,43,.85);transition:color .5s,text-shadow .5s}
+.work-card .play::after{content:'';position:absolute;inset:-4px;border-radius:999px;border:1px solid rgba(210,31,43,.55);opacity:0;animation:playPulse 2.8s ease-out infinite}
+@keyframes playPulse{0%{transform:scale(.8);opacity:.7}70%{transform:scale(1.25);opacity:0}100%{transform:scale(1.25);opacity:0}}
+.work-plank{display:none}
+@media(max-width:860px){
+  .work-grid{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;
+    padding:6px var(--pad) 18px;margin:0 calc(var(--pad)*-1);
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    mask-image:linear-gradient(90deg,transparent 0,#000 4%,#000 96%,transparent 100%);
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 4%,#000 96%,transparent 100%)}
+  .work-grid::-webkit-scrollbar{display:none}
+  .work-card{flex:0 0 76vw;scroll-snap-align:center}
+  .work-card.wide{flex-basis:92vw;grid-column:auto}
+  .work-card.wide figure{aspect-ratio:16/9;max-height:none}
+  .work-grid>.work-card:nth-child(2),.work-grid>.work-card:nth-child(5){margin-top:0}
+  .work-plank{display:block;height:3px;background:#d4d0c7;margin:14px var(--pad) 0;position:relative;overflow:hidden;border-radius:2px}
+  .work-plank i{position:absolute;left:0;top:0;bottom:0;width:22%;background:var(--red);border-radius:2px}
+}
+@media(prefers-reduced-motion:reduce){[data-rv="flip"]{opacity:1;transform:none}.work-card .play::after{animation:none;opacity:0}}
