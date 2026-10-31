@@ -675,3 +675,24 @@ body{overscroll-behavior-y:auto}
   .hero .marquee{order:5}
   .cue,.spark{display:none}
 }
+
+
+/* ══ v29: POSTER COMPOSITE — name split behind head INSIDE image,
+   lede flies on the floor beside his feet (no black card) ═══════════ */
+.hero::before{display:none}
+.hero-eye{color:var(--mut-d)}
+.hero-wm{margin:clamp(6px,1.6vh,18px) 0 clamp(10px,2vh,22px)}
+.wm{position:absolute;top:10%;z-index:2;font-weight:800;line-height:1;letter-spacing:.02em;color:#edeae3;opacity:.95;pointer-events:none;
+  font-size:clamp(16px,8.6vw,96px);text-shadow:0 0 26px rgba(236,233,226,.28),0 2px 10px rgba(0,0,0,.8)}
+.wm-l{left:2.5%;right:58.5%;text-align:right}
+.wm-r{left:58.5%;right:2.5%;text-align:left}
+.hero-lede-fly{position:absolute;left:4%;bottom:7%;width:38%;z-index:2;pointer-events:none;
+  color:#f4f1ea;font-weight:700;font-size:clamp(12px,1.35vw,19px);line-height:1.5;
+  text-shadow:0 2px 14px rgba(0,0,0,.92),0 0 5px rgba(0,0,0,.65)}
+.hero-meta{display:flex;align-items:center;gap:clamp(16px,3vw,30px);flex-wrap:wrap;margin-top:clamp(18px,3vw,34px);position:relative;z-index:2}
+.hero-meta .hero-tags{margin:0}
+@media(max-width:760px){
+  .wm{top:8%;letter-spacing:0;font-size:clamp(15px,8.6vw,30px)}
+  .hero-lede-fly{left:5%;width:40%;right:auto;bottom:6%;font-size:12px;line-height:1.42}
+  .hero-meta{order:4;margin-top:16px}
+}
