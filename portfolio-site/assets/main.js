@@ -197,4 +197,39 @@ $('#contactForm').addEventListener('submit', (ev) => {
   f.reset();
 });
 
+/* ── Film player modal (v5) ─────────────────────────────── */
+const pl = $('#player'), plV = $('#plVideo'), plT = $('#plTitle'), plC = $('#plClose');
+function plOpen(src, title, wide) {
+  plV.src = src;
+  if (wide) plV.setAttribute('data-wide', '1'); else plV.removeAttribute('data-wide');
+  plT.textContent = (title || 'FILM').toUpperCase();
+  pl.classList.add('on');
+  pl.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('locked');
+  setTimeout(() => { plV.play().catch(() => {}); }, 80);
+}
+function plClose() {
+  plV.pause();
+  plV.removeAttribute('src');
+  plV.load();
+  pl.classList.remove('on');
+  pl.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('locked');
+}
+$$('.work-card[data-src]').forEach((c) => c.addEventListener('click', () => {
+  plOpen(c.dataset.src, c.dataset.title, c.dataset.wide === '1');
+}));
+plC.addEventListener('click', plClose);
+pl.addEventListener('click', (e) => { if (e.target === pl) plClose(); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && pl.classList.contains('on')) plClose(); });
+
+/* proof loop: play only while visible */
+const ploop = $('#proofLoop');
+if (ploop && !reduced) {
+  new IntersectionObserver((en) => en.forEach((x) => {
+    if (x.isIntersecting) ploop.play().catch(() => {}); else ploop.pause();
+  }), { threshold: .3 }).observe(ploop);
+}
+
+
 boot();

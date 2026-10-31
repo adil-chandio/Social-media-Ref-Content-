@@ -102,27 +102,67 @@
     </ul>
   </section>
 
-  <!-- ── Work ────────────────────────────────────────────────── -->
+  <!-- ── Films ───────────────────────────────────────────────── -->
   <section class="section" id="work">
-    <h2 class="sec-title" data-rv="mask">Featured Work</h2>
+    <h2 class="sec-title" data-rv="mask">Selected Films</h2>
     <div class="work-grid stagger">
-      <a class="work-card" data-rv="up" data-tilt href="https://github.com/adil-chandio/Social-media-Ref-Content-/blob/arena/cf1b3e02-social-media-ref-content/deliverables/adil-chandio-reference-match.mp4" target="_blank" rel="noopener">
+      <button class="work-card" data-rv="up" data-tilt data-src="media/intro.mp4" data-title="Reference-Match Portfolio Film">
         <figure><img src="assets/work-film.jpg" alt="Portrait film frame"><span class="play mono">▶ 28S</span></figure>
         <h3>Reference-Match Portfolio Film</h3>
-        <p class="mono">FILM • BEAT-LOCKED AUDIO • 2026</p>
-      </a>
-      <a class="work-card" data-rv="up" data-tilt href="https://github.com/adil-chandio/Social-media-Ref-Content-/blob/arena/cf1b3e02-social-media-ref-content/deliverables/adil-chandio-site-match.mp4" target="_blank" rel="noopener">
+        <p class="mono"><i class="tag t-film">FILM</i> BEAT-LOCKED AUDIO • 2026</p>
+      </button>
+      <button class="work-card" data-rv="up" data-tilt data-src="media/paanch.web.mp4" data-title="Paanch Rules — Motivational Short">
+        <figure><img src="assets/post-paanch.jpg" alt="Paanch Rules short frame"><span class="play mono">▶ 75S</span></figure>
+        <h3>Paanch Rules</h3>
+        <p class="mono"><i class="tag t-short">SHORT</i> 583K+ VIEWS • URDU MOTION</p>
+      </button>
+      <button class="work-card" data-rv="up" data-tilt data-src="media/lawone.web.mp4" data-title="Monarch: Law One — Cinematic Law Story">
+        <figure><img src="assets/post-lawone.jpg" alt="Law One cinematic frame"><span class="play mono">▶ 63S</span></figure>
+        <h3>Monarch: Law One</h3>
+        <p class="mono"><i class="tag t-mon">MONARCH</i> CINEMATIC LAW STORY</p>
+      </button>
+      <button class="work-card" data-rv="up" data-tilt data-src="media/site.web.mp4" data-title="Construction-Site Reference Match">
         <figure><img src="assets/work-site.jpg" alt="Construction site film frame"><span class="play mono">▶ FILM</span></figure>
         <h3>Construction-Site Reference Match</h3>
-        <p class="mono">FILM • SHOT-FOR-SHOT REBUILD • 2026</p>
-      </a>
-      <a class="work-card" data-rv="up" data-tilt href="https://github.com/adil-chandio/Social-media-Ref-Content-/blob/arena/cf1b3e02-social-media-ref-content/deliverables/adil-chandio-monarch-intro.mp4" target="_blank" rel="noopener">
+        <p class="mono"><i class="tag t-film">FILM</i> SHOT-FOR-SHOT REBUILD</p>
+      </button>
+      <button class="work-card" data-rv="up" data-tilt data-src="media/monarch.web.mp4" data-title="Monarch Intro Film">
         <figure><img src="assets/work-intro.jpg" alt="Monarch intro frame"><span class="play mono">▶ INTRO</span></figure>
         <h3>Monarch Intro Film</h3>
-        <p class="mono">FILM • IDENTITY REVEAL • 2026</p>
-      </a>
+        <p class="mono"><i class="tag t-mon">MONARCH</i> IDENTITY REVEAL</p>
+      </button>
+      <button class="work-card" data-rv="up" data-tilt data-src="media/process.web.mp4" data-title="Inside the Pipeline — AI Co-Production BTS">
+        <figure><img src="assets/post-process.jpg" alt="AI pipeline screen frame"><span class="play mono">▶ BTS</span></figure>
+        <h3>Inside the Pipeline</h3>
+        <p class="mono"><i class="tag t-pro">PROCESS</i> AI CO-PRODUCTION BTS</p>
+      </button>
     </div>
     <p class="mono work-more" data-rv="up"><a href="https://github.com/adil-chandio" target="_blank" rel="noopener">VIEW ALL ON GITHUB ↗</a></p>
+  </section>
+
+  <!-- ── Proof ──────────────────────────────────────────────── -->
+  <section class="section dark" id="proof">
+    <h2 class="sec-title" data-rv="mask">Proof.</h2>
+    <div class="proof-grid">
+      <div class="proof-left stagger">
+        <p class="proof-lede" data-rv="up">Numbers, not adjectives. One organic Short — <em>583,290 views</em>, <em>+1.6K subscribers</em>, 74% average retention — built end-to-end with the same pipeline shown above.</p>
+        <ul class="stats mono">
+          <li data-rv="up"><b data-count="583">0</b>K+ VIEWS / ONE SHORT</li>
+          <li data-rv="up"><b>+1.6K</b> SUBSCRIBERS</li>
+          <li data-rv="up"><b data-count="74">0</b>% AVG RETENTION</li>
+          <li data-rv="up"><b data-count="85">0</b>% WATCHED TO END</li>
+        </ul>
+        <p class="mono proof-src" data-rv="up">SOURCE: YOUTUBE STUDIO ANALYTICS — LIFETIME, ORGANIC</p>
+      </div>
+      <div class="phone" data-rv="zoom" aria-label="YouTube Studio analytics recording">
+        <video id="proofLoop" src="media/proof-loop.web.mp4" muted loop playsinline preload="metadata"></video>
+      </div>
+    </div>
+    <div class="receipts" data-rv="up" aria-label="Analytics receipts">
+      <img src="assets/proof-1.jpg" alt="Short analytics: 583.2K views">
+      <img src="assets/proof-2.jpg" alt="Subscribers: +1.6K">
+      <img src="assets/proof-3.jpg" alt="Second short: 470 views, +45 subscribers">
+    </div>
   </section>
 
   <!-- ── Contact ──────────────────────────────────────────────── -->
@@ -151,6 +191,10 @@
   </div>
 </footer>
 
+<div id="player" aria-hidden="true">
+  <div class="pl-bar"><span class="mono" id="plTitle">FILM</span><button class="mono" id="plClose" aria-label="Close player">✕ CLOSE [ESC]</button></div>
+  <video id="plVideo" controls playsinline preload="metadata"></video>
+</div>
 <div id="toast" class="toast mono" role="status"></div>
 <script src="assets/main.js"></script>
 </body>
