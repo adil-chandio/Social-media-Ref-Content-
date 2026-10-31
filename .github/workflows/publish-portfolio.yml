@@ -1,0 +1,49 @@
+name: publish-portfolio
+
+# Mirrors ./portfolio-site into the standalone adil-chandio/portfolio repo and
+# switches on GitHub Pages there. Needs the repo secret PORTFOLIO_PAT
+# (classic PAT, `repo` scope) which the owner manages in
+# Settings → Secrets and variables → Actions. The token never leaves GitHub.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [arena/cf1b3e02-social-media-ref-content]
+    paths: ['portfolio-site/**']
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push site to adil-chandio/portfolio
+        env:
+          PAT: ${{ secrets.PORTFOLIO_PAT }}
+        run: |
+          set -e
+          git clone --depth 1 "https://x-access-token:${PAT}@github.com/adil-chandio/portfolio.git" /tmp/pf || {
+            # empty repo: clone fails, init instead
+            mkdir -p /tmp/pf && cd /tmp/pf && git init -b main && git remote add origin "https://x-access-token:${PAT}@github.com/adil-chandio/portfolio.git"
+          }
+          cd /tmp/pf
+          find . -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
+          cp -r "$GITHUB_WORKSPACE"/portfolio-site/. .
+          git add -A
+          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          git -c user.name="adil-chandio" -c user.email="260368012+adil-chandio@users.noreply.github.com" \
+            commit -m "Portfolio site: intro film splash + single-page site (auto-published)"
+          git push origin main
+
+      - name: Enable GitHub Pages on portfolio repo
+        env:
+          PAT: ${{ secrets.PORTFOLIO_PAT }}
+        run: |
+          curl -s -o /dev/null -w '%{http_code}\n' -X POST \
+            -H "Authorization: Bearer ${PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/adil-chandio/portfolio/pages \
+            -d '{"source":{"branch":"main","path":"/"}}' || true
