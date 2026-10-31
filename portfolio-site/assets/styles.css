@@ -355,3 +355,42 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
   .marquee-track,.cue::after,.portrait{animation:none!important}
   .curve path{transition:none!important;stroke-dashoffset:0!important}
 }
+
+/* ══ v7 TABAHI PASS ═══════════════════════════════════════ */
+/* section dot rail (auto-inverts via difference) */
+.dots{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:15px;z-index:45;mix-blend-mode:difference}
+.dots a{width:8px;height:8px;border-radius:50%;background:#fff;opacity:.55;transition:transform .3s var(--ease),opacity .3s;position:relative}
+.dots a.on{opacity:1;transform:scale(1.65)}
+.dots a::after{content:attr(data-lbl);position:absolute;right:20px;top:50%;transform:translateY(-50%);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;color:#fff;opacity:0;transition:opacity .25s;white-space:nowrap;pointer-events:none}
+.dots a:hover::after,.dots a.on::after{opacity:.9}
+@media(max-width:760px){.dots{display:none}}
+/* tools marquee strip */
+.marquee.tools{background:var(--ink);color:var(--paper);border-block:1px solid #26262a;padding:15px 0}
+.marquee.tools span{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.3em}
+/* word-by-word lede reveal */
+[data-rv="words"]{opacity:1;transform:none;clip-path:none}
+.wd{display:inline-block;opacity:0;transform:translateY(70%);transition:transform .6s var(--ease),opacity .45s ease}
+[data-rv="words"].in .wd{opacity:1;transform:none}
+/* dark-section cursor spotlight */
+.section.dark{position:relative}
+.section.dark::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(560px circle at var(--sx,50%) var(--sy,50%),rgba(210,31,43,.11),transparent 65%);opacity:0;transition:opacity .4s}
+.section.dark:hover::after{opacity:1}
+/* skill tile accent bar */
+.skill-grid li::before{content:'';position:absolute;left:0;top:0;height:2px;width:0;background:var(--red);transition:width .9s var(--ease) .15s;z-index:2}
+.skill-grid li.in::before{width:38%}
+.skill-grid li:hover::before{width:100%}
+/* back-to-top FAB with progress ring */
+.fab{position:fixed;right:18px;bottom:18px;z-index:45;width:48px;height:48px;border-radius:50%;border:1px solid #3a3a3f;background:var(--ink);color:var(--paper);cursor:pointer;opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .35s,visibility .35s,transform .35s var(--ease);display:grid;place-items:center;font-size:15px}
+body.fab-on .fab{opacity:1;visibility:visible;transform:none}
+.fab:hover{border-color:var(--red);color:var(--red)}
+.fab svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.fab .bg{fill:none;stroke:#33333a;stroke-width:2}
+.fab .fg{fill:none;stroke:var(--red);stroke-width:2;stroke-dasharray:106.8;stroke-dashoffset:106.8;stroke-linecap:round}
+/* footer availability pulse */
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#37c26e;margin-right:9px;vertical-align:1px;box-shadow:0 0 0 0 rgba(55,194,110,.55);animation:pulse 2.2s ease-out infinite}
+@keyframes pulse{to{box-shadow:0 0 0 11px rgba(55,194,110,0)}}
+@media(prefers-reduced-motion:reduce){
+  .wd{transition:none!important;opacity:1!important;transform:none!important}
+  .pulse{animation:none!important}
+  .dots a{transition:none!important}
+}

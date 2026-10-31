@@ -301,4 +301,55 @@ const secIO = new IntersectionObserver((es) => es.forEach((en) => {
 $$('main section[id]').forEach((sec) => secIO.observe(sec));
 
 
+/* ── v7 tabahi pass ─────────────────────────────────────── */
+/* word-by-word lede split (preserves <em>) */
+function wordify(el) {
+  const nodes = Array.from(el.childNodes); el.textContent = '';
+  let i = 0;
+  const add = (n) => { n.classList.add('wd'); n.style.transitionDelay = (i * 34) + 'ms'; el.appendChild(n); el.appendChild(document.createTextNode(' ')); i++; };
+  nodes.forEach((nd) => {
+    if (nd.nodeType === 3) nd.textContent.split(/\s+/).filter(Boolean).forEach((w) => { const sp = document.createElement('span'); sp.textContent = w; add(sp); });
+    else if (nd.nodeType === 1) add(nd);
+  });
+}
+$$('[data-rv="words"]').forEach(wordify);
+/* dot rail spy */
+const dotAs = $$('.dots a');
+const dotIO = new IntersectionObserver((es) => es.forEach((en) => {
+  if (!en.isIntersecting) return;
+  const id = en.target.classList.contains('hero') ? '#top' : '#' + en.target.id;
+  dotAs.forEach((a) => a.classList.toggle('on', a.getAttribute('href') === id));
+}), { rootMargin: '-42% 0px -52% 0px' });
+const heroEl = $('.hero');
+if (heroEl) dotIO.observe(heroEl);
+$$('main section[id]').forEach((sec) => dotIO.observe(sec));
+/* dark-section cursor spotlight */
+let sRaf = 0, sEl = null, sx = 0, sy = 0;
+if (fine) document.addEventListener('mousemove', (e) => {
+  sx = e.clientX; sy = e.clientY;
+  const el = e.target.closest ? e.target.closest('.section.dark') : null;
+  if (el !== sEl) { if (sEl) { sEl.style.removeProperty('--sx'); sEl.style.removeProperty('--sy'); } sEl = el; }
+  if (!el || sRaf) return;
+  sRaf = requestAnimationFrame(() => { sRaf = 0; if (!sEl) return; const r = sEl.getBoundingClientRect(); sEl.style.setProperty('--sx', (sx - r.left) + 'px'); sEl.style.setProperty('--sy', (sy - r.top) + 'px'); });
+}, { passive: true });
+/* back-to-top FAB + progress ring */
+const fab = $('#topFab'), fabFg = fab ? fab.querySelector('.fg') : null, FAB_C = 106.8;
+let fR = 0;
+function fabUp() {
+  fR = 0;
+  const y = scrollY || 0;
+  const max = document.documentElement.scrollHeight - innerHeight;
+  const p = max > 0 ? Math.min(1, y / max) : 0;
+  if (fabFg) fabFg.style.strokeDashoffset = String(FAB_C * (1 - p));
+  document.body.classList.toggle('fab-on', y > 600);
+  const d0 = dotAs[0];
+  if (d0 && y < 240) d0.classList.add('on');
+}
+addEventListener('scroll', () => { if (!fR) fR = requestAnimationFrame(fabUp); }, { passive: true });
+if (fab) fab.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+/* second clock (footer) */
+const clk2 = $('#clk2');
+if (clk && clk2) { const t2 = () => { clk2.textContent = clk.textContent; }; setInterval(t2, 1000); t2(); }
+
+
 boot();
