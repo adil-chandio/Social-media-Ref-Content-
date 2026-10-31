@@ -197,31 +197,27 @@ $('#contactForm').addEventListener('submit', (ev) => {
   f.reset();
 });
 
-/* ── Film player modal (v5) ─────────────────────────────── */
-const pl = $('#player'), plV = $('#plVideo'), plT = $('#plTitle'), plC = $('#plClose');
-function plOpen(src, title, wide) {
-  plV.src = src;
-  if (wide) plV.setAttribute('data-wide', '1'); else plV.removeAttribute('data-wide');
-  plT.textContent = (title || 'FILM').toUpperCase();
-  pl.classList.add('on');
-  pl.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('locked');
+/* ── Film player modal (v5.2): local files + YouTube embeds ── */
+const pl = $('#player'), plV = $('#plVideo'), plF = $('#plFrame'), plT = $('#plTitle'), plC = $('#plClose');
+function plShow() { pl.classList.add('on'); pl.setAttribute('aria-hidden', 'false'); document.body.classList.add('locked'); }
+function plHide() { pl.classList.remove('on'); pl.setAttribute('aria-hidden', 'true'); document.body.classList.remove('locked'); }
+function plOpen(src, title) {
+  plF.innerHTML = ''; plV.style.display = '';
+  plV.src = src; plT.textContent = (title || 'FILM').toUpperCase(); plShow();
   setTimeout(() => { plV.play().catch(() => {}); }, 80);
 }
-function plClose() {
-  plV.pause();
-  plV.removeAttribute('src');
-  plV.load();
-  pl.classList.remove('on');
-  pl.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('locked');
+function plOpenYt(id, title, wide) {
+  plV.pause(); plV.removeAttribute('src'); plV.load(); plV.style.display = 'none';
+  plF.innerHTML = '<iframe class="' + (wide ? 'yt-h' : 'yt-v') + '" src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1" title="' + (title || 'Film') + '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  plT.textContent = (title || 'FILM').toUpperCase(); plShow();
 }
-$$('.work-card[data-src]').forEach((c) => c.addEventListener('click', () => {
-  plOpen(c.dataset.src, c.dataset.title, c.dataset.wide === '1');
+function plClose() { plV.pause(); plV.removeAttribute('src'); plV.load(); plF.innerHTML = ''; plHide(); }
+$$('.work-card[data-src], .work-card[data-yt]').forEach((c) => c.addEventListener('click', () => {
+  if (c.dataset.yt) plOpenYt(c.dataset.yt, c.dataset.title, c.dataset.wide === '1');
+  else plOpen(c.dataset.src, c.dataset.title);
 }));
 plC.addEventListener('click', plClose);
 pl.addEventListener('click', (e) => { if (e.target === pl) plClose(); });
-addEventListener('keydown', (e) => { if (e.key === 'Escape' && pl.classList.contains('on')) plClose(); });
 
 /* proof loop: play only while visible */
 const ploop = $('#proofLoop');
@@ -232,27 +228,41 @@ if (ploop && !reduced) {
 }
 
 
-/* ── Receipts carousel (v5.1): one box, tap/swipe to slide ── */
-const rcT = $('#rcTrack');
-if (rcT) {
-  const slides = $$('.rc-slide'), dots = $('#rcDots');
-  const step = () => slides[0].getBoundingClientRect().width + 12;
-  const idx = () => Math.min(slides.length - 1, Math.max(0, Math.round(rcT.scrollLeft / step())));
-  const go = (i) => { const n = slides.length; rcT.scrollTo({ left: ((i % n) + n) % n * step(), behavior: 'smooth' }); };
-  slides.forEach((_, i) => {
-    const b = document.createElement('button');
-    b.className = 'rc-dot'; b.setAttribute('aria-label', 'Receipt ' + (i + 1));
-    b.addEventListener('click', (e) => { e.stopPropagation(); go(i); });
-    dots.appendChild(b);
-  });
-  let raf = 0;
-  const paint = () => { Array.from(dots.children).forEach((d, i) => d.classList.toggle('on', i === idx())); };
-  rcT.addEventListener('scroll', () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; paint(); }); }, { passive: true });
-  $('#rcPrev').addEventListener('click', (e) => { e.stopPropagation(); go(idx() - 1); });
-  $('#rcNext').addEventListener('click', (e) => { e.stopPropagation(); go(idx() + 1); });
-  rcT.addEventListener('click', () => go(idx() + 1));
-  paint();
+/* ── Receipts folder: fan stack → sliding cards (v5.2) ── */
+const rcStack = $('#rcStack'), rcM = $('#rcModal'), rcmT = $('#rcmTrack'), rcmStage = $('#rcmStage'), rcmDots = $('#rcmDots'), rcmCount = $('#rcCount');
+const rcCards = $$('.rcm-card');
+let rci = 0;
+rcCards.forEach((_, i) => {
+  const b = document.createElement('button');
+  b.className = 'rc-dot'; b.setAttribute('aria-label', 'Receipt ' + (i + 1));
+  b.addEventListener('click', () => rcGo(i));
+  rcmDots.appendChild(b);
+});
+function rcGo(i) {
+  rci = Math.min(rcCards.length - 1, Math.max(0, i));
+  const off = rcmStage.clientWidth + 18;
+  rcmT.style.transform = 'translateX(' + (-rci * off) + 'px)';
+  Array.from(rcmDots.children).forEach((d, k) => d.classList.toggle('on', k === rci));
+  rcmCount.textContent = (rci + 1) + ' / ' + rcCards.length;
 }
-
+function rcOpen() { rcM.classList.add('on'); rcM.setAttribute('aria-hidden', 'false'); document.body.classList.add('locked'); rcGo(rci); }
+function rcClose() { rcM.classList.remove('on'); rcM.setAttribute('aria-hidden', 'true'); document.body.classList.remove('locked'); }
+rcStack.addEventListener('click', rcOpen);
+$('#rcmClose').addEventListener('click', rcClose);
+rcM.addEventListener('click', (e) => { if (e.target === rcM) rcClose(); });
+$('#rcmPrev').addEventListener('click', () => rcGo(rci - 1));
+$('#rcmNext').addEventListener('click', () => rcGo(rci + 1));
+addEventListener('resize', () => { if (rcM.classList.contains('on')) rcGo(rci); });
+let rx0 = null;
+rcmStage.addEventListener('pointerdown', (e) => { rx0 = e.clientX; });
+rcmStage.addEventListener('pointerup', (e) => {
+  if (rx0 === null) return;
+  const d = e.clientX - rx0; rx0 = null;
+  if (d < -40) rcGo(rci + 1); else if (d > 40) rcGo(rci - 1);
+});
+addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (rcM.classList.contains('on')) rcClose();
+});
 
 boot();

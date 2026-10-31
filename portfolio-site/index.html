@@ -121,10 +121,25 @@
         <h3>Monarch: Law One</h3>
         <p class="mono"><i class="tag t-mon">MONARCH</i> CINEMATIC LAW STORY</p>
       </button>
-                  <button class="work-card" data-rv="up" data-tilt data-src="media/process.web.mp4" data-title="Inside the Pipeline — AI Co-Production BTS">
+                        <button class="work-card" data-rv="up" data-tilt data-yt="hO9KS-lJmQM" data-title="Einstein Edit">
+        <figure><img src="https://i.ytimg.com/vi/hO9KS-lJmQM/hqdefault.jpg" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='assets/work-film.jpg'" alt="Einstein edit short"><span class="play mono">▶ SHORT</span></figure>
+        <h3>Einstein Edit</h3>
+        <p class="mono"><i class="tag t-short">EDIT</i> YT SHORTS • MOTION CUT</p>
+      </button>
+      <button class="work-card" data-rv="up" data-tilt data-yt="0irVNe1_XEY" data-title="Let's Play 1 Game">
+        <figure><img src="https://i.ytimg.com/vi/0irVNe1_XEY/hqdefault.jpg" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='assets/work-film.jpg'" alt="Let's play 1 game short"><span class="play mono">▶ SHORT</span></figure>
+        <h3>Let's Play 1 Game</h3>
+        <p class="mono"><i class="tag t-pro">GAME</i> YT SHORTS • COMMENTARY</p>
+      </button>
+<button class="work-card" data-rv="up" data-tilt data-src="media/process.web.mp4" data-title="Inside the Pipeline — AI Co-Production BTS">
         <figure><img src="assets/post-process.jpg" alt="AI pipeline screen frame"><span class="play mono">▶ BTS</span></figure>
         <h3>Inside the Pipeline</h3>
         <p class="mono"><i class="tag t-pro">PROCESS</i> AI CO-PRODUCTION BTS</p>
+      </button>
+      <button class="work-card wide" data-rv="up" data-tilt data-yt="Y-1FLdv_aD8" data-wide="1" data-title="Powerful Personality">
+        <figure><img src="https://i.ytimg.com/vi/Y-1FLdv_aD8/hqdefault.jpg" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='assets/work-film.jpg'" alt="Powerful personality film"><span class="play mono">▶ 44S • 16:9</span></figure>
+        <h3>Powerful Personality</h3>
+        <p class="mono"><i class="tag t-film">FILM</i> WIDESCREEN 16:9 • YOUTUBE</p>
       </button>
     </div>
     <p class="mono work-more" data-rv="up"><a href="https://github.com/adil-chandio" target="_blank" rel="noopener">VIEW ALL ON GITHUB ↗</a></p>
@@ -148,22 +163,12 @@
         <video id="proofLoop" src="media/proof-loop.web.mp4" muted loop playsinline preload="metadata"></video>
       </div>
     </div>
-    <div class="rc-box" data-rv="up">
-      <div class="rc-head mono"><span>CHANNEL RESULTS — YOUTUBE STUDIO</span><span class="rc-hint">TAP / SWIPE →</span></div>
-      <div class="rc-track" id="rcTrack" aria-label="Analytics receipts carousel">
-        <figure class="rc-slide"><img src="assets/proof-1.jpg" alt="Short analytics: 583.2K views"><figcaption class="mono">SHORT #1 — 583.2K VIEWS</figcaption></figure>
-        <figure class="rc-slide"><img src="assets/proof-2.jpg" alt="Subscribers: +1.6K"><figcaption class="mono">SHORT #1 — +1.6K SUBS</figcaption></figure>
-        <figure class="rc-slide"><img src="assets/proof-4.jpg" alt="16,698 views, +16 subscribers"><figcaption class="mono">SHORT #2 — 16.7K VIEWS / +16 SUBS</figcaption></figure>
-        <figure class="rc-slide"><img src="assets/proof-5.jpg" alt="92.5% audience retention"><figcaption class="mono">SHORT #2 — 92.5% RETENTION</figcaption></figure>
-        <figure class="rc-slide"><img src="assets/proof-6.jpg" alt="9,470 views"><figcaption class="mono">SHORT #3 — 9.5K VIEWS</figcaption></figure>
-        <figure class="rc-slide"><img src="assets/proof-3.jpg" alt="470 views, +45 subscribers"><figcaption class="mono">SHORT #4 — 470 VIEWS / +45 SUBS</figcaption></figure>
-      </div>
-      <div class="rc-ctrl">
-        <button class="rc-arrow mono" id="rcPrev" aria-label="Previous receipt">←</button>
-        <div class="rc-dots" id="rcDots"></div>
-        <button class="rc-arrow mono" id="rcNext" aria-label="Next receipt">→</button>
-      </div>
-    </div>
+    <button class="rc-stack" id="rcStack" data-rv="up" aria-label="Open channel results folder">
+      <span class="rc-fan" aria-hidden="true">
+        <img src="assets/proof-1.jpg" alt=""><img src="assets/proof-2.jpg" alt=""><img src="assets/proof-4.jpg" alt=""><img src="assets/proof-5.jpg" alt=""><img src="assets/proof-6.jpg" alt=""><img src="assets/proof-3.jpg" alt="">
+      </span>
+      <span class="rc-meta mono"><b>CHANNEL RESULTS</b> 6 RECEIPTS — YOUTUBE STUDIO <i>OPEN FOLDER ↗</i></span>
+    </button>
   </section>
 
   <!-- ── Contact ──────────────────────────────────────────────── -->
@@ -192,9 +197,24 @@
   </div>
 </footer>
 
+<div id="rcModal" aria-hidden="true">
+  <div class="rcm-bar mono"><span id="rcCount">1 / 6</span><button id="rcmClose" aria-label="Back to folder">✕ BACK TO FOLDER [ESC]</button></div>
+  <div class="rcm-stage" id="rcmStage">
+    <div class="rcm-track" id="rcmTrack">
+      <figure class="rcm-card"><img src="assets/proof-1.jpg" alt="Short analytics: 583.2K views"><figcaption class="mono">SHORT #1 — 583.2K VIEWS</figcaption></figure>
+      <figure class="rcm-card"><img src="assets/proof-2.jpg" alt="Subscribers: +1.6K"><figcaption class="mono">SHORT #1 — +1.6K SUBS</figcaption></figure>
+      <figure class="rcm-card"><img src="assets/proof-4.jpg" alt="16,698 views, +16 subscribers"><figcaption class="mono">SHORT #2 — 16.7K VIEWS / +16 SUBS</figcaption></figure>
+      <figure class="rcm-card"><img src="assets/proof-5.jpg" alt="92.5% audience retention"><figcaption class="mono">SHORT #2 — 92.5% RETENTION</figcaption></figure>
+      <figure class="rcm-card"><img src="assets/proof-6.jpg" alt="9,470 views"><figcaption class="mono">SHORT #3 — 9.5K VIEWS</figcaption></figure>
+      <figure class="rcm-card"><img src="assets/proof-3.jpg" alt="470 views, +45 subscribers"><figcaption class="mono">SHORT #4 — 470 VIEWS / +45 SUBS</figcaption></figure>
+    </div>
+  </div>
+  <div class="rcm-ctrl"><button class="rc-arrow mono" id="rcmPrev" aria-label="Previous receipt">←</button><div class="rc-dots" id="rcmDots"></div><button class="rc-arrow mono" id="rcmNext" aria-label="Next receipt">→</button></div>
+</div>
 <div id="player" aria-hidden="true">
   <div class="pl-bar"><span class="mono" id="plTitle">FILM</span><button class="mono" id="plClose" aria-label="Close player">✕ CLOSE [ESC]</button></div>
   <video id="plVideo" controls playsinline preload="metadata"></video>
+  <div id="plFrame"></div>
 </div>
 <div id="toast" class="toast mono" role="status"></div>
 <script src="assets/main.js"></script>
