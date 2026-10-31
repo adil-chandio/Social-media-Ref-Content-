@@ -563,3 +563,9 @@ body{overscroll-behavior-y:none}
   .hero-type,.portrait img,.work-card{will-change:auto}
 }
 @media(prefers-reduced-motion:reduce){.soc-tile,.soc svg,.soc-lb{transition:none!important}}
+
+/* ══ v16 ANTI-STUCK + LOW-END SMOOTH ══════════════════════ */
+.marquee-track,.soc-bob,.rc-fan,.spark,.rcm-track{backface-visibility:visible}
+#grain,.marquee-track{will-change:auto}
+body{overscroll-behavior-y:auto}
+@media(pointer:coarse){#grain{opacity:.035;animation-duration:3.2s}}

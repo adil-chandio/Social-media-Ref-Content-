@@ -428,3 +428,20 @@ if (!('IntersectionObserver' in window)) {
   setTimeout(rvNet, 1200);
   setTimeout(rvNet, 3500);
 }
+
+/* ── v16 anti-stuck watchdog: scroll kabhi lock nahi rahega ── */
+const overlayUp = () =>
+  (!gate.classList.contains('hidden')) ||
+  (!splash.classList.contains('hidden') && !splash.classList.contains('done')) ||
+  pl.classList.contains('on') || rcM.classList.contains('on') || lt.classList.contains('on');
+let lockSince = 0;
+setInterval(() => {
+  const locked = document.body.classList.contains('locked');
+  if (!locked) { lockSince = 0; return; }
+  if (overlayUp()) { lockSince = Date.now(); return; }
+  if (!lockSince) { lockSince = Date.now(); return; }
+  if (Date.now() - lockSince > 5000) { document.body.classList.remove('locked'); lockSince = 0; }
+}, 1000);
+document.addEventListener('touchstart', () => {
+  if (document.body.classList.contains('locked') && !overlayUp()) document.body.classList.remove('locked');
+}, { passive: true });
