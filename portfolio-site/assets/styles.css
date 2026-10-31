@@ -440,3 +440,29 @@ html{scrollbar-width:thin;scrollbar-color:#2e2e33 #0d0d0f}
 .sig path{fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:760;stroke-dashoffset:760;transition:stroke-dashoffset 2.2s var(--ease) .2s}
 .sig.in path{stroke-dashoffset:0}
 .sig-cap{color:var(--mut-d);margin-top:8px}
+
+/* ══ v10 THE LETTER ═══════════════════════════════════════ */
+.letter-card{display:block;width:100%;text-align:left;background:var(--ink);color:var(--paper);border:1px solid #26262a;border-radius:16px;padding:clamp(24px,4vw,44px);cursor:pointer;position:relative;transform:rotate(-.4deg);transition:transform .45s var(--ease),border-color .3s,box-shadow .45s;margin-top:clamp(34px,5vw,60px);font:inherit}
+.letter-card:hover{transform:rotate(0) translateY(-5px);border-color:var(--red);box-shadow:0 40px 90px -40px rgba(210,31,43,.35)}
+.seal{position:absolute;top:22px;right:26px;width:48px;height:48px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-family:'Manrope';font-weight:800;font-size:18px;color:#fff;box-shadow:0 8px 22px -6px rgba(210,31,43,.75);animation:seal 2.4s ease-in-out infinite}
+@keyframes seal{0%,100%{transform:scale(1) rotate(-6deg)}50%{transform:scale(1.1) rotate(4deg)}}
+.lt-kick{color:var(--red);letter-spacing:.24em;margin-bottom:12px}
+.lt-title{font-size:clamp(30px,4.6vw,56px);font-weight:800;letter-spacing:-.03em;margin-bottom:12px}
+.lt-tease{color:#a9a6a0;max-width:62ch;line-height:1.65;font-size:15px}
+.lt-open{color:var(--paper);margin-top:18px;transition:letter-spacing .3s}
+.letter-card:hover .lt-open{letter-spacing:.24em;color:var(--red)}
+#letter{position:fixed;inset:0;z-index:120;background:rgba(6,6,7,.95);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:clamp(14px,4vw,40px);opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
+#letter.on{opacity:1;visibility:visible}
+.lt-bar{width:min(680px,92vw);display:flex;justify-content:space-between;align-items:center;gap:14px;color:var(--red)}
+#ltClose{background:none;border:1px solid #3a3a3f;border-radius:999px;color:var(--paper);padding:8px 14px;cursor:pointer;font-size:10px;letter-spacing:.12em;transition:background .25s,border-color .25s}
+#ltClose:hover{background:var(--red);border-color:var(--red)}
+.lt-scroll{overflow-y:auto;width:min(680px,92vw);max-height:calc(100vh - 150px);scrollbar-width:thin;scrollbar-color:#3a3a3f transparent;border-radius:14px}
+.lt-scroll::-webkit-scrollbar{width:6px}
+.lt-scroll::-webkit-scrollbar-thumb{background:#3a3a3f;border:0;border-radius:6px}
+.lt-paper{background:var(--paper);color:var(--ink);padding:clamp(26px,5vw,54px);border-radius:14px}
+.lt-paper p{font-size:15px;line-height:1.8;color:#33312d;margin-bottom:18px}
+.lt-drop::first-letter{font-size:3.4em;font-weight:800;color:var(--red);float:left;line-height:.85;margin:6px 12px 0 0}
+.lt-paper h5{color:var(--red);letter-spacing:.22em;margin:26px 0 10px;font-size:11px}
+.lt-sign{color:var(--mut-d);letter-spacing:.18em;margin-top:26px}
+.lt-hint{color:#77746e;letter-spacing:.2em}
+@media(prefers-reduced-motion:reduce){.seal{animation:none!important}}

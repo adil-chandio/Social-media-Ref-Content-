@@ -317,6 +317,34 @@ $$('.work-card[data-src]').forEach((c) => {
 if (!reduced) $$('.nav-links a, .foot-bar a').forEach((a) => a.addEventListener('mouseenter', () => scramble(a)));
 
 
+/* ── v10 the letter: auto-reading scroll ────────────────── */
+const lt = $('#letter'), ltS = $('#ltScroll'), ltCard = $('#letterCard');
+let ltAuto = false, ltRaf = 0;
+function ltStep() {
+  if (!ltAuto || !lt.classList.contains('on')) { ltRaf = 0; return; }
+  ltS.scrollTop += 0.65;
+  if (ltS.scrollTop + ltS.clientHeight >= ltS.scrollHeight - 4) ltAuto = false;
+  ltRaf = requestAnimationFrame(ltStep);
+}
+function ltOpen() {
+  lt.classList.add('on'); lt.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('locked');
+  ltS.scrollTop = 0; ltAuto = true;
+  if (!ltRaf) ltRaf = requestAnimationFrame(ltStep);
+}
+function ltClose() {
+  ltAuto = false; lt.classList.remove('on'); lt.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('locked');
+}
+if (ltCard) {
+  ltCard.addEventListener('click', ltOpen);
+  $('#ltClose').addEventListener('click', ltClose);
+  lt.addEventListener('click', (e) => { if (e.target === lt) ltClose(); });
+  ['wheel', 'touchstart', 'pointerdown'].forEach((ev) => ltS.addEventListener(ev, () => { ltAuto = false; }, { passive: true }));
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && lt.classList.contains('on')) ltClose(); });
+}
+
+
 /* ── v7 tabahi pass ─────────────────────────────────────── */
 /* word-by-word lede split (preserves <em>) */
 function wordify(el) {
