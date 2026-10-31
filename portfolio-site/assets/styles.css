@@ -750,3 +750,12 @@ body{overscroll-behavior-y:auto}
     margin-top:clamp(12px,3vw,20px);padding-inline:var(--pad);
     font-size:12.5px;line-height:1.5;color:#f4f1ea;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 }
+
+
+/* ══ v34: LIGHTS-OFF → RED EYES IGNITE ══════════════════════
+   base img = lights-off composite; .car-on (lit) + glows flicker
+   in from black on one synced 7.5s ignition cycle              */
+.car-on{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;animation:ignite 7.5s ease-in-out infinite}
+.hl,.beam,.hl-gnd{animation-name:ignite}
+@keyframes ignite{0%,5%{opacity:0}8%{opacity:.45}10%{opacity:.1}14%{opacity:1}17%{opacity:.7}21%,60%{opacity:1}72%{opacity:.55}84%{opacity:.9}95%,100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.car-on{animation:none;opacity:1}}
