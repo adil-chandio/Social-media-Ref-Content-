@@ -484,3 +484,30 @@ html{scrollbar-width:thin;scrollbar-color:#2e2e33 #0d0d0f}
 .letter-card .seal{transition:transform .5s var(--ease)}
 .letter-card:hover .seal{transform:scale(1.15) rotate(10deg)}
 @media(prefers-reduced-motion:reduce){.phone video,.rc-fan{animation:none!important}}
+
+/* ══ v12 MAZA PASS ════════════════════════════════════════ */
+/* locked quote: urdu + gloss */
+.quote.urdu p{font-size:clamp(19px,2.5vw,31px);font-weight:800;line-height:1.55;letter-spacing:-.01em}
+.quote.urdu em{font-style:normal;color:var(--red)}
+.q-gloss{color:var(--mut-d);margin-top:16px;font-size:10.5px;letter-spacing:.18em;line-height:1.9}
+/* click ripple burst */
+.click-pop{position:fixed;z-index:98;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;border:1.5px solid var(--red);pointer-events:none;animation:pop .55s var(--ease) forwards}
+@keyframes pop{to{transform:scale(7);opacity:0}}
+/* title chars jiggle on hover */
+.sec-title:hover .ch{animation:jig .5s var(--ease)}
+.sec-title:hover .ch:nth-child(odd){animation-delay:.04s}
+@keyframes jig{30%{transform:translateY(-7px) rotate(-2deg)}65%{transform:translateY(2px) rotate(1deg)}100%{transform:none}}
+/* hero floating sparks */
+.spark{position:absolute;border-radius:50%;background:var(--red);opacity:.45;pointer-events:none;animation:floaty 9s ease-in-out infinite}
+.spark.s1{width:6px;height:6px;top:22%;left:7%}
+.spark.s2{width:5px;height:5px;top:62%;right:11%;animation-delay:2.5s}
+.spark.s3{width:4px;height:4px;top:36%;right:28%;animation-delay:5s;opacity:.3}
+@keyframes floaty{50%{transform:translateY(-26px)}}
+/* play badge ping on hover */
+.work-card:hover .play::after{content:'';position:absolute;inset:-4px;border-radius:inherit;border:1px solid var(--red);animation:ping 2.6s ease-out infinite}
+@keyframes ping{0%{transform:scale(.85);opacity:.6}70%,100%{transform:scale(1.45);opacity:0}}
+/* anchors clear the floating nav */
+section[id]{scroll-margin-top:96px}
+/* receipts fan: hovered card lifts out */
+.rc-fan img:hover{transform:translate(-50%,-50%) translateX(calc(var(--x)*var(--sp))) rotate(0deg) scale(1.09);z-index:9}
+@media(prefers-reduced-motion:reduce){.spark,.click-pop{animation:none!important;display:none}}

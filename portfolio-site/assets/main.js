@@ -345,6 +345,17 @@ if (ltCard) {
 }
 
 
+/* ── v12 maza: click ripple burst ───────────────────────── */
+if (fine && !reduced) addEventListener('pointerdown', (e) => {
+  const r = document.createElement('span');
+  r.className = 'click-pop';
+  r.style.left = e.clientX + 'px';
+  r.style.top = e.clientY + 'px';
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 620);
+}, { passive: true });
+
+
 /* ── v7 tabahi pass ─────────────────────────────────────── */
 /* word-by-word lede split (preserves <em>) */
 function wordify(el) {
