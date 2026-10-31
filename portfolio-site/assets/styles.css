@@ -466,3 +466,21 @@ html{scrollbar-width:thin;scrollbar-color:#2e2e33 #0d0d0f}
 .lt-sign{color:var(--mut-d);letter-spacing:.18em;margin-top:26px}
 .lt-hint{color:#77746e;letter-spacing:.2em}
 @media(prefers-reduced-motion:reduce){.seal{animation:none!important}}
+
+/* ══ v11 HUMAN + MOTION POLISH ════════════════════════════ */
+.nav-links a{position:relative}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:-5px;height:1px;width:0;background:var(--red);transition:width .3s var(--ease)}
+.nav-links a:hover::after,.nav-links a.on::after{width:100%}
+.work-card figure img{clip-path:inset(0 0 100% 0);transition:clip-path 1s var(--ease),transform .8s var(--ease),filter .4s}
+.work-card.in figure img{clip-path:inset(0 0 0 0)}
+.phone video{animation:bob 6.5s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.enter-btn:active,.ghost-btn:active,.hire-btn:active,.replay-btn:active,.rc-arrow:active,.fab:active{transform:scale(.96)}
+.work-more a{display:inline-block;transition:transform .3s var(--ease),color .25s}
+.work-more a:hover{transform:translateX(6px);color:var(--red)}
+.marquee{mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.rc-fan{animation:sway 7s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.letter-card .seal{transition:transform .5s var(--ease)}
+.letter-card:hover .seal{transform:scale(1.15) rotate(10deg)}
+@media(prefers-reduced-motion:reduce){.phone video,.rc-fan{animation:none!important}}
