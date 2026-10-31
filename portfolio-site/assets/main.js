@@ -498,3 +498,11 @@ $$('#fpTitle .ch').forEach((c, i) => c.style.setProperty('--wd', (i * 70) + 'ms'
   }), { threshold: .1 }).observe(cv);
   frame();
 })();
+
+/* ── v20: hero car scroll depth ─────────────────────────── */
+(function () {
+  const car = $('.hero-car'); if (!car) return;
+  let q = 0;
+  const mv = () => { q = 0; car.style.transform = 'translateX(-50%) translateY(' + Math.min(window.scrollY * 0.08, 150).toFixed(1) + 'px)'; };
+  window.addEventListener('scroll', () => { if (!q) q = requestAnimationFrame(mv); }, { passive: true });
+})();
