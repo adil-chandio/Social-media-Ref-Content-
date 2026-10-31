@@ -61,11 +61,11 @@ function boot() {
     });
   }
 }
-$('#enterBtn').addEventListener('click', startSplash);
+$('#enterBtn').addEventListener('click', playSplash);
 $('#skipBtn').addEventListener('click', endIntro);
 $('#replayBtn').addEventListener('click', () => {
   sessionStorage.removeItem(KEY);
-  startSplash();
+  playSplash();
   window.scrollTo({ top: 0, behavior: 'auto' });
 });
 film.addEventListener('ended', endIntro);
@@ -305,18 +305,6 @@ const secIO = new IntersectionObserver((es) => es.forEach((en) => {
 $$('main section[id]').forEach((sec) => secIO.observe(sec));
 
 
-/* ── v8 absolute cinema ─────────────────────────────────── */
-function startSplash() {
-  if (reduced) { playSplash(); return; }
-  const L = $('#leader'), N = $('#leadN');
-  L.classList.add('on');
-  let n = 3; N.textContent = n;
-  const iv = setInterval(() => {
-    n--;
-    if (n < 1) { clearInterval(iv); L.classList.remove('on'); playSplash(); }
-    else N.textContent = n;
-  }, 450);
-}
 $$('.work-card[data-src]').forEach((c) => {
   const v = c.querySelector('.trailer');
   if (!v || !fine) return;

@@ -422,3 +422,21 @@ body.fab-on .fab{opacity:1;visibility:visible;transform:none}
 html{scrollbar-width:thin;scrollbar-color:#2e2e33 #0d0d0f}
 .about-lede{position:sticky;top:96px;align-self:start}
 @media(prefers-reduced-motion:reduce){.spin-badge,.lead-ring::before{animation:none!important}}
+
+/* ══ v9 HUMAN TOUCH ═══════════════════════════════════════ */
+.quote{font-size:clamp(20px,2.6vw,34px);font-weight:800;line-height:1.35;letter-spacing:-.01em;margin:clamp(24px,4vw,44px) 0;border-left:3px solid var(--red);padding-left:clamp(16px,2.5vw,28px)}
+.quote em{font-style:normal;color:var(--red)}
+.chips{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin:0 0 clamp(10px,2vw,18px)}
+.chips li{border:1px solid #d4d0c7;border-radius:999px;padding:8px 14px;font-size:10px;letter-spacing:.14em;color:#4c4a45;background:#f4f1ea;transition:transform .3s var(--ease),border-color .3s,color .3s}
+.chips li:hover{transform:translateY(-3px);border-color:var(--red);color:var(--red)}
+.timeline{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,3vw,32px);margin:clamp(26px,4vw,46px) 0 0}
+.timeline li{position:relative;padding-top:26px;border-top:1px solid #d4d0c7}
+.timeline li::before{content:'';position:absolute;top:-5px;left:0;width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(210,31,43,.15)}
+.timeline b{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--red);letter-spacing:.2em}
+.timeline h4{font-size:18px;font-weight:800;margin:8px 0 6px}
+.timeline p{color:#4c4a45;font-size:13.5px;line-height:1.6}
+@media(max-width:760px){.timeline{grid-template-columns:1fr}}
+.sig{width:min(280px,60vw);margin-top:clamp(24px,4vw,40px);display:block}
+.sig path{fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;stroke-dasharray:760;stroke-dashoffset:760;transition:stroke-dashoffset 2.2s var(--ease) .2s}
+.sig.in path{stroke-dashoffset:0}
+.sig-cap{color:var(--mut-d);margin-top:8px}
