@@ -625,7 +625,7 @@ body{overscroll-behavior-y:auto}
 .wm-name{display:block;font-weight:800;letter-spacing:.015em;line-height:1;white-space:nowrap;font-size:min(14.5vw,205px);
   background:linear-gradient(180deg,#f6f3ec 0%,#cfcabd 52%,#8f8b82 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 0 30px rgba(236,233,226,.15));animation:wmBreathe 7.5s ease-in-out infinite}
-.wm-sub{display:block;margin-top:.55em;font-family:'IBM Plex Mono',monospace;font-size:clamp(9px,1vw,13px);letter-spacing:.52em;text-indent:.52em;color:rgba(210,31,43,.85)}
+.wm-sub{display:block;margin:0 0 .45em;font-family:'IBM Plex Mono',monospace;font-size:clamp(9px,1vw,13px);letter-spacing:.52em;text-indent:.52em;color:rgba(210,31,43,.85)}
 @keyframes wmBreathe{0%,100%{opacity:.84}50%{opacity:1}}
 /* car blends over the name — text glows through behind head/shoulders */
 .hero-car{z-index:1;mix-blend-mode:screen}
@@ -647,3 +647,31 @@ body{overscroll-behavior-y:auto}
   .cue{display:none}
 }
 @media(prefers-reduced-motion:reduce){.wm-name{animation:none!important;opacity:.92}}
+
+
+/* ══ v28: hero = pure FLOW layers (no absolute overlap math, no blend wash) ══
+   stack: eye → NAME (tucks behind car top on dark stage) → car (bottom fades)
+   → dark copy card → marquee. Mobile: same stack, name in ink on paper.   */
+.hero{display:block}
+.hero::before{left:-6%;right:-6%;top:-2%;bottom:auto;width:auto;height:min(76%,860px);transform:none;aspect-ratio:auto;z-index:0;
+  background:radial-gradient(72% 52% at 50% 30%,rgba(10,10,11,.97) 0%,rgba(10,10,11,.9) 55%,rgba(10,10,11,.5) 78%,rgba(10,10,11,0) 92%),
+             radial-gradient(22% 18% at 50% 38%,rgba(210,31,43,.16),transparent 72%);filter:blur(2px)}
+.hero-eye{position:relative;z-index:3;color:#a8a49c}
+.hero-wm{position:relative;left:auto;top:auto;transform:none;width:100%;z-index:1;margin:clamp(6px,1.6vh,18px) 0 calc(clamp(36px,6.5vh,70px) * -1);text-align:center}
+.wm-name{font-size:clamp(26px,10.5vw,190px);letter-spacing:-.01em}
+.hero-car{position:relative;left:auto;bottom:auto;transform:none;width:min(1250px,142%);margin:0 auto;z-index:2;mix-blend-mode:normal;opacity:1;
+  -webkit-mask-image:linear-gradient(#000 80%,rgba(0,0,0,.55) 92%,transparent 99%);mask-image:linear-gradient(#000 80%,rgba(0,0,0,.55) 92%,transparent 99%)}
+.hero-card{z-index:3;margin-top:calc(clamp(26px,4.5vw,56px) - clamp(20px,3vw,48px))}
+.hero .marquee{position:relative;z-index:3}
+@media(max-width:760px){
+  .hero{display:flex;flex-direction:column}
+  .hero::before{display:none}
+  .hero-eye{order:1;margin-bottom:10px;color:var(--mut-d)}
+  .hero-wm{order:2;margin:0 0 4px}
+  .wm-name{font-size:clamp(24px,10.5vw,64px);background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#17171a;-webkit-text-fill-color:#17171a;filter:none;animation:none;opacity:1}
+  .wm-sub{letter-spacing:.34em;text-indent:.34em;margin:0 0 .4em}
+  .hero-car{order:3;width:100%;margin:0}
+  .hero-card{order:4;margin-top:clamp(14px,3.5vw,24px)}
+  .hero .marquee{order:5}
+  .cue,.spark{display:none}
+}
