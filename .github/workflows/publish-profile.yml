@@ -1,0 +1,47 @@
+name: publish-profile
+
+# Mirrors ./profile-kit (README.md + assets) into the GitHub profile repo
+# adil-chandio/adil-chandio so the animated MONARCH profile goes live.
+# Uses the repo secret PORTFOLIO_PAT (classic PAT, repo scope) which the owner
+# manages in Settings -> Secrets and variables -> Actions. The token never leaves GitHub.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [arena/cf1b3e02-social-media-ref-content]
+    paths: ['profile-kit/**', '.github/workflows/publish-profile.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push profile kit to adil-chandio/adil-chandio
+        env:
+          PAT: ${{ secrets.PORTFOLIO_PAT }}
+        run: |
+          set -x
+          if [ -z "$PAT" ]; then echo "PORTFOLIO_PAT secret is empty" | tee /tmp/diag.log; exit 77; fi
+          if ! git clone --depth 1 "https://x-access-token:${PAT}@github.com/adil-chandio/adil-chandio.git" /tmp/prof 2>>/tmp/diag.log; then
+            mkdir -p /tmp/prof && cd /tmp/prof && git init -b main && git remote add origin "https://x-access-token:${PAT}@github.com/adil-chandio/adil-chandio.git"
+          fi
+          cd /tmp/prof
+          mkdir -p assets
+          cp "$GITHUB_WORKSPACE"/profile-kit/README.md README.md
+          cp "$GITHUB_WORKSPACE"/profile-kit/assets/* assets/
+          git add -A
+          if git diff --cached --quiet; then echo "no changes to publish" >> /tmp/diag.log; exit 0; fi
+          git -c user.name="adil-chandio" -c user.email="260368012+adil-chandio@users.noreply.github.com" \
+            commit -m "MONARCH profile kit: animated SVG cards + approved signature (portfolio theme)"
+          git push origin HEAD:main 2>>/tmp/diag.log || { git push --force origin HEAD:main 2>>/tmp/diag.log; }
+
+      - name: Upload diag on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: profile-publish-diag
+          path: /tmp/diag.log
