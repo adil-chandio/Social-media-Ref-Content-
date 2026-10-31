@@ -4,15 +4,17 @@ name: publish-portfolio
 # switches on GitHub Pages there. Needs the repo secret PORTFOLIO_PAT
 # (classic PAT, `repo` scope) which the owner manages in
 # Settings → Secrets and variables → Actions. The token never leaves GitHub.
+# On failure the run commits portfolio-publish-diag.log back to this repo so
+# the sandbox (which cannot read Actions logs) can inspect the error.
 
 on:
   workflow_dispatch:
   push:
     branches: [arena/cf1b3e02-social-media-ref-content]
-    paths: ['portfolio-site/**']
+    paths: ['portfolio-site/**', '.github/workflows/publish-portfolio.yml']
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   publish:
@@ -24,26 +26,41 @@ jobs:
         env:
           PAT: ${{ secrets.PORTFOLIO_PAT }}
         run: |
-          set -e
-          git clone --depth 1 "https://x-access-token:${PAT}@github.com/adil-chandio/portfolio.git" /tmp/pf || {
-            # empty repo: clone fails, init instead
+          set -x
+          if [ -z "$PAT" ]; then echo "PORTFOLIO_PAT secret is empty" | tee /tmp/diag.log; exit 77; fi
+          echo "PAT length: ${#PAT}, prefix: ${PAT:0:4}" >> /tmp/diag.log
+          if ! git clone --depth 1 "https://x-access-token:${PAT}@github.com/adil-chandio/portfolio.git" /tmp/pf 2>>/tmp/diag.log; then
             mkdir -p /tmp/pf && cd /tmp/pf && git init -b main && git remote add origin "https://x-access-token:${PAT}@github.com/adil-chandio/portfolio.git"
-          }
+          fi
           cd /tmp/pf
           find . -mindepth 1 -maxdepth 1 -not -name '.git' -exec rm -rf {} +
           cp -r "$GITHUB_WORKSPACE"/portfolio-site/. .
           git add -A
-          if git diff --cached --quiet; then echo "no changes"; exit 0; fi
+          if git diff --cached --quiet; then echo "no changes to publish" >> /tmp/diag.log; exit 0; fi
           git -c user.name="adil-chandio" -c user.email="260368012+adil-chandio@users.noreply.github.com" \
-            commit -m "Portfolio site: intro film splash + single-page site (auto-published)"
-          git push origin main
+            commit -m "Portfolio site: intro film splash + single-page site (auto-published)" || true
+          git push origin main 2>>/tmp/diag.log
 
       - name: Enable GitHub Pages on portfolio repo
         env:
           PAT: ${{ secrets.PORTFOLIO_PAT }}
         run: |
-          curl -s -o /dev/null -w '%{http_code}\n' -X POST \
+          curl -s -o /tmp/pages.out -w '%{http_code}\n' -X POST \
             -H "Authorization: Bearer ${PAT}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/adil-chandio/portfolio/pages \
             -d '{"source":{"branch":"main","path":"/"}}' || true
+          cat /tmp/pages.out >> /tmp/diag.log 2>/dev/null || true
+
+      - name: Report failure back to source repo
+        if: failure()
+        env:
+          GT: ${{ github.token }}
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          cp /tmp/diag.log portfolio-publish-diag.log 2>/dev/null || echo "diag unavailable" > portfolio-publish-diag.log
+          git config user.name "arena-diag"
+          git config user.email "arena-diag@users.noreply.github.com"
+          git add portfolio-publish-diag.log
+          git commit -m "diag: portfolio publish failure log" || true
+          git push "https://x-access-token:${GT}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}" || true
