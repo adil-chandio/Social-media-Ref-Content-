@@ -511,3 +511,11 @@ section[id]{scroll-margin-top:96px}
 /* receipts fan: hovered card lifts out */
 .rc-fan img:hover{transform:translate(-50%,-50%) translateX(calc(var(--x)*var(--sp))) rotate(0deg) scale(1.09);z-index:9}
 @media(prefers-reduced-motion:reduce){.spark,.click-pop{animation:none!important;display:none}}
+
+/* ══ v13 MONARCH IDENTITY ═════════════════════════════════ */
+.nav-logo{width:21px;height:21px;border-radius:6px;margin-right:9px;vertical-align:-5px;box-shadow:0 2px 10px -2px rgba(210,31,43,.5)}
+.socials{display:flex;gap:clamp(14px,2.5vw,26px);flex-wrap:wrap;margin-top:20px}
+.socials a{border-bottom:1px solid transparent;transition:color .25s,border-color .25s,transform .3s var(--ease);display:inline-block}
+.socials a:hover{color:var(--red);border-color:var(--red);transform:translateY(-2px)}
+.foot-soc{display:flex;gap:18px;flex-wrap:wrap}
+.about-grid .quote{grid-column:1/-1}

@@ -4,7 +4,7 @@
 'use strict';
 const CONFIG = {
   // Wire your real inbox here; until then the form points visitors to GitHub.
-  email: '',
+  email: 'workadilchandio@gmail.com',
   github: 'https://github.com/adil-chandio'
 };
 const KEY = 'ac_intro_seen';
