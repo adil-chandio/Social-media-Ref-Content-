@@ -521,8 +521,8 @@ section[id]{scroll-margin-top:96px}
 .about-grid .quote{grid-column:1/-1}
 
 /* ══ v14 SOC LOGOS + BULLETPROOF REVEAL ═══════════════════ */
-.socials a.soc{border-bottom:0;display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:var(--ink);transform:none;animation:socIn .7s var(--ease) both;animation-delay:calc(.15s + var(--i)*.12s)}
-.socials a.soc:hover{transform:none;border-color:transparent;color:var(--ink)}
+.socials a.soc{border-bottom:0;display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:var(--paper);transform:none;animation:socIn .7s var(--ease) both;animation-delay:calc(.15s + var(--i)*.12s)}
+.socials a.soc:hover{transform:none;border-color:transparent;color:var(--paper)}
 .soc-tile{width:54px;height:54px;border:1px solid #2a2a2e;border-radius:16px;display:grid;place-items:center;background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,0) 65%);position:relative;overflow:hidden;transition:transform .4s var(--ease),border-color .3s,box-shadow .4s}
 .soc-tile::after{content:"";position:absolute;inset:0;transform:translateX(-130%);background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.16) 50%,transparent 68%)}
 .soc-bob{display:grid;place-items:center;animation:socBob 3.6s ease-in-out infinite;animation-delay:calc(var(--i)*.5s)}
@@ -543,3 +543,23 @@ section[id]{scroll-margin-top:96px}
 @keyframes qIn{from{opacity:0;clip-path:inset(0 0 100% 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
 @keyframes qPulse{0%,100%{border-left-color:var(--red)}50%{border-left-color:#ff5b64}}
 @media(prefers-reduced-motion:reduce){.soc,.soc-bob,.quote.urdu,.soc-tile::after,.fs-ic{animation:none!important}}
+
+/* ══ v15 VISIBILITY + BUTTER-SMOOTH PASS ══════════════════ */
+.soc svg{opacity:.92}
+.soc-tile{border-color:#3a3a40}
+.socials{display:grid;grid-template-columns:repeat(3,1fr);justify-items:center;gap:20px 8px;margin:26px 0 4px}
+.soc-lb{max-width:112px;text-align:center;line-height:1.8;word-break:break-all;font-size:9.5px}
+@media(min-width:820px){
+  .socials{display:flex;justify-content:flex-start;gap:clamp(18px,3vw,34px);margin-top:26px}
+  .soc-lb{max-width:none;word-break:normal;font-size:10px}
+}
+/* butter: no tap flash, no rubber-band jerk, compositor-only loops */
+*{-webkit-tap-highlight-color:transparent}
+body{overscroll-behavior-y:none}
+.marquee-track,.soc-bob,.rc-fan,.spark,.rcm-track{backface-visibility:hidden}
+.marquee-track,#grain{will-change:transform}
+@media(pointer:coarse){
+  #grain{inset:-40%;animation-duration:2.4s}
+  .hero-type,.portrait img,.work-card{will-change:auto}
+}
+@media(prefers-reduced-motion:reduce){.soc-tile,.soc svg,.soc-lb{transition:none!important}}
