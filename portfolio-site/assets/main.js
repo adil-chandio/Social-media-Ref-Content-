@@ -562,3 +562,14 @@ $$('#fpTitle .ch').forEach((c, i) => c.style.setProperty('--wd', (i * 70) + 'ms'
   if (reduced.addEventListener) reduced.addEventListener('change', sync);
   sync();
 })();
+
+
+/* ── v37: pause off-screen infinite animations (compositor relief) ── */
+(function () {
+  const els = document.querySelectorAll('.hero-car, .marquee, .sol-flag');
+  if (!els.length || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(function (en) {
+    en.forEach(function (e) { e.target.classList.toggle('idle', !e.isIntersecting); });
+  }, { rootMargin: '12% 0px' });
+  els.forEach(function (el) { io.observe(el); });
+})();
