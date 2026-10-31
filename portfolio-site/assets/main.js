@@ -445,3 +445,56 @@ setInterval(() => {
 document.addEventListener('touchstart', () => {
   if (document.body.classList.contains('locked') && !overlayUp()) document.body.classList.remove('locked');
 }, { passive: true });
+
+/* ── v19: FREE PALESTINE wave delays + cloth flag ────────── */
+$$('#fpTitle .ch').forEach((c, i) => c.style.setProperty('--wd', (i * 70) + 'ms'));
+(function () {
+  const cv = $('#flagCv'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const FW = 560, FH = 360, flagW = 470, flagH = 280, ox = 56, oy = 44;
+  const off = document.createElement('canvas'); off.width = flagW; off.height = flagH;
+  const o = off.getContext('2d');
+  const s = flagH / 3;
+  o.fillStyle = '#000000'; o.fillRect(0, 0, flagW, s);
+  o.fillStyle = '#f4f4f4'; o.fillRect(0, s, flagW, s);
+  o.fillStyle = '#009736'; o.fillRect(0, s * 2, flagW, s);
+  o.fillStyle = '#e2213b'; o.beginPath(); o.moveTo(0, 0); o.lineTo(flagW * 0.42, flagH / 2); o.lineTo(0, flagH); o.closePath(); o.fill();
+  o.globalAlpha = .05;
+  for (let i = 0; i < 900; i++) { o.fillStyle = Math.random() > .5 ? '#fff' : '#000'; o.fillRect(Math.random() * flagW, Math.random() * flagH, 1.4, 1.4); }
+  o.globalAlpha = 1;
+  const COLS = 56, cw = flagW / COLS;
+  let t = 0, raf = 0, on = true;
+  function frame() {
+    raf = 0;
+    ctx.clearRect(0, 0, FW, FH);
+    const pg = ctx.createLinearGradient(ox - 10, 0, ox + 6, 0);
+    pg.addColorStop(0, '#3a3a40'); pg.addColorStop(.5, '#8a8781'); pg.addColorStop(1, '#222226');
+    ctx.fillStyle = pg; ctx.fillRect(ox - 7, oy - 26, 9, FH - oy - 16);
+    ctx.beginPath(); ctx.arc(ox - 2.5, oy - 30, 7, 0, 7); ctx.fillStyle = '#d21f2b'; ctx.fill();
+    for (let i = 0; i < COLS; i++) {
+      const x = i * cw;
+      const amp = 5 + 20 * (x / flagW);
+      const ph = x * 0.018 - t;
+      const y1 = Math.sin(ph) * amp + Math.sin(ph * 1.8 + 1.2) * amp * 0.35;
+      const ph2 = (x + cw) * 0.018 - t;
+      const amp2 = 5 + 20 * ((x + cw) / flagW);
+      const y2 = Math.sin(ph2) * amp2 + Math.sin(ph2 * 1.8 + 1.2) * amp2 * 0.35;
+      const slope = (y2 - y1) / cw;
+      ctx.save();
+      ctx.translate(ox + x, oy + y1);
+      ctx.transform(1, slope * 0.9, 0, 1, 0, 0);
+      ctx.drawImage(off, x, 0, cw + 0.6, flagH, 0, 0, cw + 0.6, flagH);
+      const sh = Math.max(-1, Math.min(1, slope * 2.4));
+      ctx.fillStyle = sh > 0 ? 'rgba(255,255,255,' + (sh * 0.16).toFixed(3) + ')' : 'rgba(0,0,0,' + (-sh * 0.34).toFixed(3) + ')';
+      ctx.fillRect(0, 0, cw + 0.6, flagH);
+      ctx.restore();
+    }
+    t += 0.045;
+    if (on && !reduced) raf = requestAnimationFrame(frame);
+  }
+  new IntersectionObserver((en) => en.forEach((e) => {
+    if (e.isIntersecting) { on = true; if (!raf && !reduced) raf = requestAnimationFrame(frame); }
+    else { on = false; if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+  }), { threshold: .1 }).observe(cv);
+  frame();
+})();
