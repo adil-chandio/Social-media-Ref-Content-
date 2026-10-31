@@ -121,17 +121,7 @@
         <h3>Monarch: Law One</h3>
         <p class="mono"><i class="tag t-mon">MONARCH</i> CINEMATIC LAW STORY</p>
       </button>
-      <button class="work-card" data-rv="up" data-tilt data-src="media/site.web.mp4" data-title="Construction-Site Reference Match">
-        <figure><img src="assets/work-site.jpg" alt="Construction site film frame"><span class="play mono">▶ FILM</span></figure>
-        <h3>Construction-Site Reference Match</h3>
-        <p class="mono"><i class="tag t-film">FILM</i> SHOT-FOR-SHOT REBUILD</p>
-      </button>
-      <button class="work-card" data-rv="up" data-tilt data-src="media/monarch.web.mp4" data-title="Monarch Intro Film">
-        <figure><img src="assets/work-intro.jpg" alt="Monarch intro frame"><span class="play mono">▶ INTRO</span></figure>
-        <h3>Monarch Intro Film</h3>
-        <p class="mono"><i class="tag t-mon">MONARCH</i> IDENTITY REVEAL</p>
-      </button>
-      <button class="work-card" data-rv="up" data-tilt data-src="media/process.web.mp4" data-title="Inside the Pipeline — AI Co-Production BTS">
+                  <button class="work-card" data-rv="up" data-tilt data-src="media/process.web.mp4" data-title="Inside the Pipeline — AI Co-Production BTS">
         <figure><img src="assets/post-process.jpg" alt="AI pipeline screen frame"><span class="play mono">▶ BTS</span></figure>
         <h3>Inside the Pipeline</h3>
         <p class="mono"><i class="tag t-pro">PROCESS</i> AI CO-PRODUCTION BTS</p>
@@ -158,10 +148,21 @@
         <video id="proofLoop" src="media/proof-loop.web.mp4" muted loop playsinline preload="metadata"></video>
       </div>
     </div>
-    <div class="receipts" data-rv="up" aria-label="Analytics receipts">
-      <img src="assets/proof-1.jpg" alt="Short analytics: 583.2K views">
-      <img src="assets/proof-2.jpg" alt="Subscribers: +1.6K">
-      <img src="assets/proof-3.jpg" alt="Second short: 470 views, +45 subscribers">
+    <div class="rc-box" data-rv="up">
+      <div class="rc-head mono"><span>CHANNEL RESULTS — YOUTUBE STUDIO</span><span class="rc-hint">TAP / SWIPE →</span></div>
+      <div class="rc-track" id="rcTrack" aria-label="Analytics receipts carousel">
+        <figure class="rc-slide"><img src="assets/proof-1.jpg" alt="Short analytics: 583.2K views"><figcaption class="mono">SHORT #1 — 583.2K VIEWS</figcaption></figure>
+        <figure class="rc-slide"><img src="assets/proof-2.jpg" alt="Subscribers: +1.6K"><figcaption class="mono">SHORT #1 — +1.6K SUBS</figcaption></figure>
+        <figure class="rc-slide"><img src="assets/proof-4.jpg" alt="16,698 views, +16 subscribers"><figcaption class="mono">SHORT #2 — 16.7K VIEWS / +16 SUBS</figcaption></figure>
+        <figure class="rc-slide"><img src="assets/proof-5.jpg" alt="92.5% audience retention"><figcaption class="mono">SHORT #2 — 92.5% RETENTION</figcaption></figure>
+        <figure class="rc-slide"><img src="assets/proof-6.jpg" alt="9,470 views"><figcaption class="mono">SHORT #3 — 9.5K VIEWS</figcaption></figure>
+        <figure class="rc-slide"><img src="assets/proof-3.jpg" alt="470 views, +45 subscribers"><figcaption class="mono">SHORT #4 — 470 VIEWS / +45 SUBS</figcaption></figure>
+      </div>
+      <div class="rc-ctrl">
+        <button class="rc-arrow mono" id="rcPrev" aria-label="Previous receipt">←</button>
+        <div class="rc-dots" id="rcDots"></div>
+        <button class="rc-arrow mono" id="rcNext" aria-label="Next receipt">→</button>
+      </div>
     </div>
   </section>
 

@@ -232,4 +232,27 @@ if (ploop && !reduced) {
 }
 
 
+/* ── Receipts carousel (v5.1): one box, tap/swipe to slide ── */
+const rcT = $('#rcTrack');
+if (rcT) {
+  const slides = $$('.rc-slide'), dots = $('#rcDots');
+  const step = () => slides[0].getBoundingClientRect().width + 12;
+  const idx = () => Math.min(slides.length - 1, Math.max(0, Math.round(rcT.scrollLeft / step())));
+  const go = (i) => { const n = slides.length; rcT.scrollTo({ left: ((i % n) + n) % n * step(), behavior: 'smooth' }); };
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'rc-dot'; b.setAttribute('aria-label', 'Receipt ' + (i + 1));
+    b.addEventListener('click', (e) => { e.stopPropagation(); go(i); });
+    dots.appendChild(b);
+  });
+  let raf = 0;
+  const paint = () => { Array.from(dots.children).forEach((d, i) => d.classList.toggle('on', i === idx())); };
+  rcT.addEventListener('scroll', () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; paint(); }); }, { passive: true });
+  $('#rcPrev').addEventListener('click', (e) => { e.stopPropagation(); go(idx() - 1); });
+  $('#rcNext').addEventListener('click', (e) => { e.stopPropagation(); go(idx() + 1); });
+  rcT.addEventListener('click', () => go(idx() + 1));
+  paint();
+}
+
+
 boot();

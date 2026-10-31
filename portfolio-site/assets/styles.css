@@ -240,7 +240,27 @@ button.work-card{background:none;border:0;text-align:left;cursor:pointer;font:in
 .phone{position:relative;width:min(300px,72vw);margin:0 auto;border-radius:34px;border:1px solid #2c2c31;background:#000;padding:10px;box-shadow:0 60px 120px -50px rgba(0,0,0,.9),inset 0 0 0 2px #141417}
 .phone::before{content:'';position:absolute;top:16px;left:50%;transform:translateX(-50%);width:74px;height:16px;border-radius:999px;background:#000;z-index:3}
 .phone video{display:block;width:100%;border-radius:26px;aspect-ratio:9/19.5;object-fit:cover;object-position:top}
-.receipts{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:clamp(28px,4vw,44px) 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#333 transparent}
+.receipts-old{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:clamp(28px,4vw,44px) 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#333 transparent}
 .receipts img{flex:0 0 auto;width:min(250px,62vw);border-radius:12px;border:1px solid #26262a;scroll-snap-align:start;filter:saturate(.9);transition:transform .5s var(--ease),border-color .3s}
 .receipts img:hover{transform:translateY(-6px);border-color:var(--red)}
 @media(max-width:860px){.proof-grid{grid-template-columns:1fr}}
+
+/* ── Receipts carousel box (v5.1) ───────────────────────── */
+.rc-box{border:1px solid #26262a;border-radius:18px;background:#0d0d0f;padding:clamp(12px,2vw,20px);overflow:hidden}
+.rc-head{display:flex;justify-content:space-between;gap:12px;color:#77746e;margin-bottom:12px}
+.rc-head .rc-hint{color:var(--red)}
+.rc-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;cursor:pointer;-webkit-overflow-scrolling:touch}
+.rc-track::-webkit-scrollbar{display:none}
+.rc-slide{flex:0 0 min(300px,78vw);scroll-snap-align:start;margin:0}
+.rc-slide img{width:100%;border-radius:12px;border:1px solid #26262a;transition:border-color .3s,transform .5s var(--ease)}
+.rc-slide:hover img{border-color:var(--red)}
+.rc-slide figcaption{color:#8a8781;margin-top:8px;font-size:10px}
+.rc-ctrl{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.rc-arrow{background:none;border:1px solid #3a3a3f;color:var(--paper);border-radius:999px;width:36px;height:36px;cursor:pointer;transition:background .25s,border-color .25s}
+.rc-arrow:hover{background:var(--red);border-color:var(--red)}
+.rc-dots{display:flex;gap:7px}
+.rc-dot{width:7px;height:7px;border-radius:50%;border:0;background:#333;padding:0;cursor:pointer;transition:background .25s,transform .25s}
+.rc-dot.on{background:var(--red);transform:scale(1.35)}
+/* wide (16:9) film card */
+.work-card.wide{grid-column:1/-1}
+.work-card.wide figure{aspect-ratio:16/9;max-height:560px}
