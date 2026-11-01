@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Node / OCR
+ocr/node_modules/
+ocr/package-lock.json
+
+# Analysis intermediates (keep metadata, skip frames)
+analysis/frames_*/
+analysis/metadata/audio_analysis.json
+
+# Reference media (keep final deliverable, skip source)
+reference_video.mp4
+audio.wav
+google_drive/
+models/
+
+# Temp
+recreate/test_frames/
+recreate/verify_frames/
