@@ -12,6 +12,7 @@ on:
   push:
     paths:
       - "ingest/queue.txt"
+      - ".github/workflows/yt-ingest.yml"
   workflow_dispatch:
     inputs:
       urls:
