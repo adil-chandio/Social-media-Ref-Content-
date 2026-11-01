@@ -38,9 +38,10 @@ jobs:
           trap report EXIT
           mkdir -p out/vision
           python3 -m pip install --user -q videodl || true
+          python3 -m pip install --user -q -U "https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp.tar.gz" || true
           sed '/^[[:space:]]*$/d' ingest/vision-queue.txt | while read -r ID; do
             echo "::group::vision $ID"
-            for f in maxresdefault sddefault hqdefault mqdefault default 0 1 2 3; do
+            for f in maxresdefault sddefault hqdefault mqdefault default 0 1 2 3 hq1 hq2 hq3 sd1 sd2 sd3 maxres1 maxres2 maxres3; do
               curl -s -m 20 -o "out/vision/${ID}_$f.jpg" "https://i.ytimg.com/vi/$ID/$f.jpg" || true
             done
             for L in 0 1 2 3; do
@@ -48,6 +49,20 @@ jobs:
             done
             python3 -m videodl --version 2>/dev/null || true
             python3 -m videodl -i "https://www.youtube.com/watch?v=$ID" -o out/vision/ 2>&1 | tail -3 || true
+            echo "--- yt-dlp nightly client-rotation attempts (2026 combo) ---"
+            python3 -m yt_dlp --version || true
+            python3 -m yt_dlp --no-playlist --retries 2 --socket-timeout 20 \
+              --extractor-args "youtube:player_client=tv,web_embedded,android_vr,tv_downgraded;player_skip=webpage" \
+              --remote-components ejs:github \
+              -f "bestvideo*+bestaudio/best" -S "res:720" --force-ipv4 --merge-output-format mp4 \
+              -o "out/vision/${ID}_dl.mp4" "https://www.youtube.com/watch?v=$ID" 2>&1 | tail -5 || true
+            if [ ! -f "out/vision/${ID}_dl.mp4" ]; then
+              python3 -m yt_dlp --no-playlist --retries 2 --socket-timeout 20 \
+                --extractor-args "youtube:player_client=default,-android_sdkless" \
+                -f "best[ext=mp4]/best" --force-ipv4 \
+                -o "out/vision/${ID}_dl.mp4" "https://www.youtube.com/watch?v=$ID" 2>&1 | tail -5 || true
+            fi
+            ls -la "out/vision/${ID}_dl.mp4" 2>/dev/null || echo "no bytes for $ID" 
             echo "::endgroup::"
           done
           ls -la out/vision/ | head -60
