@@ -48,8 +48,8 @@ w.color = BONE
 w.keyframe_insert('color', frame=1)
 w.color = BONE; w.keyframe_insert('color', frame=13)
 w.color = INK; w.keyframe_insert('color', frame=14)
-w.color = INK; w.keyframe_insert('color', frame=18)
-w.color = LIME; w.keyframe_insert('color', frame=19)
+w.color = INK; w.keyframe_insert('color', frame=26)
+w.color = LIME; w.keyframe_insert('color', frame=27)
 w.color = LIME; w.keyframe_insert('color', frame=40)
 w.color = WHITE; w.keyframe_insert('color', frame=41)
 w.color = WHITE; w.keyframe_insert('color', frame=56)
@@ -231,7 +231,7 @@ tw.data.extrude = 0.045
 tw.data.keyframe_insert('extrude', frame=13)
 tw.data.extrude = 0.15
 tw.data.keyframe_insert('extrude', frame=18)
-vis(tw, 1, 18); ease(tw)
+vis(tw, 1, 28); ease(tw)
 bi = text_obj('bi', 'BILLION', 99, LIME_TX, 0.045, align='LEFT')
 x2, z2 = px(364, 572)
 bi.location = (x2, 0, z2)
@@ -240,7 +240,7 @@ bi.data.extrude = 0.045
 bi.data.keyframe_insert('extrude', frame=13)
 bi.data.extrude = 0.15
 bi.data.keyframe_insert('extrude', frame=18)
-vis(bi, 7, 18); ease(bi)
+vis(bi, 7, 28); ease(bi)
 
 # ---------- money bag (beveled cube + bill fan) ----------
 bagroot = bpy.data.objects.new('bagroot', None); sc.collection.objects.link(bagroot)
@@ -271,13 +271,13 @@ for i, ang in enumerate((-26, -13, 0, 13, 26)):
 for ob in [bag] + flaps + bills:
     ob.parent = bagroot
 x, z = px(352, 749)
-kf(bagroot, 19, loc=(x - 0.25, 0, -3.2), scale=(1.35, 1.35, 1.35))
-kf(bagroot, 34, loc=(x - 0.25, 0, z + 0.10), scale=(1.35, 1.35, 1.35))
+kf(bagroot, 27, loc=(x - 0.25, 0, -3.2), scale=(1.35, 1.35, 1.35))
+kf(bagroot, 40, loc=(x - 0.25, 0, z + 0.10), scale=(1.35, 1.35, 1.35))
 kf(bagroot, 41, loc=(x, 0, z), scale=(0.90, 0.90, 0.90))
 kf(bagroot, 46, loc=(x, 0, z))
 kf(bagroot, 49, loc=(x, 0, z - 0.10))
 kf(bagroot, 53, loc=(x, 0, z))
-visgroup(bagroot, 19, 89); ease(bagroot)
+visgroup(bagroot, 27, 89); ease(bagroot)
 
 # ---------- stool ----------
 stroot = bpy.data.objects.new('stroot', None); sc.collection.objects.link(stroot)
@@ -303,12 +303,12 @@ visgroup(stroot, 41, 89); ease(stroot)
 bink = text_obj('bink', 'BILLION', 97, INK, 0.04)
 bink.rotation_euler = (math.radians(90), math.radians(-8), 0)
 x, z = px(362, 350); bink.location = (x, 0, z)
-kf(bink, 19, loc=px(362, 350)); kf(bink, 41, loc=px(362, 300))
-vis(bink, 19, 56)
+kf(bink, 27, loc=px(362, 350)); kf(bink, 41, loc=px(362, 300))
+vis(bink, 27, 56)
 tag = text_obj('tag', 'TWENTY', 34, RED, 0.03)
 tag.rotation_euler = (math.radians(90), math.radians(-78), 0)
 x, z = px(140, 200); tag.location = (x, 0, z)
-vis(tag, 19, 56)
+vis(tag, 27, 56)
 
 # ---------- HE SAID / NO ----------
 he = text_obj('he', 'HE SAID', 77, lin((200, 30, 40)), 0.04)

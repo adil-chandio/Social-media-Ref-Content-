@@ -93,7 +93,11 @@ def render_frame(n):
         if 1.90 <= tl < 3.00:
             gsy = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
             gsy = cv2.cvtColor(gsy, cv2.COLOR_GRAY2BGR).astype(np.float32)
-            fr = (fr.astype(np.float32) * 0.12 + gsy * 0.88).clip(0, 255).astype(np.uint8)
+            des = (fr.astype(np.float32) * 0.12 + gsy * 0.88).clip(0, 255)
+            hsv = cv2.cvtColor(fr, cv2.COLOR_BGR2HSV).astype(np.int16)
+            keep = (((hsv[..., 0] < 12) | (hsv[..., 0] > 168)) & (hsv[..., 1] > 110) & (hsv[..., 2] > 110)).astype(np.float32)
+            keep = cv2.GaussianBlur(keep, (5, 5), 0)[..., None]
+            fr = (des * (1 - keep) + fr.astype(np.float32) * keep).clip(0, 255).astype(np.uint8)
         # smoke puffs 1.58-2.35
         if 1.58 <= tl < 2.35:
             sn = int(47 + (tl - 1.35) / .55 * 25)
