@@ -283,10 +283,10 @@ def beat(fr, bi, tl, t):
         return 1 + .06 * eoi(tl / 4)
     if bi == 5:  # 3 trillion: maroon + graph gold draw + counters
         maroon_field(fr, t)
-        giant(fr, '3T', GOLD + (255,), 500, t, sz=620, spd=16)
+        giant(fr, 'TRILLION', (150, 60, 64, 255), 1250, t, sz=430, spd=14)
         stamp(fr, 'AAJ KI QEEMAT:', 62, CX, 270, tl, .2, fill=(242, 238, 232))
         val = 3.0 * clamp((tl - .6) / 1.6)
-        stamp(fr, f'${val:.2f}T', 150, CX, 450, tl, .6, fill=GOLD, maxw=600)
+        stamp(fr, f'${val:.2f}T', 210, CX, 520, tl, .6, fill=GOLD, maxw=700)
         d = ImageDraw.Draw(fr)
         pts = [(CX - 360 + i * 120, 1500 - (i ** 2.1) * 26) for i in range(7)]
         n = int(7 * clamp((tl - 1.0) / 1.6))
@@ -368,7 +368,7 @@ for fno in range(NF):
     for st in STARTS[1:]:
         dt = t - st
         if 0 <= dt < 0.10:
-            fl = Image.new('RGB', (W, H), (255, 244, 240)); fr = Image.blend(fr, fl, 0.45 * (1 - dt / 0.10))
+            fl = Image.new('RGB', (W, H), (255, 244, 240)); fr = Image.blend(fr, fl, 0.35 * (1 - dt / 0.10))
     gr = grains[fno % 4].resize((W, H)); fr.paste(Image.alpha_composite(fr.convert('RGBA'), gr).convert('RGB'), (0, 0))
     fr.paste(Image.composite(fr, Image.new('RGB', (W, H), INK), VIG), (0, 0))
     proc.stdin.write(fr.tobytes())
