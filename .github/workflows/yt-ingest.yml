@@ -37,6 +37,8 @@ jobs:
       - name: Resolve queue
         id: q
         run: |
+          exec > >(tee /tmp/push.log) 2>&1
+          set -x
           if [ "${{ github.event_name }}" = "push" ]; then
             FOLDER=$(head -n 1 ingest/queue.txt)
             URLS=$(tail -n +2 ingest/queue.txt)
@@ -50,7 +52,12 @@ jobs:
 
       - name: Download videos
         run: |
-          python3 -m pip install --user -q yt-dlp || python3 -m pip install -q yt-dlp
+          exec > >(tee -a /tmp/push.log) 2>&1
+          set -x
+          [ -s /tmp/urls.txt ] || tail -n +2 ingest/queue.txt > /tmp/urls.txt
+          echo "--- urls.txt:"; cat -A /tmp/urls.txt | head -40; wc -l /tmp/urls.txt
+          python3 -m pip install --user -q yt-dlp || python3 -m pip install -q yt-dlp || true
+          python3 -m yt_dlp --version || true
           mkdir -p "out/${{ steps.q.outputs.folder }}"
           nl -ba -nr '%02d' -i 1 /tmp/urls.txt | sed '/^[[:space:]]*[0-9]*[[:space:]]*$/d' | while read -r n url; do
             echo "::group::[$n] $url"
