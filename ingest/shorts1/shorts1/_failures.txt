@@ -1,0 +1,10 @@
+FAILED [01] https://youtube.com/shorts/Ld5LkPkQodQ
+FAILED [02] https://youtube.com/shorts/t5rLzpXZ5o8
+FAILED [03] https://youtube.com/shorts/3Gf_8827t7o
+FAILED [04] https://youtube.com/shorts/KzuKj44a620
+FAILED [05] https://youtube.com/shorts/me3sFZCXxlg
+FAILED [06] https://youtube.com/shorts/C-yZlQXN3rQ
+FAILED [07] https://youtube.com/shorts/bRpEwZ9w6-w
+FAILED [08] https://youtube.com/shorts/FeDF9ywCCYM
+FAILED [09] https://youtube.com/shorts/FG8NB_IMLa4
+FAILED [10] https://youtube.com/shorts/hmk9nkwzLrc
