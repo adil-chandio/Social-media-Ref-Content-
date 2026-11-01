@@ -66,6 +66,8 @@ jobs:
         env:
           FOLDER: ${{ steps.q.outputs.folder }}
         run: |
+          set -x
+          echo "FOLDER=[$FOLDER]"; ls -la out/ "out/$FOLDER" || true
           git init pushdir
           cd pushdir
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
@@ -79,5 +81,7 @@ jobs:
           mkdir -p ingest
           cp -r "../out/$FOLDER" "ingest/$FOLDER"
           git add -A ingest
-          git commit -m "ingest: $FOLDER (run ${{ github.run_id }})" || echo "nothing new"
-          git push origin ingest/media
+          git status --porcelain | head -20
+          git commit -m "ingest: $FOLDER (run ${{ github.run_id }})"
+          git rev-parse HEAD
+          git push -v origin HEAD:refs/heads/ingest/media
