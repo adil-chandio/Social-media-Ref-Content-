@@ -99,12 +99,12 @@ def render_frame(n):
             keep = cv2.GaussianBlur(keep, (5, 5), 0)[..., None]
             fr = (des * (1 - keep) + fr.astype(np.float32) * keep).clip(0, 255).astype(np.uint8)
         # smoke puffs 1.58-2.35
-        if 1.58 <= tl < 2.35:
+        if 1.55 <= tl < 2.45:
             sn = int(47 + (tl - 1.35) / .55 * 25)
             sm = smoke(min(72, max(47, sn)))
             if sm is not None:
-                sa = min(1, (tl - 1.58) / .12) * min(1, (2.35 - tl) / .2) * 0.9
-                scl = 0.85 + 0.3 * seg(tl, 1.6, .3)
+                sa = min(1, (tl - 1.55) / .12) * min(1, (2.45 - tl) / .2) * 1.0
+                scl = 0.95 + 0.35 * seg(tl, 1.6, .3)
                 smi = cv2.resize(sm, (int(sm.shape[1] * scl), int(sm.shape[0] * scl)))
                 a = (smi.astype(np.float32) / 255 * sa)[..., None]
                 col = np.array((150, 148, 145), np.float32)
@@ -141,11 +141,14 @@ if __name__ == '__main__':
             cv2.imwrite(f'/tmp/v12_still_{n}.png', render_frame(n))
         print('stills ok')
         sys.exit(0)
-    cmd = ['/tmp/ff' if False else open('/tmp/ffpath').read().strip(),
+    AUDIO = os.environ.get('AUDIO', 'refs/ref-audio.m4a')
+    OUTMP4 = os.environ.get('OUTMP4', 'deliverables/shorts/S01_monarch_20billion_v12.mp4')
+    acodec = ['copy'] if AUDIO.endswith('.m4a') else ['aac', '-b:a', '192k']
+    cmd = [open('/tmp/ffpath').read().strip(),
            '-y', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-           '-i', 'refs/ref-audio.m4a',
+           '-i', AUDIO,
            '-c:v', 'libx264', '-crf', '16', '-preset', 'medium', '-pix_fmt', 'yuv420p',
-           '-c:a', 'copy', '-shortest', 'deliverables/shorts/S01_monarch_20billion_v12.mp4']
+           '-c:a'] + acodec + ['-shortest', OUTMP4]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     for n in range(NF):
         p.stdin.write(render_frame(n).tobytes())

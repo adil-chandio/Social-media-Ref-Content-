@@ -278,6 +278,14 @@ kf(bagroot, 46, loc=(x, 0, z))
 kf(bagroot, 49, loc=(x, 0, z - 0.10))
 kf(bagroot, 53, loc=(x, 0, z))
 visgroup(bagroot, 27, 89); ease(bagroot)
+vis(bag, 0, 0)
+for fl in flaps:
+    vis(fl, 0, 0)
+for b in bills:
+    vis(b, 0, 0)
+bb = plate('bagbills', 'assets/sprites/bagbills.png', 411, 333, 0, 0)
+bb.parent = bagroot; bb.location = (0, 0, 0)
+vis(bb, 27, 89)
 
 # ---------- stool ----------
 stroot = bpy.data.objects.new('stroot', None); sc.collection.objects.link(stroot)
@@ -299,6 +307,13 @@ for ob in [seat, rim] + legs:
 x, z = px(360, 800)
 kf(stroot, 41, loc=(2.4, 0, z)); kf(stroot, 45, loc=(x, 0, z))
 visgroup(stroot, 41, 89); ease(stroot)
+vis(seat, 0, 0); vis(rim, 0, 0)
+for L in legs:
+    vis(L, 0, 0)
+xs2, zs2 = px(360, 880)
+stp = plate('stoolp', 'assets/sprites/stool.png', 280, 280, xs2, zs2)
+kf(stp, 41, loc=(2.4, 0, zs2)); kf(stp, 45, loc=(xs2, 0, zs2))
+vis(stp, 41, 89); ease(stp)
 
 bink = text_obj('bink', 'BILLION', 97, INK, 0.04)
 bink.rotation_euler = (math.radians(90), math.radians(-8), 0)
@@ -337,17 +352,17 @@ x, z = px(460, 745)
 kf(croot, 98, loc=(3.0, 0, 1.2), rot=(0, math.radians(-35), 0))
 kf(croot, 110, loc=(x, 0, z), rot=(0, math.radians(-8), 0))
 vis(cash, 0, 0); vis(cband, 0, 0)
-cf = plate('cashfist', '/tmp/v11b/cashfist.png', 238, 172, 0, 0)
+cf = plate('cashfist', 'assets/sprites/cashfist.png', 238, 172, 0, 0)
 cf.parent = croot; cf.location = (0, 0, 0)
 visgroup(croot, 98, 176); ease(croot)
 
 # ---------- glove / hand2 / logo plates ----------
-gl = plate('glove', '/tmp/v11b/glove2.png', 300, 190, *px(-260, 760))
+gl = plate('glove', 'assets/sprites/glove2.png', 300, 190, *px(-260, 760))
 kf(gl, 102, loc=(*px(-260, 760),)); kf(gl, 112, loc=(*px(140, 760),))
 vis(gl, 98, 176); ease(gl)
-h2 = plate('hand2', '/tmp/v11b/hand2.png', 207, 234, *px(570, 780))
+h2 = plate('hand2', 'assets/sprites/hand2.png', 207, 234, *px(570, 780))
 vis(h2, 0, 0)
-lg = plate('logo', '/tmp/v11b/logo2.png', 161, 108, *px(164, 637))
+lg = plate('logo', 'assets/sprites/logo2.png', 161, 108, *px(164, 637))
 kf(lg, 107, scale=(0.2, 0.2, 0.2)); kf(lg, 116, scale=(1.0, 1.0, 1.0))
 vis(lg, 107, 176); ease(lg)
 
