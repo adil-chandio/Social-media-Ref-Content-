@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""S01 v12 compositor: Blender 3D renders (/tmp/b3d) + graded footage + grade.
+Timeline 23.35s: graphics 0-9 (loop x2), graded footage 9-11.675 & 20.675-23.35.
+Audio = refs/ref-audio.m4a verbatim (-c:a copy).
+Usage: engine_v12.py [stills n,n,...]
+"""
+import cv2, numpy as np, math, subprocess, os, sys
+
+W, H = 720, 1280
+FPS = 30
+PASS = 11.675
+NF = 701
+B3D = '/tmp/b3d'
+RF = '/tmp/rf'
+
+INK = (16, 16, 18); BONE = (244, 241, 234); GOLD = (212, 175, 55); RED = (255, 85, 96)
+
+def bgr(c): return (c[2], c[1], c[0])
+
+_yy, _xx = np.mgrid[0:H, 0:W].astype(np.float32)
+_r = np.sqrt((( _xx - W / 2) / (W / 2)) ** 2 + ((_yy - H / 2) / (H / 2)) ** 2) / 1.4142
+_vig = (1 - 0.13 * (_r ** 2.2))[..., None]
+
+GC = {}
+def gframe(g):
+    if g not in GC:
+        GC[g] = cv2.imread(f'{B3D}/{g:04d}.png')
+        if len(GC) > 40:
+            GC.pop(next(iter(GC)))
+    return GC[g]
+
+FC = {}
+def fframe(e):
+    e = max(0, min(697, e))
+    if e not in FC:
+        FC[e] = cv2.imread(f'{RF}/{e + 1:04d}.png')
+        if len(FC) > 8:
+            FC.pop(next(iter(FC)))
+    return FC[e]
+
+SM = {}
+def smoke(n):
+    if n not in SM:
+        SM[n] = cv2.imread(f'/tmp/v11b/smoke/{n:04d}.png', 0)
+    return SM[n]
+
+def scene_at(t):
+    t = t % PASS
+    if t < 9.0:
+        return 'gfx', t
+    return 'graded', t
+
+def graded(fr, t, tl):
+    e = min(int(t * 30), 696)
+    f = fframe(e)
+    hsv = cv2.cvtColor(f, cv2.COLOR_BGR2HSV).astype(np.int16)
+    hch, sch, vch = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    out = f.astype(np.float32)
+    reg = np.zeros_like(hch, bool); reg[940:1130, 150:570] = True
+    gl = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY).astype(np.int16)
+    yel = reg & (((hch > 18) & (hch < 40) & (sch > 90)) | (gl > 130))
+    w = cv2.GaussianBlur(yel.astype(np.float32), (7, 7), 0)[..., None]
+    gold = np.array(bgr(GOLD), np.float32)
+    out = out * (1 - w) + (out * 0.35 + gold * 0.65) * w
+    txtm = reg & (gl > 185)
+    wt = cv2.GaussianBlur(txtm.astype(np.float32), (5, 5), 0)[..., None] * 0.9
+    out = out * (1 - wt) + np.array(bgr(INK), np.float32) * wt
+    reg2 = np.zeros_like(gl, bool); reg2[150:330, 40:680] = True
+    reg2[330:400, 40:240] = True; reg2[330:400, 480:680] = True
+    reg2[150:340, 210:510] = False
+    dig = reg2 & (gl > 100)
+    wd = cv2.GaussianBlur(dig.astype(np.float32), (5, 5), 0)[..., None]
+    wd = np.clip(wd * 1.2, 0, 1)
+    out = out * (1 - wd) + np.array(bgr(INK), np.float32) * wd
+    fr[:] = out.clip(0, 255).astype(np.uint8)
+    gk = min(1, seg(tl, 9.0, .6, lin) if tl < 11 else 1)
+    if gk > 0:
+        g = np.zeros((H, W), np.float32)
+        for ex in (-60, 60):
+            cv2.ellipse(g, (360 + ex, 392), (30, 16), 0, 0, 360, 1.0, -1)
+        g = cv2.GaussianBlur(g, (21, 21), 0) * gk
+        fr[:] = np.clip(fr.astype(np.float32) + g[..., None] * np.array((30, 30, 255), np.float32) * 0.85, 0, 255).astype(np.uint8)
+
+def lin(x): return x
+def seg(t, t0, d, fn=None):
+    return max(0.0, min(1.0, (t - t0) / d))
+
+def render_frame(n):
+    t = n / FPS
+    sc, tl = scene_at(t)
+    if sc == 'gfx':
+        g = int(tl * 30) + 1
+        fr = gframe(g).copy()
+        # desat grade 1.90-3.00
+        if 1.90 <= tl < 3.00:
+            gsy = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
+            gsy = cv2.cvtColor(gsy, cv2.COLOR_GRAY2BGR).astype(np.float32)
+            fr = (fr.astype(np.float32) * 0.12 + gsy * 0.88).clip(0, 255).astype(np.uint8)
+        # smoke puffs 1.58-2.35
+        if 1.58 <= tl < 2.35:
+            sn = int(47 + (tl - 1.35) / .55 * 25)
+            sm = smoke(min(72, max(47, sn)))
+            if sm is not None:
+                sa = min(1, (tl - 1.58) / .12) * min(1, (2.35 - tl) / .2) * 0.9
+                scl = 0.85 + 0.3 * seg(tl, 1.6, .3)
+                smi = cv2.resize(sm, (int(sm.shape[1] * scl), int(sm.shape[0] * scl)))
+                a = (smi.astype(np.float32) / 255 * sa)[..., None]
+                col = np.array((150, 148, 145), np.float32)
+                for (px_, py_) in ((108, 410), (634, 512)):
+                    x0 = px_ - smi.shape[1] // 2; y0 = py_ - smi.shape[0] // 2
+                    xs, ye = max(x0, 0), min(y0 + smi.shape[0], H)
+                    xe = min(x0 + smi.shape[1], W); ys = max(y0, 0)
+                    aa = a[ys - y0:ye - y0, xs - x0:xe - x0]
+                    fr[ys:ye, xs:xe] = (fr[ys:ye, xs:xe].astype(np.float32) * (1 - aa) + col * aa).astype(np.uint8)
+    else:
+        fr = np.zeros((H, W, 3), np.uint8)
+        graded(fr, t, tl)
+    fr = (fr.astype(np.float32) * _vig).clip(0, 255).astype(np.uint8)
+    grain = np.random.default_rng(n).normal(0, 1.1, (H, W, 1))
+    fr = np.clip(fr.astype(np.float32) + grain, 0, 255).astype(np.uint8)
+    return fr
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == 'stills':
+        for n in [int(x) for x in sys.argv[2].split(',')]:
+            cv2.imwrite(f'/tmp/v12_still_{n}.png', render_frame(n))
+        print('stills ok')
+        sys.exit(0)
+    cmd = ['/tmp/ff' if False else open('/tmp/ffpath').read().strip(),
+           '-y', '-f', 'rawvideo', '-pix_fmt', 'bgr24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
+           '-i', 'refs/ref-audio.m4a',
+           '-c:v', 'libx264', '-crf', '16', '-preset', 'medium', '-pix_fmt', 'yuv420p',
+           '-c:a', 'copy', '-shortest', 'deliverables/shorts/S01_monarch_20billion_v12.mp4']
+    p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for n in range(NF):
+        p.stdin.write(render_frame(n).tobytes())
+        if n % 50 == 0:
+            print('frame', n, flush=True)
+    p.stdin.close(); p.wait()
+    print('v12 master done', flush=True)
