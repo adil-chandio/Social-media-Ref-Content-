@@ -61,11 +61,17 @@ jobs:
           mkdir -p "out/${{ steps.q.outputs.folder }}"
           awk 'NF{n++; printf "%02d %s\n", n, $0}' /tmp/urls.txt | while read -r n url; do
             echo "::group::[$n] $url"
+            OUT="out/${{ steps.q.outputs.folder }}/${n}_%(title).50s_[%(id)s].mp4"
             python3 -m yt_dlp --no-warnings --restrict-filenames --max-filesize 95M \
               -f "bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4]/bv*[height<=720]+ba/b[height<=720]/b" \
-              --merge-output-format mp4 \
-              -o "out/${{ steps.q.outputs.folder }}/${n}_%(title).50s_[%(id)s].mp4" \
-              "$url" || echo "FAILED [$n] $url" >> "out/${{ steps.q.outputs.folder }}/_failures.txt"
+              --merge-output-format mp4 -o "$OUT" "$url" \
+            || python3 -m yt_dlp --no-warnings --restrict-filenames --max-filesize 95M \
+              --extractor-args "youtube:player_client=android,vr,tv" \
+              -f "bv*[height<=720]+ba/b[height<=720]/b" --merge-output-format mp4 -o "$OUT" "$url" \
+            || python3 -m yt_dlp --no-warnings --restrict-filenames --max-filesize 95M \
+              --extractor-args "youtube:player_client=web_embedded,ios" \
+              -f "bv*[height<=720]+ba/b[height<=720]/b" --merge-output-format mp4 -o "$OUT" "$url" \
+            || echo "FAILED [$n] $url" >> "out/${{ steps.q.outputs.folder }}/_failures.txt"
             echo "::endgroup::"
           done
           ls -la "out/${{ steps.q.outputs.folder }}"
@@ -106,4 +112,3 @@ jobs:
           git commit -m "ingest: $FOLDER (run ${{ github.run_id }})"
           git rev-parse HEAD
           git push -v origin HEAD:refs/heads/ingest/media
-          trap - EXIT
