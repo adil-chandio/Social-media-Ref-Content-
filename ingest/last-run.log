@@ -46,8 +46,115 @@ https://youtube.com/shorts/hmk9nkwzLrc$
 + python3 -m yt_dlp --version
 2026.10.26
 + mkdir -p out/shorts1
++ python3 -m pip install --user -q youtube-transcript-api
++ mkdir -p out/shorts1/transcripts
 + awk 'NF{n++; printf "%02d %s\n", n, $0}' /tmp/urls.txt
 + read -r n url
+++ echo https://youtube.com/shorts/Ld5LkPkQodQ
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=Ld5LkPkQodQ
++ python3 -m youtube_transcript_api Ld5LkPkQodQ --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/Ld5LkPkQodQ.txt
+1472 out/shorts1/transcripts/Ld5LkPkQodQ.txt
++ read -r n url
+++ echo https://youtube.com/shorts/t5rLzpXZ5o8
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=t5rLzpXZ5o8
++ python3 -m youtube_transcript_api t5rLzpXZ5o8 --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/t5rLzpXZ5o8.txt
+1472 out/shorts1/transcripts/t5rLzpXZ5o8.txt
++ read -r n url
+++ echo https://youtube.com/shorts/3Gf_8827t7o
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=3Gf_8827t7o
++ python3 -m youtube_transcript_api 3Gf_8827t7o --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/3Gf_8827t7o.txt
+1472 out/shorts1/transcripts/3Gf_8827t7o.txt
++ read -r n url
+++ echo https://youtube.com/shorts/KzuKj44a620
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=KzuKj44a620
++ python3 -m youtube_transcript_api KzuKj44a620 --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/KzuKj44a620.txt
+1472 out/shorts1/transcripts/KzuKj44a620.txt
++ read -r n url
+++ echo https://youtube.com/shorts/me3sFZCXxlg
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=me3sFZCXxlg
++ python3 -m youtube_transcript_api me3sFZCXxlg --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/me3sFZCXxlg.txt
+1472 out/shorts1/transcripts/me3sFZCXxlg.txt
++ read -r n url
+++ echo https://youtube.com/shorts/C-yZlQXN3rQ
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=C-yZlQXN3rQ
++ python3 -m youtube_transcript_api C-yZlQXN3rQ --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/C-yZlQXN3rQ.txt
+1472 out/shorts1/transcripts/C-yZlQXN3rQ.txt
++ read -r n url
+++ echo https://youtube.com/shorts/bRpEwZ9w6-w
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=bRpEwZ9w6-w
++ python3 -m youtube_transcript_api bRpEwZ9w6-w --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/bRpEwZ9w6-w.txt
+1472 out/shorts1/transcripts/bRpEwZ9w6-w.txt
++ read -r n url
+++ echo https://youtube.com/shorts/FeDF9ywCCYM
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=FeDF9ywCCYM
++ python3 -m youtube_transcript_api FeDF9ywCCYM --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/FeDF9ywCCYM.txt
+1472 out/shorts1/transcripts/FeDF9ywCCYM.txt
++ read -r n url
+++ echo https://youtube.com/shorts/FG8NB_IMLa4
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=FG8NB_IMLa4
++ python3 -m youtube_transcript_api FG8NB_IMLa4 --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/FG8NB_IMLa4.txt
+1472 out/shorts1/transcripts/FG8NB_IMLa4.txt
++ read -r n url
+++ echo https://youtube.com/shorts/hmk9nkwzLrc
+++ grep -oE '[A-Za-z0-9_-]{11}'
+++ tail -1
++ ID=hmk9nkwzLrc
++ python3 -m youtube_transcript_api hmk9nkwzLrc --languages en --languages hi --languages ur
++ wc -c out/shorts1/transcripts/hmk9nkwzLrc.txt
+1472 out/shorts1/transcripts/hmk9nkwzLrc.txt
++ read -r n url
++ git clone --depth=1 https://github.com/Brainicism/bgutil-ytdlp-pot-provider /tmp/pot
+Cloning into '/tmp/pot'...
++ '[' -d /tmp/pot/server ']'
++ cd /tmp/pot/server
++ npm ci --no-audit --no-fund --silent
++ sleep 8
++ npm run build --silent
++ curl -s -m 3 http://localhost:4416/ping
++ true
+++ python3 -c 'import site;print(site.getusersitepackages())'
++ PDIR=/home/runner/.local/lib/python3.12/site-packages/yt_dlp_plugins
++ mkdir -p /home/runner/.local/lib/python3.12/site-packages/yt_dlp_plugins
++ '[' -d /tmp/pot/plugin/yt_dlp_plugins ']'
++ cp -r /tmp/pot/plugin/yt_dlp_plugins/extractor /home/runner/.local/lib/python3.12/site-packages/yt_dlp_plugins/
++ ls -R /home/runner/.local/lib/python3.12/site-packages/yt_dlp_plugins
++ head -10
+/home/runner/.local/lib/python3.12/site-packages/yt_dlp_plugins:
+extractor
+
+/home/runner/.local/lib/python3.12/site-packages/yt_dlp_plugins/extractor:
+getpot_bgutil.py
+getpot_bgutil_http.py
+getpot_bgutil_script.py
++ read -r n url
++ awk 'NF{n++; printf "%02d %s\n", n, $0}' /tmp/urls.txt
 + echo '::group::[01] https://youtube.com/shorts/Ld5LkPkQodQ'
 ::group::[01] https://youtube.com/shorts/Ld5LkPkQodQ
 + bash scripts/ytget.sh https://youtube.com/shorts/Ld5LkPkQodQ out/shorts1/01_https://youtube.com/shorts/Ld5LkPkQodQ.mp4
@@ -147,7 +254,6 @@ ID=KzuKj44a620
 ERROR: [youtube] KzuKj44a620: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
 [youtube] Extracting URL: https://youtube.com/shorts/KzuKj44a620
 [youtube] KzuKj44a620: Downloading webpage
-[youtube] KzuKj44a620: Downloading initial data API JSON
 [youtube] KzuKj44a620: Downloading android player API JSON
 [youtube] KzuKj44a620: Downloading tv client config
 [youtube] KzuKj44a620: Downloading player 11a45ffb-main
@@ -330,25 +436,27 @@ FAILED all strategies for hmk9nkwzLrc
 ::endgroup::
 + read -r n url
 + ls -la out/shorts1
-total 12
-drwxr-xr-x 2 runner runner 4096 Nov  1 00:58 .
-drwxr-xr-x 3 runner runner 4096 Nov  1 00:58 ..
--rw-r--r-- 1 runner runner  510 Nov  1 01:02 _failures.txt
+total 16
+drwxr-xr-x 3 runner runner 4096 Nov  1 01:16 .
+drwxr-xr-x 3 runner runner 4096 Nov  1 01:15 ..
+-rw-r--r-- 1 runner runner  510 Nov  1 01:19 _failures.txt
+drwxr-xr-x 2 runner runner 4096 Nov  1 01:15 transcripts
 + trap report EXIT
 + echo 'FOLDER=[shorts1]'
 FOLDER=[shorts1]
 + ls -la out/ out/shorts1
 out/:
 total 12
-drwxr-xr-x  3 runner runner 4096 Nov  1 00:58 .
-drwxr-xr-x 15 runner runner 4096 Nov  1 00:58 ..
-drwxr-xr-x  2 runner runner 4096 Nov  1 00:58 shorts1
+drwxr-xr-x  3 runner runner 4096 Nov  1 01:15 .
+drwxr-xr-x 15 runner runner 4096 Nov  1 01:15 ..
+drwxr-xr-x  3 runner runner 4096 Nov  1 01:16 shorts1
 
 out/shorts1:
-total 12
-drwxr-xr-x 2 runner runner 4096 Nov  1 00:58 .
-drwxr-xr-x 3 runner runner 4096 Nov  1 00:58 ..
--rw-r--r-- 1 runner runner  510 Nov  1 01:02 _failures.txt
+total 16
+drwxr-xr-x 3 runner runner 4096 Nov  1 01:16 .
+drwxr-xr-x 3 runner runner 4096 Nov  1 01:15 ..
+-rw-r--r-- 1 runner runner  510 Nov  1 01:19 _failures.txt
+drwxr-xr-x 2 runner runner 4096 Nov  1 01:15 transcripts
 + git init pushdir
 hint: Using 'master' as the name for the initial branch. This default branch name
 hint: will change to "main" in Git 3.0. To configure the initial branch name
@@ -365,7 +473,7 @@ hint:
 hint: Disable this message with "git config set advice.defaultBranchName false"
 Initialized empty Git repository in /home/runner/work/Social-media-Ref-Content-/Social-media-Ref-Content-/pushdir/.git/
 + cd pushdir
-+ git remote add origin https://x-access-token:ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJEYm9Ec0VUbnc0cDh4dndqUXBLSjJJYjBkdDJFSWRSeGh1THoxZFRxV29VLU5rT00xNmJKUVI4IiwiZXhwIjoxNzkzNDk4Mjg2LCJpYXQiOjE3OTM0OTQ2ODYsImlzcyI6ImdpdGh1YiIsImp0aSI6ImVjODgxNjkzLTEzYjctNDE1YS1hZGEzLTU3ZTkwMmM1NDUwZiIsInZlciI6M30.mzpEa0Ix-D6j-dzmJ4tDxAN258612zMCr-eFRA5rN4xqord-wahZqExTm4YnIuccVsC3lhShzl2HIOavv_FKMQ@github.com/adil-chandio/Social-media-Ref-Content-.git
++ git remote add origin https://x-access-token:ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJmbHdla2pQWjJ5NVZGTHdQaGRFdkdfQ2REa2hkM3ZseXh5Y2lXV1U2bGZrRVhRTW5Rc2dxUzNrIiwiZXhwIjoxNzkzNDk5MzIwLCJpYXQiOjE3OTM0OTU3MjAsImlzcyI6ImdpdGh1YiIsImp0aSI6IjgzYzNlNDRmLTRjM2UtNGE0Mi04OTVmLTZkNGFhMjAxMzI5MCIsInZlciI6M30.1PZgxTkrFkhvFCyoScWOwvxiYrucK1bqSbt9GfyQttNbHh9FT0O2XgmUPiqCl793X-yuX-crb-G0ah3NgcF4zA@github.com/adil-chandio/Social-media-Ref-Content-.git
 + git config user.name arena-ingest
 + git config user.email arena-ingest@users.noreply.github.com
 + git fetch --depth=1 origin ingest/media
@@ -380,13 +488,59 @@ branch 'ingest/media' set up to track 'origin/ingest/media'.
 + git add -A ingest
 + git status --porcelain
 + head -20
-+ git commit -m 'ingest: shorts1 (run 41259057262)'
-On branch ingest/media
-Your branch is up to date with 'origin/ingest/media'.
-
-nothing to commit, working tree clean
+A  ingest/shorts1/shorts1/transcripts/3Gf_8827t7o.err
+A  ingest/shorts1/shorts1/transcripts/3Gf_8827t7o.txt
+A  ingest/shorts1/shorts1/transcripts/C-yZlQXN3rQ.err
+A  ingest/shorts1/shorts1/transcripts/C-yZlQXN3rQ.txt
+A  ingest/shorts1/shorts1/transcripts/FG8NB_IMLa4.err
+A  ingest/shorts1/shorts1/transcripts/FG8NB_IMLa4.txt
+A  ingest/shorts1/shorts1/transcripts/FeDF9ywCCYM.err
+A  ingest/shorts1/shorts1/transcripts/FeDF9ywCCYM.txt
+A  ingest/shorts1/shorts1/transcripts/KzuKj44a620.err
+A  ingest/shorts1/shorts1/transcripts/KzuKj44a620.txt
+A  ingest/shorts1/shorts1/transcripts/Ld5LkPkQodQ.err
+A  ingest/shorts1/shorts1/transcripts/Ld5LkPkQodQ.txt
+A  ingest/shorts1/shorts1/transcripts/bRpEwZ9w6-w.err
+A  ingest/shorts1/shorts1/transcripts/bRpEwZ9w6-w.txt
+A  ingest/shorts1/shorts1/transcripts/hmk9nkwzLrc.err
+A  ingest/shorts1/shorts1/transcripts/hmk9nkwzLrc.txt
+A  ingest/shorts1/shorts1/transcripts/me3sFZCXxlg.err
+A  ingest/shorts1/shorts1/transcripts/me3sFZCXxlg.txt
+A  ingest/shorts1/shorts1/transcripts/t5rLzpXZ5o8.err
+A  ingest/shorts1/shorts1/transcripts/t5rLzpXZ5o8.txt
++ git commit -m 'ingest: shorts1 (run 41260307282)'
+[ingest/media 0082720] ingest: shorts1 (run 41260307282)
+ 20 files changed, 120 insertions(+)
+ create mode 100644 ingest/shorts1/shorts1/transcripts/3Gf_8827t7o.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/3Gf_8827t7o.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/C-yZlQXN3rQ.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/C-yZlQXN3rQ.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/FG8NB_IMLa4.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/FG8NB_IMLa4.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/FeDF9ywCCYM.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/FeDF9ywCCYM.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/KzuKj44a620.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/KzuKj44a620.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/Ld5LkPkQodQ.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/Ld5LkPkQodQ.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/bRpEwZ9w6-w.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/bRpEwZ9w6-w.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/hmk9nkwzLrc.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/hmk9nkwzLrc.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/me3sFZCXxlg.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/me3sFZCXxlg.txt
+ create mode 100644 ingest/shorts1/shorts1/transcripts/t5rLzpXZ5o8.err
+ create mode 100644 ingest/shorts1/shorts1/transcripts/t5rLzpXZ5o8.txt
++ git rev-parse HEAD
+0082720d9f45ef092170b53fed380d2a43d45666
++ git push -v origin HEAD:refs/heads/ingest/media
+Pushing to https://github.com/adil-chandio/Social-media-Ref-Content-.git
+POST git-receive-pack (2283 bytes)
+To https://github.com/adil-chandio/Social-media-Ref-Content-.git
+   bb43662..0082720  HEAD -> ingest/media
+updating local tracking ref 'refs/remotes/origin/ingest/media'
 + report
-+ RC=1
++ RC=0
 + cd /home/runner/work/Social-media-Ref-Content-/Social-media-Ref-Content-
 + git config user.name arena-ingest
 + git config user.email arena-ingest@users.noreply.github.com
