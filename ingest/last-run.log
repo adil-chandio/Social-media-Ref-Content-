@@ -153,8 +153,8 @@ extractor
 getpot_bgutil.py
 getpot_bgutil_http.py
 getpot_bgutil_script.py
-+ read -r n url
 + awk 'NF{n++; printf "%02d %s\n", n, $0}' /tmp/urls.txt
++ read -r n url
 + echo '::group::[01] https://youtube.com/shorts/Ld5LkPkQodQ'
 ::group::[01] https://youtube.com/shorts/Ld5LkPkQodQ
 + bash scripts/ytget.sh https://youtube.com/shorts/Ld5LkPkQodQ out/shorts1/01_https://youtube.com/shorts/Ld5LkPkQodQ.mp4
@@ -437,26 +437,26 @@ FAILED all strategies for hmk9nkwzLrc
 + read -r n url
 + ls -la out/shorts1
 total 16
-drwxr-xr-x 3 runner runner 4096 Nov  1 01:16 .
-drwxr-xr-x 3 runner runner 4096 Nov  1 01:15 ..
--rw-r--r-- 1 runner runner  510 Nov  1 01:19 _failures.txt
-drwxr-xr-x 2 runner runner 4096 Nov  1 01:15 transcripts
+drwxr-xr-x 3 runner runner 4096 Nov  1 01:23 .
+drwxr-xr-x 3 runner runner 4096 Nov  1 01:22 ..
+-rw-r--r-- 1 runner runner  510 Nov  1 01:27 _failures.txt
+drwxr-xr-x 2 runner runner 4096 Nov  1 01:22 transcripts
 + trap report EXIT
 + echo 'FOLDER=[shorts1]'
 FOLDER=[shorts1]
 + ls -la out/ out/shorts1
 out/:
 total 12
-drwxr-xr-x  3 runner runner 4096 Nov  1 01:15 .
-drwxr-xr-x 15 runner runner 4096 Nov  1 01:15 ..
-drwxr-xr-x  3 runner runner 4096 Nov  1 01:16 shorts1
+drwxr-xr-x  3 runner runner 4096 Nov  1 01:22 .
+drwxr-xr-x 15 runner runner 4096 Nov  1 01:22 ..
+drwxr-xr-x  3 runner runner 4096 Nov  1 01:23 shorts1
 
 out/shorts1:
 total 16
-drwxr-xr-x 3 runner runner 4096 Nov  1 01:16 .
-drwxr-xr-x 3 runner runner 4096 Nov  1 01:15 ..
--rw-r--r-- 1 runner runner  510 Nov  1 01:19 _failures.txt
-drwxr-xr-x 2 runner runner 4096 Nov  1 01:15 transcripts
+drwxr-xr-x 3 runner runner 4096 Nov  1 01:23 .
+drwxr-xr-x 3 runner runner 4096 Nov  1 01:22 ..
+-rw-r--r-- 1 runner runner  510 Nov  1 01:27 _failures.txt
+drwxr-xr-x 2 runner runner 4096 Nov  1 01:22 transcripts
 + git init pushdir
 hint: Using 'master' as the name for the initial branch. This default branch name
 hint: will change to "main" in Git 3.0. To configure the initial branch name
@@ -473,7 +473,7 @@ hint:
 hint: Disable this message with "git config set advice.defaultBranchName false"
 Initialized empty Git repository in /home/runner/work/Social-media-Ref-Content-/Social-media-Ref-Content-/pushdir/.git/
 + cd pushdir
-+ git remote add origin https://x-access-token:ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJmbHdla2pQWjJ5NVZGTHdQaGRFdkdfQ2REa2hkM3ZseXh5Y2lXV1U2bGZrRVhRTW5Rc2dxUzNrIiwiZXhwIjoxNzkzNDk5MzIwLCJpYXQiOjE3OTM0OTU3MjAsImlzcyI6ImdpdGh1YiIsImp0aSI6IjgzYzNlNDRmLTRjM2UtNGE0Mi04OTVmLTZkNGFhMjAxMzI5MCIsInZlciI6M30.1PZgxTkrFkhvFCyoScWOwvxiYrucK1bqSbt9GfyQttNbHh9FT0O2XgmUPiqCl793X-yuX-crb-G0ah3NgcF4zA@github.com/adil-chandio/Social-media-Ref-Content-.git
++ git remote add origin https://x-access-token:ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJjYkNGREpLMlN3cDItb3V3QV9RRUJKdjI0NjJYR2ozaHpHOTIzZS1jZnVULW1lRXJJekx0OURRIiwiZXhwIjoxNzkzNDk5NzUxLCJpYXQiOjE3OTM0OTYxNTEsImlzcyI6ImdpdGh1YiIsImp0aSI6IjRkOWFhMmZjLTdkNWYtNDI5Yi05OGNkLTY2NmZmMDUxZWQwMyIsInZlciI6M30.Jbps5reIqn24o9bmKUxFb97BpnD-TbyXXgbnsPLm1ExX5W3yaNT6VFP4yV-iY0rg9LdE0wylNF6HD5rF5DqVDg@github.com/adil-chandio/Social-media-Ref-Content-.git
 + git config user.name arena-ingest
 + git config user.email arena-ingest@users.noreply.github.com
 + git fetch --depth=1 origin ingest/media
@@ -484,60 +484,61 @@ From https://github.com/adil-chandio/Social-media-Ref-Content-
 Switched to a new branch 'ingest/media'
 branch 'ingest/media' set up to track 'origin/ingest/media'.
 + mkdir -p ingest
-+ cp -r ../out/shorts1 ingest/shorts1
++ mkdir -p ingest/shorts1
++ cp -r ../out/shorts1/. ingest/shorts1/
 + git add -A ingest
 + git status --porcelain
 + head -20
-A  ingest/shorts1/shorts1/transcripts/3Gf_8827t7o.err
-A  ingest/shorts1/shorts1/transcripts/3Gf_8827t7o.txt
-A  ingest/shorts1/shorts1/transcripts/C-yZlQXN3rQ.err
-A  ingest/shorts1/shorts1/transcripts/C-yZlQXN3rQ.txt
-A  ingest/shorts1/shorts1/transcripts/FG8NB_IMLa4.err
-A  ingest/shorts1/shorts1/transcripts/FG8NB_IMLa4.txt
-A  ingest/shorts1/shorts1/transcripts/FeDF9ywCCYM.err
-A  ingest/shorts1/shorts1/transcripts/FeDF9ywCCYM.txt
-A  ingest/shorts1/shorts1/transcripts/KzuKj44a620.err
-A  ingest/shorts1/shorts1/transcripts/KzuKj44a620.txt
-A  ingest/shorts1/shorts1/transcripts/Ld5LkPkQodQ.err
-A  ingest/shorts1/shorts1/transcripts/Ld5LkPkQodQ.txt
-A  ingest/shorts1/shorts1/transcripts/bRpEwZ9w6-w.err
-A  ingest/shorts1/shorts1/transcripts/bRpEwZ9w6-w.txt
-A  ingest/shorts1/shorts1/transcripts/hmk9nkwzLrc.err
-A  ingest/shorts1/shorts1/transcripts/hmk9nkwzLrc.txt
-A  ingest/shorts1/shorts1/transcripts/me3sFZCXxlg.err
-A  ingest/shorts1/shorts1/transcripts/me3sFZCXxlg.txt
-A  ingest/shorts1/shorts1/transcripts/t5rLzpXZ5o8.err
-A  ingest/shorts1/shorts1/transcripts/t5rLzpXZ5o8.txt
-+ git commit -m 'ingest: shorts1 (run 41260307282)'
-[ingest/media 0082720] ingest: shorts1 (run 41260307282)
+A  ingest/shorts1/transcripts/3Gf_8827t7o.err
+A  ingest/shorts1/transcripts/3Gf_8827t7o.txt
+A  ingest/shorts1/transcripts/C-yZlQXN3rQ.err
+A  ingest/shorts1/transcripts/C-yZlQXN3rQ.txt
+A  ingest/shorts1/transcripts/FG8NB_IMLa4.err
+A  ingest/shorts1/transcripts/FG8NB_IMLa4.txt
+A  ingest/shorts1/transcripts/FeDF9ywCCYM.err
+A  ingest/shorts1/transcripts/FeDF9ywCCYM.txt
+A  ingest/shorts1/transcripts/KzuKj44a620.err
+A  ingest/shorts1/transcripts/KzuKj44a620.txt
+A  ingest/shorts1/transcripts/Ld5LkPkQodQ.err
+A  ingest/shorts1/transcripts/Ld5LkPkQodQ.txt
+A  ingest/shorts1/transcripts/bRpEwZ9w6-w.err
+A  ingest/shorts1/transcripts/bRpEwZ9w6-w.txt
+A  ingest/shorts1/transcripts/hmk9nkwzLrc.err
+A  ingest/shorts1/transcripts/hmk9nkwzLrc.txt
+A  ingest/shorts1/transcripts/me3sFZCXxlg.err
+A  ingest/shorts1/transcripts/me3sFZCXxlg.txt
+A  ingest/shorts1/transcripts/t5rLzpXZ5o8.err
+A  ingest/shorts1/transcripts/t5rLzpXZ5o8.txt
++ git commit -m 'ingest: shorts1 (run 41260821848)'
+[ingest/media 05f8f25] ingest: shorts1 (run 41260821848)
  20 files changed, 120 insertions(+)
- create mode 100644 ingest/shorts1/shorts1/transcripts/3Gf_8827t7o.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/3Gf_8827t7o.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/C-yZlQXN3rQ.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/C-yZlQXN3rQ.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/FG8NB_IMLa4.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/FG8NB_IMLa4.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/FeDF9ywCCYM.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/FeDF9ywCCYM.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/KzuKj44a620.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/KzuKj44a620.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/Ld5LkPkQodQ.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/Ld5LkPkQodQ.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/bRpEwZ9w6-w.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/bRpEwZ9w6-w.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/hmk9nkwzLrc.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/hmk9nkwzLrc.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/me3sFZCXxlg.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/me3sFZCXxlg.txt
- create mode 100644 ingest/shorts1/shorts1/transcripts/t5rLzpXZ5o8.err
- create mode 100644 ingest/shorts1/shorts1/transcripts/t5rLzpXZ5o8.txt
+ create mode 100644 ingest/shorts1/transcripts/3Gf_8827t7o.err
+ create mode 100644 ingest/shorts1/transcripts/3Gf_8827t7o.txt
+ create mode 100644 ingest/shorts1/transcripts/C-yZlQXN3rQ.err
+ create mode 100644 ingest/shorts1/transcripts/C-yZlQXN3rQ.txt
+ create mode 100644 ingest/shorts1/transcripts/FG8NB_IMLa4.err
+ create mode 100644 ingest/shorts1/transcripts/FG8NB_IMLa4.txt
+ create mode 100644 ingest/shorts1/transcripts/FeDF9ywCCYM.err
+ create mode 100644 ingest/shorts1/transcripts/FeDF9ywCCYM.txt
+ create mode 100644 ingest/shorts1/transcripts/KzuKj44a620.err
+ create mode 100644 ingest/shorts1/transcripts/KzuKj44a620.txt
+ create mode 100644 ingest/shorts1/transcripts/Ld5LkPkQodQ.err
+ create mode 100644 ingest/shorts1/transcripts/Ld5LkPkQodQ.txt
+ create mode 100644 ingest/shorts1/transcripts/bRpEwZ9w6-w.err
+ create mode 100644 ingest/shorts1/transcripts/bRpEwZ9w6-w.txt
+ create mode 100644 ingest/shorts1/transcripts/hmk9nkwzLrc.err
+ create mode 100644 ingest/shorts1/transcripts/hmk9nkwzLrc.txt
+ create mode 100644 ingest/shorts1/transcripts/me3sFZCXxlg.err
+ create mode 100644 ingest/shorts1/transcripts/me3sFZCXxlg.txt
+ create mode 100644 ingest/shorts1/transcripts/t5rLzpXZ5o8.err
+ create mode 100644 ingest/shorts1/transcripts/t5rLzpXZ5o8.txt
 + git rev-parse HEAD
-0082720d9f45ef092170b53fed380d2a43d45666
+05f8f25a6e24aaa99937ae232528d9874b4c0dd3
 + git push -v origin HEAD:refs/heads/ingest/media
 Pushing to https://github.com/adil-chandio/Social-media-Ref-Content-.git
-POST git-receive-pack (2283 bytes)
+POST git-receive-pack (2230 bytes)
 To https://github.com/adil-chandio/Social-media-Ref-Content-.git
-   bb43662..0082720  HEAD -> ingest/media
+   0082720..05f8f25  HEAD -> ingest/media
 updating local tracking ref 'refs/remotes/origin/ingest/media'
 + report
 + RC=0
