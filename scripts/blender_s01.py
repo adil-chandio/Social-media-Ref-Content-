@@ -197,10 +197,9 @@ me = bpy.data.meshes.new('bars'); me.from_pydata([(-4, 1.2, -4), (4, 1.2, -4), (
 bars = bpy.data.objects.new('bars', me); sc.collection.objects.link(bars)
 mb = bpy.data.materials.new('bars_m'); mb.use_nodes = True
 nt = mb.node_tree; b = nt.nodes['Principled BSDF']
-wav = nt.nodes.new('ShaderNodeTexWave')
-wav.inputs['Scale'].default_value = 0.85
-wav.inputs['Distortion'].default_value = 0.0
-wav.bands_direction = 'DIAGONAL'
+wav = nt.nodes.new('ShaderNodeTexVoronoi')
+wav.inputs['Scale'].default_value = 1.15
+wav.inputs['Randomness'].default_value = 0.75
 ramp = nt.nodes.new('ShaderNodeValToRGB')
 ramp.color_ramp.interpolation = 'CONSTANT'
 ramp.color_ramp.elements[0].color = rgba(lin((92, 8, 10)))
@@ -211,6 +210,8 @@ tc = nt.nodes.new('ShaderNodeTexCoord')
 nt.links.new(tc.outputs['Object'], mapn.inputs['Vector'])
 nt.links.new(mapn.outputs['Vector'], wav.inputs['Vector'])
 nt.links.new(wav.outputs['Color'], ramp.inputs['Fac'])
+ramp.color_ramp.elements[1].position = 0.45
+e3 = ramp.color_ramp.elements.new(0.75); e3.color = rgba(lin((84, 6, 8)))
 em2 = nt.nodes.new('ShaderNodeEmission'); em2.inputs[1].default_value = 1.0
 nt.links.new(ramp.outputs['Color'], em2.inputs[0])
 ou2 = nt.nodes.new('ShaderNodeOutputMaterial')
