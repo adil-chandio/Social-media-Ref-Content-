@@ -381,4 +381,8 @@ tmp = OUT + '.mux.mp4'
 subprocess.run([FF, '-y', '-i', OUT, '-i', V1, '-map', '0:v', '-map', '1:a', '-c', 'copy', '-shortest', tmp],
                check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 os.replace(tmp, OUT)
+tmpw = WEB + '.mux.mp4'
+subprocess.run([FF, '-y', '-i', WEB, '-i', V1, '-map', '0:v', '-map', '1:a', '-c', 'copy', '-shortest', tmpw],
+               check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+os.replace(tmpw, WEB)
 print('DONE v3', os.path.getsize(WEB))
