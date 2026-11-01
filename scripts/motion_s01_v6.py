@@ -7,7 +7,7 @@ Pass = 11.67s played twice. Audio = reference original track verbatim.
 Render 1080x1920 (1.5x ref 720x1280 coords) = sharper 'next level' master.
 """
 import math, os, subprocess
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFilter, ImageEnhance, ImageFont, ImageOps, ImageChops
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 E = ROOT + '/refs/extract/'
@@ -48,6 +48,7 @@ def lerp(a, b, k): return tuple(int(a[i] + (b[i] - a[i]) * k) for i in range(3))
 
 def loadA(n): return Image.open(E + n).convert('RGBA')
 BAG = loadA('sp_bag.png'); STOOL = loadA('sp_stool.png')
+STOOL = STOOL.resize((STOOL.width, int(STOOL.height * 1.55)))
 SMKL = loadA('sp_smoke_l.png'); SMKR = loadA('sp_smoke_r.png')
 LOGO = loadA('sp_logo.png'); GLOVE = loadA('sp_glove.png')
 CASH = loadA('sp_cash.png'); JEN = loadA('sp_jensen.png'); PLATE = loadA('sp_plate.png')
@@ -124,6 +125,26 @@ def wireframe(fr, x, y, w, h, seed=3, al=1.0):
     for i in (1, 4, 7):
         d.line([pts[i], pts[(i + 4) % 9]], fill=(255, 255, 255, int(110 * al)), width=2)
 
+def soft_shadow(fr, x, y, rx, ry, alpha):
+    ov = Image.new('RGBA', fr.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(ov)
+    d.ellipse([int(x - rx), int(y - ry), int(x + rx), int(y + ry)], fill=(95, 95, 95, int(alpha)))
+    ov = ov.filter(ImageFilter.GaussianBlur(28))
+    fr.paste(ov.convert('RGB'), (0, 0), ov.split()[3])
+
+def desat_hue(fr, k, h0, h1):
+    if k <= 0: return
+    hsv = fr.convert('HSV')
+    hch, sch, vch = hsv.split()
+    hm = hch.point(lambda v: 255 if h0 <= v <= h1 else 0)
+    sm = sch.point(lambda v: 255 if v > 50 else 0)
+    mask = ImageChops.darker(hm, sm)
+    rgb = fr.convert('RGB')
+    gray = rgb.convert('L').convert('RGB')
+    blended = Image.blend(rgb, gray, k)
+    out = Image.composite(blended, rgb, mask)
+    fr.paste(out, (0, 0))
+
 def desat(fr, k, dark=1.0):
     if k <= 0: return
     g = ImageOps.grayscale(fr).convert('RGB')
@@ -135,8 +156,8 @@ def eyeglow(fr, x, y, spread, k):
     if k <= 0: return
     g = Image.new('RGBA', (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(g)
     for ex in (-spread / 2, spread / 2):
-        d.ellipse([int(x + ex - 62), int(y - 34), int(x + ex + 62), int(y + 34)], fill=(255, 40, 40, int(170 * k)))
-    g = g.filter(ImageFilter.GaussianBlur(30))
+        d.ellipse([int(x + ex - 46), int(y - 30), int(x + ex + 46), int(y + 30)], fill=(255, 30, 30, int(230 * k)))
+    g = g.filter(ImageFilter.GaussianBlur(18))
     fr.paste(Image.alpha_composite(fr.convert('RGBA'), g).convert('RGB'), (0, 0))
 
 SHAKES = [0.43, 0.60, 3.00, 3.25, 11.67, 12.10, 12.27, 14.67, 14.92]
@@ -152,52 +173,56 @@ def scene(fr, tl):
         fr.paste(Image.new('RGB', (W, H), WHITE_F), (0, 0)); glow(fr, 40); edge_vig(fr)
         if tl > 0.10:
             k = eob((tl - .10) / .22)
-            paste(fr, text_im('TWENTY', anton(86), LIME + (255,)), CX, 640 * S, scale=1.45 - .45 * k, alpha=clamp((tl - .10) / .08))
+            paste(fr, text_im('TWENTY', anton(62), LIME + (255,)), CX, 300 * S, scale=1.45 - .45 * k, alpha=clamp((tl - .10) / .08))
     elif tl < 0.60:
         fr.paste(Image.new('RGB', (W, H), BLACK_F), (0, 0)); glow(fr, 16); edge_vig(fr)
         k = eoc((tl - .43) / .17)
         xx = CX - 180 * S * (1 - k)
-        extrude(fr, 'TWENTY', 42, xx - 150 * S, 640 * S, LIME, LIME_D, depth=7)
-        extrude(fr, 'BILLION', 94, xx + 95 * S, 640 * S, LIME, LIME_D)
+        extrude(fr, 'TWENTY', 46, xx - 120 * S, 300 * S, LIME, LIME_D, depth=7)
+        extrude(fr, 'BILLION', 63, xx + 60 * S, 300 * S, LIME, LIME_D)
     elif tl < 1.35:
         kk = clamp((tl - .60) / .30)
         fr.paste(Image.new('RGB', (W, H), lerp((46, 74, 2), GREEN_F, kk)), (0, 0)); edge_vig(fr)
         k = eoc((tl - .60) / .18)
-        extrude(fr, 'BILLION', 100, CX + 40 * S + 160 * S * (1 - k), 230 * S, BLK, (40, 40, 8))
-        extrude(fr, 'TWENTY', 36, CX - 128 * S, 300 * S, BLK, (40, 40, 8), depth=6, rot=78)
-        ry = H + 400 - (H + 400 - 660 * S) * eoc((tl - .60) / .40)
+        extrude(fr, 'BILLION', 100, 330 * S + 160 * S * (1 - k), 180 * S, BLK, (40, 40, 8))
+        extrude(fr, 'TWENTY', 60, 185 * S, 260 * S, BLK, (40, 40, 8), depth=8, rot=78)
+        ry = H + 400 - (H + 400 - 360 * S) * eoc((tl - .60) / .35)
         vk = 1 - clamp((tl - .60) / .40)
         if vk > 0.25:
             for g_, al in ((.06, .3), (.12, .16)):
                 paste(fr, BAG, CX, ry + 900 * vk * g_, tw=470 * S, alpha=al)
-        paste(fr, BAG, CX, ry, tw=470 * S)
+        paste(fr, BAG, CX, ry, tw=(470 - 120 * eoc((tl - 1.35) / .2)) * S)
     elif tl < 1.90:
         fr.paste(Image.new('RGB', (W, H), WHITE_F), (0, 0)); glow(fr, 36); edge_vig(fr)
         sk = eoc((tl - 1.35) / .25)
-        paste(fr, STOOL, CX, 1000 * S + (1 - sk) * 80 * S, tw=390 * S, alpha=sk)
+        extrude(fr, 'TWENTY', 60, 288 * S, 166 * S, BLK, (40, 40, 8), depth=8, rot=78)
+        soft_shadow(fr, CX, 1115 * S + (1 - sk) * 400 * S, 250 * S, 30 * S, 90 * sk)
+        paste(fr, STOOL, CX, 1030 * S + (1 - sk) * 400 * S, tw=450 * S, alpha=sk)
         b = 1 + .09 * math.sin((tl - 1.55) * 16) * math.exp(-(tl - 1.55) * 6) if tl > 1.55 else 1
-        by = 700 * S + (760 - 700) * S * eoc((tl - 1.35) / .2)
-        paste(fr, BAG, CX, by, tw=470 * S * b)
+        by = 360 * S + 400 * S * eoc((tl - 1.35) / .25) + 60 * S * (1 - eoc((tl - 1.55) / .18))
+        paste(fr, BAG, CX, by, tw=350 * S * b)
         pk = clamp((tl - 1.60) / .3)
         if pk > 0:
-            paste(fr, SMKL, 95 * S, 520 * S, tw=SMKL.width * S * .95, alpha=pk)
-            paste(fr, SMKR, 625 * S, 560 * S, tw=SMKR.width * S * .95, alpha=pk)
+            paste(fr, SMKL, 108 * S, 410 * S, tw=216 * S, alpha=pk)
+            paste(fr, SMKR, 634 * S, 512 * S, tw=216 * S, alpha=pk)
     elif tl < 3.00:
         fr.paste(Image.new('RGB', (W, H), WHITE_F), (0, 0)); glow(fr, 32); edge_vig(fr)
-        paste(fr, STOOL, CX, 1000 * S, tw=390 * S)
+        extrude(fr, 'TWENTY', 60, 288 * S, 166 * S, BLK, (40, 40, 8), depth=8, rot=78)
+        soft_shadow(fr, CX, 1115 * S, 250 * S, 30 * S, 90)
+        paste(fr, STOOL, CX, 1030 * S, tw=450 * S)
         b = 1 + .04 * math.sin((tl - 1.55) * 16) * math.exp(-(tl - 1.55) * 6)
-        paste(fr, BAG, CX, 760 * S, tw=470 * S * b)
-        paste(fr, SMKL, 95 * S, 520 * S, tw=SMKL.width * S * .95)
-        paste(fr, SMKR, 625 * S, 560 * S, tw=SMKR.width * S * .95)
+        paste(fr, BAG, CX, 860 * S, tw=350 * S * b)
+        paste(fr, SMKL, 108 * S, 410 * S, tw=216 * S)
+        paste(fr, SMKR, 634 * S, 512 * S, tw=216 * S)
         desat(fr, clamp((tl - 1.90) / .25))
         if tl > 2.05:
-            paste(fr, text_im('HE', anton(90), REDT + (255,)), 262 * S, 300 * S, alpha=clamp((tl - 2.05) / .1))
+            paste(fr, text_im('HE', anton(75), REDT + (255,)), 158 * S, 295 * S, alpha=clamp((tl - 2.05) / .1))
         if tl > 2.20:
             fk = clamp((tl - 2.20) / .25)
-            paste(fr, text_im('SAID', anton(90), lerp(PINK, REDT, fk) + (255,)), 400 * S, 300 * S, alpha=clamp((tl - 2.20) / .1))
+            paste(fr, text_im('SAID', anton(75), lerp(PINK, REDT, fk) + (255,)), 245 * S, 295 * S, alpha=clamp((tl - 2.20) / .1))
         if tl > 2.45:
             fk = clamp((tl - 2.45) / .3)
-            paste(fr, text_im('NO', anton(170), lerp(PINK, REDT, fk) + (255,)), CX, 450 * S, scale=1.2 - .2 * eob(fk))
+            paste(fr, text_im('NO', anton(160), lerp(PINK, REDT, fk) + (255,)), 209 * S, 410 * S, scale=1.2 - .2 * eob(fk))
     elif tl < 3.25:
         chevron(fr, TEAL_B, TEAL_C, TEAL_S, tl)
     else:
@@ -214,14 +239,12 @@ def scene(fr, tl):
                 for g_, al in ((.06, .3), (.12, .16)):
                     paste(fr, CASH, cxp + 240 * g_, cyp, tw=360 * S, rot=-24 + 16 * ck, alpha=al * pf)
             paste(fr, CASH, cxp, cyp, tw=360 * S, rot=-24 + 16 * ck, alpha=pf)
-            wireframe(fr, cxp, cyp, 200 * S, 90 * S, seed=7, al=pf)
         hk = eoc((tl2 - .15) / .35)
         if tl2 > .15 and pf > 0:
             paste(fr, GLOVE, -260 + (145 * S + 260) * hk, 770 * S, tw=340 * S, alpha=pf)
         if tl2 > .35 and pf > 0:
             lk = eob((tl2 - .35) / .3)
             paste(fr, LOGO, 164 * S, 636 * S + 6 * math.sin(tl * 1.6), tw=158 * S * (.5 + .5 * lk), rot=-6 + 6 * lk, alpha=pf)
-            if lk >= 1: wireframe(fr, 164 * S, 636 * S, 110 * S, 80 * S, seed=11, al=pf)
         if tl2 > 1.50:
             n = int((tl2 - 1.40) / .15) + 1
             txt = '2008'
@@ -241,11 +264,13 @@ def scene(fr, tl):
             push = 1 + .05 * eoi((tl2 - 3.55) / 8.1)
         if tl2 > 4.25:
             pk2 = eob((tl2 - 4.25) / .3)
-            paste(fr, PLATE, CX, 911 * S, tw=390 * S * (.5 + .5 * pk2), rot=-5 + 5 * eoc((tl2 - 4.25) / .3), alpha=clamp((tl2 - 4.25) / .1))
+            paste(fr, PLATE, CX, 461 * S, tw=390 * S * (.5 + .5 * pk2), rot=-5 + 5 * eoc((tl2 - 4.25) / .3), alpha=clamp((tl2 - 4.25) / .1))
         if tl2 > 5.75:
             gk = clamp((tl2 - 5.75) / .4)
             desat(fr, .80 * gk, dark=1 - .30 * gk)
-            eyeglow(fr, CX, 610 * S, 90 * S, gk)
+            desat_hue(fr, .85 * gk, 20, 75)
+            eyeglow(fr, CX, 352 * S, 150 * S, gk)
+            eyeglow(fr, CX, 352 * S, 90 * S, gk * .7)
     return push
 
 def render_frame(fno):
