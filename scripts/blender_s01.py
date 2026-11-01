@@ -24,7 +24,7 @@ def lin(c255):
 INK = lin((16, 16, 18)); BONE = lin((244, 241, 234)); RED = lin((255, 85, 96))
 LIME = lin((130, 195, 10)); WHITE = lin((236, 236, 234)); GREY = lin((206, 206, 204))
 FLASH = lin((185, 10, 8)); MAROON = lin((78, 20, 28)); GOLD = lin((212, 175, 55))
-WOOD = lin((150, 115, 80)); WOODD = lin((105, 78, 55)); ROSE = lin((240, 170, 170))
+WOOD = lin((150, 115, 80)); WOODD = lin((105, 78, 55)); ROSE = lin((196, 72, 84))
 DRED = lin((92, 8, 10))
 
 sc = bpy.context.scene
@@ -316,8 +316,8 @@ x, z = px(352, 286); he.location = (x, 0, z)
 kf(he, 62, scale=(0.2, 0.2, 0.2)); kf(he, 69, scale=(1, 1, 1))
 vis(he, 62, 89); ease(he)
 no = text_obj('no', 'NO', 228, ROSE, 0.05)
-x, z = px(360, 740); no.location = (x, 0, z)
-kf(no, 74, scale=(0.2, 0.2, 0.2)); kf(no, 82, scale=(1, 1, 1))
+x, z = px(360, 460); no.location = (x, -0.6, z)
+kf(no, 74, scale=(0.38, 0.2, 0.2)); kf(no, 82, scale=(1.9, 1, 1))
 vis(no, 74, 89); ease(no)
 
 # ---------- cash stack ----------
