@@ -59,7 +59,7 @@ jobs:
           python3 -m pip install --user -q yt-dlp || python3 -m pip install -q yt-dlp || true
           python3 -m yt_dlp --version || true
           mkdir -p "out/${{ steps.q.outputs.folder }}"
-          nl -ba -nr '%02d' -i 1 /tmp/urls.txt | sed '/^[[:space:]]*[0-9]*[[:space:]]*$/d' | while read -r n url; do
+          awk 'NF{n++; printf "%02d %s\n", n, $0}' /tmp/urls.txt | while read -r n url; do
             echo "::group::[$n] $url"
             python3 -m yt_dlp --no-warnings --restrict-filenames --max-filesize 95M \
               -f "bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4]/bv*[height<=720]+ba/b[height<=720]/b" \
@@ -74,7 +74,7 @@ jobs:
         env:
           FOLDER: ${{ steps.q.outputs.folder }}
         run: |
-          exec > >(tee /tmp/push.log) 2>&1
+          exec > >(tee -a /tmp/push.log) 2>&1
           set -x
           report() {
             RC=$?
