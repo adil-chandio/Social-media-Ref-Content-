@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 FF = open('/tmp/ffpath').read().strip()
 REF = 'refs/ref-reels-tutorial.mp4'
-A = '/tmp/v11'
+A = '/tmp/v11b'
 W, H = 720, 1280
 FPS = 60
 PASS = 11.675
@@ -39,14 +39,83 @@ def seg(t, t0, d, fn=eoC):
 SPR = {}
 def spr(name):
     if name not in SPR:
-        im = cv2.imread(f'{A}/{name}.png', cv2.IMREAD_UNCHANGED)
-        SPR[name] = im
+        if name == 'bagv':
+            SPR[name] = _vec_bag()
+        elif name == 'stoolv':
+            SPR[name] = _vec_stool()
+        elif name == 'bagvg':
+            SPR[name] = _grey(_vec_bag())
+        elif name == 'stoolvg':
+            SPR[name] = _grey(_vec_stool())
+        else:
+            SPR[name] = cv2.imread(f'{A}/{name}.png', cv2.IMREAD_UNCHANGED)
     return SPR[name]
 SMOKE = {}
 def smoke(n):
     if n not in SMOKE:
         SMOKE[n] = cv2.imread(f'{A}/smoke/{n:04d}.png', 0)
     return SMOKE[n]
+
+def _vec_bag():
+    S = 2
+    W2, H2 = 476 * S, 470 * S
+    cvx = np.zeros((H2, W2, 3), np.uint8)
+    # bill fan
+    for i, ang in enumerate((-30, -18, -6, 6, 18, 30)):
+        bw, bh = 240 * S, 92 * S
+        bill = np.full((bh, bw, 3), (234, 241, 244), np.uint8)
+        cv2.rectangle(bill, (4 * S, 4 * S), (bw - 4 * S, bh - 4 * S), (30, 30, 32), 3 * S)
+        cv2.ellipse(bill, (bw // 2, bh // 2), (17 * S, 24 * S), 0, 0, 360, (168, 166, 160), -1)
+        cv2.ellipse(bill, (bw // 2, bh // 2), (17 * S, 24 * S), 0, 0, 360, (120, 118, 112), 2 * S)
+        M = cv2.getRotationMatrix2D((bw / 2, bh / 2), ang, 1.0)
+        rot = cv2.warpAffine(bill, M, (bw, bh), borderMode=cv2.BORDER_TRANSPARENT,
+                             flags=cv2.INTER_LINEAR, borderValue=(0, 0, 0))
+        msk = (rot.sum(2) > 0).astype(np.float32)
+        x0 = int(238 * S - bw / 2 + ang * 3.0 * S); y0 = int((150 - 48 + abs(i - 2.5) * 14) * S - bh * 0.55)
+        M2 = cv2.getRotationMatrix2D((bw / 2, bh / 2), ang, 1.0)
+        canvas = np.zeros((H2, W2), np.float32)
+        tmp = np.zeros((H2, W2, 3), np.uint8)
+        ys, ye = max(y0, 0), min(y0 + bh, H2); xs, xe = max(x0, 0), min(x0 + bw, W2)
+        tmp[ys:ye, xs:xe] = rot[ys - y0:ye - y0, xs - x0:xe - x0]
+        canvas[ys:ye, xs:xe] = msk[ys - y0:ye - y0, xs - x0:xe - x0]
+        cvx = (cvx.astype(np.float32) * (1 - canvas[..., None]) + tmp.astype(np.float32) * canvas[..., None]).astype(np.uint8)
+    # envelope body with vertical gradient
+    env = np.zeros((H2, W2, 3), np.float32)
+    y0, y1 = int(150 * S), int(440 * S)
+    grad = np.linspace(1.0, 0.80, y1 - y0)[:, None]
+    col = np.array((48, 140, 84), np.float32)
+    env[y0:y1, 28 * S:448 * S] = col * grad[..., None]
+    msk = np.zeros((H2, W2), np.float32); msk[y0:y1, 28 * S:448 * S] = 1
+    cvx = (cvx.astype(np.float32) * (1 - msk[..., None]) + env * msk[..., None]).astype(np.uint8)
+    # flap
+    tri = np.array([[28 * S, y0], [238 * S, int(300 * S)], [448 * S, y0]], np.int32)
+    cv2.fillPoly(cvx, [tri], (36, 110, 62))
+    cv2.polylines(cvx, [tri], True, (150, 200, 150), 2 * S)
+    a = (cvx.sum(2) > 0).astype(np.uint8) * 255
+    out = np.dstack([cv2.resize(cvx, (476, 470), interpolation=cv2.INTER_AREA),
+                     cv2.resize(a, (476, 470), interpolation=cv2.INTER_AREA)[..., None]])
+    return out
+
+def _vec_stool():
+    S = 2
+    W2, H2 = 300 * S, 260 * S
+    cvx = np.zeros((H2, W2, 3), np.uint8)
+    cv2.fillPoly(cvx, [np.array([[130*S,68*S],[145*S,68*S],[120*S,215*S],[108*S,215*S]])], (48, 62, 80))
+    cv2.fillPoly(cvx, [np.array([[155*S,68*S],[170*S,68*S],[192*S,215*S],[180*S,215*S]])], (48, 62, 80))
+    cv2.fillPoly(cvx, [np.array([[95*S,70*S],[115*S,70*S],[75*S,255*S],[58*S,255*S]])], (66, 88, 110))
+    cv2.fillPoly(cvx, [np.array([[185*S,70*S],[205*S,70*S],[242*S,255*S],[225*S,255*S]])], (66, 88, 110))
+    for fx, fy in ((66, 255), (234, 255)):
+        cv2.ellipse(cvx, (fx * S, fy * S), (12 * S, 5 * S), 0, 0, 360, (24, 30, 40), -1)
+    cv2.ellipse(cvx, (150 * S, 55 * S), (140 * S, 30 * S), 0, 0, 360, (80, 100, 120), -1)
+    cv2.ellipse(cvx, (150 * S, 45 * S), (140 * S, 30 * S), 0, 0, 360, (95, 120, 140), -1)
+    cv2.ellipse(cvx, (150 * S, 45 * S), (116 * S, 23 * S), 0, 0, 360, (110, 138, 158), -1)
+    a = (cvx.sum(2) > 0).astype(np.uint8) * 255
+    return np.dstack([cv2.resize(cvx, (300, 260), interpolation=cv2.INTER_AREA),
+                      cv2.resize(a, (300, 260), interpolation=cv2.INTER_AREA)[..., None]])
+
+def _grey(im):
+    g = cv2.cvtColor(im[..., :3], cv2.COLOR_BGR2GRAY)[..., None].repeat(3, 2)
+    return np.dstack([g, im[..., 3:4]])
 
 FA = 'assets/fonts/Anton-Regular.ttf'
 FM = 'assets/fonts/Manrope-800.ttf'
@@ -85,7 +154,7 @@ def radial(c0, c1, p=1.6):
     return (a * (1 - t) + b * t).clip(0, 255).astype(np.uint8)
 
 def bg_bars():
-    base = radial((178, 22, 40), (96, 8, 20))
+    base = radial((150, 20, 35), (96, 10, 22))
     ov = Image.fromarray(np.zeros((H, W, 4), np.uint8))
     d = ImageDraw.Draw(ov)
     step, th, tilt, hw = 180, 95, 76, 200
@@ -110,13 +179,13 @@ def bg(name):
     elif name == 'black':
         v = radial((24, 24, 27), INK)
     elif name == 'green':
-        v = radial((40, 70, 34), (12, 24, 10))
+        v = radial((130, 195, 10), (60, 95, 0))
     elif name == 'white':
-        v = radial((250, 247, 240), (206, 200, 188))
+        v = radial((236, 236, 234), (196, 196, 194))
     elif name == 'desat':
-        v = radial((228, 224, 214), (176, 170, 158))
+        v = radial((206, 206, 204), (166, 166, 164))
     elif name == 'teal':
-        v = radial((210, 40, 56), (120, 10, 26))
+        v = radial((185, 10, 8), (140, 6, 4))
     elif name == 'red':
         v = bg_bars()
     elif name == 'jen':
@@ -231,43 +300,42 @@ def render_frame(n):
         fr = (bg('green').astype(np.float32) * kk).clip(0, 255).astype(np.uint8) if False else bg('green').copy()
         bk = eoC(seg(tl, .75, .25))
         ry = 1680 - (1680 - 360) * eoQ(seg(tl, .85, .45))
-        place(fr, spr('bag'), 360, ry, 1.0, 0, 1, 'bag', shadow=(0.5, 0.5))
+        place(fr, spr('bagv'), 260, 1500 - 900 * eoC(seg(tl, .60, .55)), 1.0, 0, 1, 'bag')
         pil = Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))
-        place_pil(pil, text_img('BILLION', 103, BONE, INK, 7), 400, 490 - 160 * bk, -6, bk)
-        place_pil(pil, text_img('TWENTY', 62, RED, INK, 5), 185, 260, -78, seg(tl, .90, .15, lin))
+        place_pil(pil, text_img('BILLION', 62, INK, (120, 118, 112), 6), 250, 120, -8, bk)
+        place_pil(pil, text_img('TWENTY', 36, RED, INK, 3), 150, 110, -78, seg(tl, .90, .15, lin))
         fr = cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
     elif sc == 'white':
         fr = bg('white').copy()
         sk = eoC(seg(tl, 1.35, .20))
         sx = 760 - 400 * sk
         by = 360 + 400 * eoC(seg(tl, 1.35, .20)) - 25 * math.sin(clamp01((tl - 1.55) / .18) * math.pi)
-        place(fr, spr('stool'), sx, 1060, 1.0, 0, 1, 'stool', shadow=(0.55, 0.4))
-        place(fr, spr('bag'), 360, by, 1.0, 0, 1, 'bagw', shadow=(0.5, 0.45))
+        place(fr, spr('bagv'), 352, 749 - 25 * math.sin(clamp01((tl - 1.55) / .18) * math.pi), 0.72, 0, 1, 'bagw')
+        place(fr, spr('stoolv'), sx, 877, 0.94, 0, 1, 'stool', shadow=(0.45, 0.3))
         sn = int(47 + (tl - 1.35) / .55 * 25)
         sm = smoke(min(72, max(47, sn)))
         if sm is not None and tl > 1.58:
             sa = min(1, (tl - 1.58) / .12) * 0.85
             scl = 0.85 + 0.3 * seg(tl, 1.6, .3, lin)
             smi = cv2.resize(sm, (int(sm.shape[1] * scl), int(sm.shape[0] * scl)))
-            rgba = np.dstack([np.full((smi.shape[0], smi.shape[1], 3), 235, np.uint8), smi])
+            rgba = np.dstack([np.full((smi.shape[0], smi.shape[1], 3), 150, np.uint8), np.clip(smi.astype(np.float32) * 3.0, 0, 255).astype(np.uint8)])
             place(fr, rgba, 108, 410, 0, 0, sa, key=None, blur=False)
             place(fr, rgba, 634, 512, 0, 0, sa * .9, key=None, blur=False)
         pil = Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))
-        tx = 185 + 103 * eoC(seg(tl, 1.35, .2))
-        ty = 260 - 94 * eoC(seg(tl, 1.35, .2))
-        place_pil(pil, text_img('TWENTY', 62, RED, INK, 5), tx, ty, -78, 1)
-        place_pil(pil, text_img('BILLION', 103, INK, (200, 196, 186), 7), 400, 330, -6, 1)
+        tx = 150 + 60 * eoC(seg(tl, 1.35, .2))
+        ty = 150 - 60 * eoC(seg(tl, 1.35, .2))
+        place_pil(pil, text_img('TWENTY', 36, RED, INK, 3), tx, ty, -78, 1)
+        place_pil(pil, text_img('BILLION', 62, INK, (120, 118, 112), 6), 300, 120, -8, 1)
         fr = cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
     elif sc == 'desat':
         fr = bg('desat').copy()
-        bag = spr('bag').copy(); bag[..., :3] = cv2.cvtColor(bag[..., :3], cv2.COLOR_BGR2GRAY)[..., None].repeat(3, 2)
-        stl = spr('stool').copy(); stl[..., :3] = cv2.cvtColor(stl[..., :3], cv2.COLOR_BGR2GRAY)[..., None].repeat(3, 2)
-        place(fr, stl, 360, 1060, 1, 0, 1, shadow=(0.55, 0.4))
-        place(fr, bag, 360, 760, 1, 0, 1, shadow=(0.5, 0.4))
         pil = Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))
-        place_pil(pil, text_img('HE', 80, GOLD, INK, 5), 150, 295, 0, back(seg(tl, 2.05, .22)))
-        place_pil(pil, text_img('SAID', 64, GOLD, INK, 5), 250, 295, 0, back(seg(tl, 2.20, .22)))
-        place_pil(pil, text_img('NO', 170, RED, INK, 9), 209, 410, 0, back(seg(tl, 2.45, .25)))
+        place_pil(pil, text_img('NO', 150, (240, 170, 170), (200, 130, 130), 8), 360, 700, 0, back(seg(tl, 2.45, .25)), min(1, seg(tl, 2.45, .18, lin) * 1.2) * 0.75)
+        fr = cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
+        place(fr, spr('bagvg'), 352, 749, 0.72, 0, 1)
+        place(fr, spr('stoolvg'), 360, 877, 0.94, 0, 1, shadow=(0.45, 0.3))
+        pil = Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))
+        place_pil(pil, text_img('HE SAID', 60, (200, 30, 40), INK, 5), 360, 420, 0, back(seg(tl, 2.05, .22)))
         fr = cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
     elif sc == 'teal':
         fr = bg('teal').copy()
@@ -277,38 +345,45 @@ def render_frame(n):
         cx = 1080 - 648 * ck
         cy = 333 + 170 * ck
         rot = -35 + 27 * ck
-        place(fr, spr('glove'), -140 + 285 * eoC(seg(tl, 3.40, .35)), 770, 1, 0, 1, 'glove')
-        place(fr, spr('hand2'), cx + 150, cy + 40, 1, rot, min(1, seg(tl, 3.55, .15, lin)), 'hand2')
-        place(fr, spr('cash'), cx, cy, 1, rot, 1, 'cash', shadow=(0.4, 0.3))
+        place(fr, spr('glove'), -160 + 310 * eoC(seg(tl, 3.40, .35)), 740, 1.0, 0, 1, 'glove')
+        place(fr, spr('hand2'), 1080 - 560 * ck + 70, 400 + 370 * ck + 25, 0.9, rot, min(1, seg(tl, 3.55, .15, lin)), 'hand2')
+        place(fr, spr('cash'), 1080 - 560 * ck, 400 + 370 * ck, 0.85, rot, 1, 'cash', shadow=(0.3, 0.22))
         lk = back(seg(tl, 3.55, .30))
-        place(fr, spr('logo'), 164, 636, 0.3 + 0.7 * lk, 0, min(1, lk * 1.5), 'logo')
+        place(fr, spr('logo'), 160, 640, 0.4 + 0.5 * lk, 0, min(1, lk * 1.5), 'logo')
+        gp = lk * (1 - lk) * 4
+        if gp > 0.03:
+            gg = np.zeros((H, W), np.float32)
+            cv2.circle(gg, (160, 640), 90, 1.0, -1)
+            gg = cv2.GaussianBlur(gg, (81, 81), 0) * gp * 0.5
+            fr = np.clip(fr.astype(np.float32) + gg[..., None] * np.array((60, 200, 80), np.float32), 0, 255).astype(np.uint8)
         # native wireframe
         wa = 0.75 * min(1, seg(tl, 3.5, .2, lin))
         if wa > 0:
             ov = np.zeros((H, W), np.float32)
-            cxy = (int(cx + 40), int(cy + 20))
-            rr = 150 + 12 * math.sin(tl * 6)
+            cxy = (1080 - 560 * ck + 40, 400 + 370 * ck + 20)
+            rr = 130 + 10 * math.sin(tl * 6)
+            ay, ax = tl * 0.0, 0.0
             pts = []
             for i in range(6):
                 an = tl * 0.9 + i * math.pi / 3
                 pts.append((cxy[0] + rr * math.cos(an), cxy[1] + rr * 0.8 * math.sin(an)))
             cv2.polylines(ov, [np.array(pts, np.int32)], True, 1.0, 2)
             ov = cv2.GaussianBlur(ov, (3, 3), 0) * wa
-            fr = np.clip(fr.astype(np.float32) + ov[..., None] * np.array(bgr(GOLD), np.float32) * 0.9, 0, 255).astype(np.uint8)
+            fr = np.clip(fr.astype(np.float32) + ov[..., None] * np.array((190, 180, 240), np.float32) * 0.8, 0, 255).astype(np.uint8)
         yk = seg(tl, 4.75, .85, lin)
         ndig = int(4 * yk + 0.999)
         if ndig > 0:
             pil = Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))
-            place_pil(pil, text_img('2008'[:ndig], 240, GOLD, INK, 6), 360 - (4 - ndig) * 60, 300, 0, 1)
+            place_pil(pil, text_img('2008'[:ndig], 95, BONE, (120, 118, 112), 5), 140 + ndig * 48, 80, 0, 1)
             fr = cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
     elif sc == 'jen':
         fr = bg('jen').copy()
         zk = 1.0 + 0.12 * eoC(seg(tl, 6.0, 1.5))
         fr = cv2.resize(fr, (int(W * zk), int(H * zk)))[int((zk - 1) * H * .45):int((zk - 1) * H * .45) + H, int((zk - 1) * W / 2):int((zk - 1) * W / 2) + W]
         pil = Image.fromarray(cv2.cvtColor(fr, cv2.COLOR_BGR2RGB))
-        place_pil(pil, text_img('2008', 240, GOLD, INK, 6), 360, 300, 0, 0.9)
+        place_pil(pil, text_img('2008', 100, (205, 202, 196), (120, 118, 112), 5), 400, 240, 0, 0.45)
         fr = cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
-        jy = 1500 - 670 * eoC(seg(tl, 6.0, .5))
+        jy = 1400 - 677 * eoC(seg(tl, 6.0, .5))
         js = spr('jen')
         js = js.copy()
         js[-30:, :, 3] = 255
@@ -316,7 +391,7 @@ def render_frame(n):
             pad = np.repeat(js[-1:, :, :], 320, 0)
             js = np.vstack([js, pad])
             SPR['jen'] = js
-        place(fr, js, 360, jy + 160, zk, 0, 1, 'jen')
+        place(fr, js, 360, jy, 0.95 * zk, 0, 1, 'jen')
         sk2 = back(seg(tl, 7.5, .28))
         if sk2 > 0:
             pw, ph = 420, 250
@@ -362,9 +437,9 @@ def render_frame(n):
             g = cv2.GaussianBlur(g, (21, 21), 0) * gk
             fr = np.clip(fr.astype(np.float32) + g[..., None] * np.array((30, 30, 255), np.float32) * 0.85, 0, 255).astype(np.uint8)
     # ---- grade: vignette + grain ----
-    vig = (1 - 0.22 * (_r ** 2.2))[..., None]
+    vig = (1 - 0.13 * (_r ** 2.2))[..., None]
     fr = (fr.astype(np.float32) * vig).clip(0, 255)
-    grain = np.random.default_rng(n).normal(0, 2.0, (H, W, 1))
+    grain = np.random.default_rng(n).normal(0, 1.1, (H, W, 1))
     fr = np.clip(fr + grain, 0, 255).astype(np.uint8)
     return fr
 
