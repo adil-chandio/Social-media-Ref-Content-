@@ -1,17 +1,74 @@
++ '[' push = push ']'
+++ head -n 1 ingest/queue.txt
++ FOLDER=test
+++ tail -n +2 ingest/queue.txt
++ URLS='https://www.youtube.com/watch?v=Y-1FLdv_aD8'
++ echo folder=test
++ printf '%s\n' 'https://www.youtube.com/watch?v=Y-1FLdv_aD8'
++ grep -c . /tmp/urls.txt
+1
++ '[' -s /tmp/urls.txt ']'
++ echo '--- urls.txt:'
+--- urls.txt:
++ cat -A /tmp/urls.txt
++ head -40
+https://www.youtube.com/watch?v=Y-1FLdv_aD8$
++ wc -l /tmp/urls.txt
+1 /tmp/urls.txt
++ python3 -m pip install --user -q yt-dlp
++ python3 -m yt_dlp --version
+2026.10.26
++ mkdir -p out/test
++ awk 'NF{n++; printf "%02d %s\n", n, $0}' /tmp/urls.txt
++ read -r n url
++ echo '::group::[01] https://www.youtube.com/watch?v=Y-1FLdv_aD8'
+::group::[01] https://www.youtube.com/watch?v=Y-1FLdv_aD8
++ OUT='out/test/01_%(title).50s_[%(id)s].mp4'
++ python3 -m yt_dlp --no-warnings --restrict-filenames --max-filesize 95M -f 'bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4]/bv*[height<=720]+ba/b[height<=720]/b' --merge-output-format mp4 -o 'out/test/01_%(title).50s_[%(id)s].mp4' 'https://www.youtube.com/watch?v=Y-1FLdv_aD8'
+[youtube] Extracting URL: https://www.youtube.com/watch?v=Y-1FLdv_aD8
+[youtube] Y-1FLdv_aD8: Downloading webpage
+[youtube] Y-1FLdv_aD8: Downloading visionos player API JSON
+ERROR: [youtube] Y-1FLdv_aD8: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
++ python3 -m yt_dlp --no-warnings --restrict-filenames --max-filesize 95M --extractor-args youtube:player_client=android,vr,tv -f 'bv*[height<=720]+ba/b[height<=720]/b' --merge-output-format mp4 -o 'out/test/01_%(title).50s_[%(id)s].mp4' 'https://www.youtube.com/watch?v=Y-1FLdv_aD8'
+[youtube] Extracting URL: https://www.youtube.com/watch?v=Y-1FLdv_aD8
+[youtube] Y-1FLdv_aD8: Downloading webpage
+[youtube] Y-1FLdv_aD8: Downloading android player API JSON
+[youtube] Y-1FLdv_aD8: Downloading tv client config
+[youtube] Y-1FLdv_aD8: Downloading player 11a45ffb-main
+[youtube] Y-1FLdv_aD8: Downloading tv player API JSON
+ERROR: [youtube] Y-1FLdv_aD8: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
++ python3 -m yt_dlp --no-warnings --restrict-filenames --max-filesize 95M --extractor-args youtube:player_client=web_embedded,ios -f 'bv*[height<=720]+ba/b[height<=720]/b' --merge-output-format mp4 -o 'out/test/01_%(title).50s_[%(id)s].mp4' 'https://www.youtube.com/watch?v=Y-1FLdv_aD8'
+[youtube] Extracting URL: https://www.youtube.com/watch?v=Y-1FLdv_aD8
+[youtube] Y-1FLdv_aD8: Downloading webpage
+[youtube] Y-1FLdv_aD8: Downloading web embedded client config
+[youtube] Y-1FLdv_aD8: Downloading player 11a45ffb-main
+[youtube] Y-1FLdv_aD8: Downloading web embedded player API JSON
+[youtube] Y-1FLdv_aD8: Downloading ios player API JSON
+ERROR: [youtube] Y-1FLdv_aD8: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
++ echo 'FAILED [01] https://www.youtube.com/watch?v=Y-1FLdv_aD8'
++ echo ::endgroup::
+::endgroup::
++ read -r n url
++ ls -la out/test
+total 12
+drwxr-xr-x 2 runner runner 4096 Nov  1 00:35 .
+drwxr-xr-x 3 runner runner 4096 Nov  1 00:35 ..
+-rw-r--r-- 1 runner runner   56 Nov  1 00:35 _failures.txt
 + trap report EXIT
 + echo 'FOLDER=[test]'
 FOLDER=[test]
 + ls -la out/ out/test
 out/:
 total 12
-drwxr-xr-x  3 runner runner 4096 Nov  1 00:31 .
-drwxr-xr-x 14 runner runner 4096 Nov  1 00:31 ..
-drwxr-xr-x  2 runner runner 4096 Nov  1 00:31 test
+drwxr-xr-x  3 runner runner 4096 Nov  1 00:35 .
+drwxr-xr-x 14 runner runner 4096 Nov  1 00:35 ..
+drwxr-xr-x  2 runner runner 4096 Nov  1 00:35 test
 
 out/test:
-total 8
-drwxr-xr-x 2 runner runner 4096 Nov  1 00:31 .
-drwxr-xr-x 3 runner runner 4096 Nov  1 00:31 ..
+total 12
+drwxr-xr-x 2 runner runner 4096 Nov  1 00:35 .
+drwxr-xr-x 3 runner runner 4096 Nov  1 00:35 ..
+-rw-r--r-- 1 runner runner   56 Nov  1 00:35 _failures.txt
 + git init pushdir
 hint: Using 'master' as the name for the initial branch. This default branch name
 hint: will change to "main" in Git 3.0. To configure the initial branch name
@@ -28,26 +85,36 @@ hint:
 hint: Disable this message with "git config set advice.defaultBranchName false"
 Initialized empty Git repository in /home/runner/work/Social-media-Ref-Content-/Social-media-Ref-Content-/pushdir/.git/
 + cd pushdir
-+ git remote add origin https://x-access-token:ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJGUmZoVC1oRHBsVXV0ZHpLVEVSc1Jzd0VnNzdodUtyaDkxZWxMNFRsaVFmcG42U0J3MnVGdFdzIiwiZXhwIjoxNzkzNDk2Njg0LCJpYXQiOjE3OTM0OTMwODQsImlzcyI6ImdpdGh1YiIsImp0aSI6IjY3ODFkOTc5LTc5MTMtNGE3YS04NjI2LTU1NTY1ZTg0NGUyNCIsInZlciI6M30.z4lYiTTtaxoMkHRGY2s0Rq2YSxEfMILFzH3Xfhbml8D24zyXLV0sbHgT0pwOnn-xFCvwHReqVplsl3fjlKcTbQ@github.com/adil-chandio/Social-media-Ref-Content-.git
++ git remote add origin https://x-access-token:ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJicDFxNHVMX0lSS24tLWxKTU04aG5JSkV5eHJBdlY3QzZIbWdZb0ZKdWhlbERtRjVVQjRiS2dJIiwiZXhwIjoxNzkzNDk2OTE4LCJpYXQiOjE3OTM0OTMzMTgsImlzcyI6ImdpdGh1YiIsImp0aSI6IjI0YTA2MWJiLTcwZWYtNGVlYi05NGJlLTI3NWY2YTEyMTM1OSIsInZlciI6M30.JYoZbdj37jeDtAy8tDV_Gelyy4VGU70vhqLLDCNlhAU_cX7QCvf4mhKFqmCNevWwJeSLciW33bjNa39n51oeew@github.com/adil-chandio/Social-media-Ref-Content-.git
 + git config user.name arena-ingest
 + git config user.email arena-ingest@users.noreply.github.com
 + git fetch --depth=1 origin ingest/media
-fatal: couldn't find remote ref ingest/media
-+ git checkout --orphan ingest/media
+From https://github.com/adil-chandio/Social-media-Ref-Content-
+ * branch            ingest/media -> FETCH_HEAD
+ * [new branch]      ingest/media -> origin/ingest/media
++ git checkout -B ingest/media origin/ingest/media
 Switched to a new branch 'ingest/media'
+branch 'ingest/media' set up to track 'origin/ingest/media'.
 + mkdir -p ingest
 + cp -r ../out/test ingest/test
 + git add -A ingest
 + git status --porcelain
 + head -20
-+ git commit -m 'ingest: test (run 41257112480)'
-On branch ingest/media
-
-Initial commit
-
-nothing to commit (create/copy files and use "git add" to track)
+A  ingest/test/test/_failures.txt
++ git commit -m 'ingest: test (run 41257392788)'
+[ingest/media 7a99111] ingest: test (run 41257392788)
+ 1 file changed, 1 insertion(+)
+ create mode 100644 ingest/test/test/_failures.txt
++ git rev-parse HEAD
+7a99111e46d5746640bf1f369ee30e8516b95e92
++ git push -v origin HEAD:refs/heads/ingest/media
+Pushing to https://github.com/adil-chandio/Social-media-Ref-Content-.git
+POST git-receive-pack (618 bytes)
+To https://github.com/adil-chandio/Social-media-Ref-Content-.git
+   d2b666c..7a99111  HEAD -> ingest/media
+updating local tracking ref 'refs/remotes/origin/ingest/media'
 + report
-+ RC=1
++ RC=0
 + cd /home/runner/work/Social-media-Ref-Content-/Social-media-Ref-Content-
 + git config user.name arena-ingest
 + git config user.email arena-ingest@users.noreply.github.com
