@@ -278,11 +278,9 @@ kf(bagroot, 46, loc=(x, 0, z))
 kf(bagroot, 49, loc=(x, 0, z - 0.10))
 kf(bagroot, 53, loc=(x, 0, z))
 visgroup(bagroot, 27, 89); ease(bagroot)
-vis(bag, 0, 0)
-for fl in flaps:
-    vis(fl, 0, 0)
-for b in bills:
-    vis(b, 0, 0)
+for ob in [bag] + flaps + bills:
+    ob.animation_data_clear()
+    ob.hide_render = True
 bb = plate('bagbills', 'assets/sprites/bagbills.png', 411, 333, 0, 0)
 bb.parent = bagroot; bb.location = (0, 0, 0)
 vis(bb, 27, 89)
@@ -307,9 +305,9 @@ for ob in [seat, rim] + legs:
 x, z = px(360, 800)
 kf(stroot, 41, loc=(2.4, 0, z)); kf(stroot, 45, loc=(x, 0, z))
 visgroup(stroot, 41, 89); ease(stroot)
-vis(seat, 0, 0); vis(rim, 0, 0)
-for L in legs:
-    vis(L, 0, 0)
+for ob in [seat, rim] + legs:
+    ob.animation_data_clear()
+    ob.hide_render = True
 xs2, zs2 = px(360, 880)
 stp = plate('stoolp', 'assets/sprites/stool.png', 280, 280, xs2, zs2)
 kf(stp, 41, loc=(2.4, 0, zs2)); kf(stp, 45, loc=(xs2, 0, zs2))
