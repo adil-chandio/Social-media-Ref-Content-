@@ -8,6 +8,22 @@ UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Ge
 size() { stat -c%s "$1" 2>/dev/null || echo 0; }
 good() { [ "$(size "$1")" -gt 200000 ]; }
 
+echo "::strategy cobalt for $ID"
+for api in cobalt-api.kwii.me cobalt.api.time.wtf capi.oak.li cobalt-backend.canine.tools co.euss.hu cobalt-api.ducks.party; do
+  r=$(curl -s -m 15 -X POST "https://$api/" -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"url\":\"$url\",\"videoQuality\":\"720\",\"downloadMode\":\"auto\"}" 2>/dev/null)
+  u=$(echo "$r" | jq -r '.url // empty' 2>/dev/null)
+  if [ -n "$u" ]; then
+    curl -s -L -m 300 -A "$UA" -o "$out" "$u" && good "$out" && { echo "OK cobalt $api"; exit 0; }
+  fi
+done
+
+echo "::strategy lemnoslife for $ID"
+j=$(curl -s -m 15 "https://yt.lemnoslife.com/videos?part=id,streamingData&id=$ID" 2>/dev/null)
+u=$(echo "$j" | jq -r '[.items[0].streamingData.formats[]? | select(.height<=720)][0].url // empty' 2>/dev/null)
+if [ -n "$u" ]; then
+  curl -s -L -m 300 -A "$UA" -o "$out" "$u" && good "$out" && { echo "OK lemnoslife"; exit 0; }
+fi
+
 echo "::strategy invidious for $ID"
 echo "ID=$ID"
 for api in yewtu.be invidious.nerdvpn.de inv.nadeko.net invidious.f5.si iv.melmac.space invidious.privacyredirect.com yt.artemislena.eu invidious.dhusch.com; do
