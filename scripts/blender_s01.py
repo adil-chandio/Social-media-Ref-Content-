@@ -107,7 +107,7 @@ def emis(name, col, str_=3.0):
 def text_obj(name, body, sz_px, col, extr=0.05, font=F, align='CENTER'):
     cu = bpy.data.curves.new(name, 'FONT')
     cu.body = body
-    cu.size = sz_px / 360.0
+    cu.size = sz_px / (0.52 * 360.0)
     cu.extrude = extr
     cu.bevel_depth = extr * 0.12
     cu.align_x = align; cu.align_y = 'CENTER'
@@ -147,6 +147,14 @@ def vis(ob, f0, f1):
         if 'hide' in fc.data_path:
             for kp in fc.keyframe_points:
                 kp.interpolation = 'CONSTANT'
+
+def visgroup(root, f0, f1):
+    vis(root, f0, f1)
+    for c in root.children:
+        has = c.animation_data and c.animation_data.action and any(
+            fc.data_path == 'hide_render' for fc in c.animation_data.action.fcurves)
+        if not has:
+            vis(c, f0, f1)
 
 def ease(ob, ease_type='BEZIER'):
     if ob.animation_data and ob.animation_data.action:
@@ -206,21 +214,24 @@ em2 = nt.nodes.new('ShaderNodeEmission'); em2.inputs[1].default_value = 1.0
 nt.links.new(ramp.outputs['Color'], em2.inputs[0])
 ou2 = nt.nodes.new('ShaderNodeOutputMaterial')
 nt.links.new(em2.outputs[0], ou2.inputs[0])
+for n in list(nt.nodes):
+    if n.type == 'OUTPUT_MATERIAL' and n != ou2:
+        nt.nodes.remove(n)
 bars.data.materials.append(mb)
 vis(bars, 98, 176)
 
 # ---------- stamp / black extrude type (lime, one line) ----------
 LIME_TX = lin((140, 220, 20))
-tw = text_obj('tw', 'TWENTY', 125, LIME_TX, 0.045, align='RIGHT')
-x, z = px(356, 560)
-kf(tw, 1, loc=px(-400, 560)); kf(tw, 6, loc=(x, 0, z))
+tw = text_obj('tw', 'TWENTY', 99, LIME_TX, 0.045, align='RIGHT')
+x, z = px(356, 572)
+kf(tw, 1, loc=px(-400, 572)); kf(tw, 8, loc=px(571, 572)); kf(tw, 13, loc=(x, 0, z))
 tw.data.extrude = 0.045
 tw.data.keyframe_insert('extrude', frame=13)
 tw.data.extrude = 0.15
 tw.data.keyframe_insert('extrude', frame=18)
 vis(tw, 1, 18); ease(tw)
-bi = text_obj('bi', 'BILLION', 125, LIME_TX, 0.045, align='LEFT')
-x2, z2 = px(364, 560)
+bi = text_obj('bi', 'BILLION', 99, LIME_TX, 0.045, align='LEFT')
+x2, z2 = px(364, 572)
 bi.location = (x2, 0, z2)
 kf(bi, 7, scale=(0.01, 0.01, 0.01)); kf(bi, 12, scale=(1, 1, 1))
 bi.data.extrude = 0.045
@@ -233,20 +244,29 @@ vis(bi, 7, 18); ease(bi)
 bagroot = bpy.data.objects.new('bagroot', None); sc.collection.objects.link(bagroot)
 bpy.ops.mesh.primitive_cube_add(size=1)
 bag = bpy.context.object; bag.name = 'bag'
-bag.scale = (0.46, 0.20, 0.34)
-bv = bag.modifiers.new('bev', 'BEVEL'); bv.width = 0.09; bv.segments = 5
+bag.scale = (0.92, 0.40, 0.68)
+bv = bag.modifiers.new('bev', 'BEVEL'); bv.width = 0.12; bv.segments = 5
 bag.data.materials.append(mat('bag_m', lin((95, 160, 60)), 0.45))
 flap = None
+flaps = []
+for sgn in (-1, 1):
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    fc_ = bpy.context.object; fc_.name = f'flap{sgn}'
+    fc_.scale = (0.55, 0.03, 0.16)
+    fc_.location = (sgn * 0.24, -0.21, 0.16)
+    fc_.rotation_euler = (0, sgn * math.radians(38), 0)
+    fc_.data.materials.append(mat(f'flap_m{sgn}', lin((62, 110, 36)), 0.5))
+    flaps.append(fc_)
 bills = []
 for i, ang in enumerate((-26, -13, 0, 13, 26)):
     bpy.ops.mesh.primitive_cube_add(size=1)
     b = bpy.context.object; b.name = f'bill{i}'
-    b.scale = (0.50, 0.012, 0.22)
+    b.scale = (1.0, 0.024, 0.44)
     b.rotation_euler = (0, math.radians(ang), 0)
-    b.location = (math.sin(math.radians(ang)) * 0.30, 0, 0.30 + abs(i - 2) * 0.02)
+    b.location = (math.sin(math.radians(ang)) * 0.45, -0.05, 0.62 + abs(i - 2) * 0.04)
     b.data.materials.append(emis(f'bill_m{i}', lin((238, 235, 224)), 1.0))
     bills.append(b)
-for ob in [bag] + bills:
+for ob in [bag] + flaps + bills:
     ob.parent = bagroot
 x, z = px(352, 749)
 kf(bagroot, 19, loc=(x - 0.25, 0, -3.2), scale=(1.35, 1.35, 1.35))
@@ -255,44 +275,45 @@ kf(bagroot, 41, loc=(x, 0, z), scale=(0.90, 0.90, 0.90))
 kf(bagroot, 46, loc=(x, 0, z))
 kf(bagroot, 49, loc=(x, 0, z - 0.10))
 kf(bagroot, 53, loc=(x, 0, z))
-vis(bagroot, 19, 89); ease(bagroot)
+visgroup(bagroot, 19, 89); ease(bagroot)
 
 # ---------- stool ----------
 stroot = bpy.data.objects.new('stroot', None); sc.collection.objects.link(stroot)
-bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.34, depth=0.07)
+bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.42, depth=0.08)
 seat = bpy.context.object; seat.name = 'seat'
 seat.data.materials.append(mat('seat_m', WOOD, 0.5))
-bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.34, depth=0.05, location=(0, 0, -0.045))
+bpy.ops.mesh.primitive_cylinder_add(vertices=48, radius=0.42, depth=0.06, location=(0, 0, -0.055))
 rim = bpy.context.object; rim.name = 'rim'
 rim.data.materials.append(mat('rim_m', WOODD, 0.5))
 legs = []
-for i, (lx, ly, ang) in enumerate(((-0.22, -0.10, 14), (0.22, -0.10, -14), (-0.16, 0.14, 8), (0.16, 0.14, -8))):
-    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.030, depth=0.62, location=(lx, ly, -0.36))
+for i, (lx, ly, ang) in enumerate(((-0.28, -0.12, 14), (0.28, -0.12, -14), (-0.20, 0.16, 8), (0.20, 0.16, -8))):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.045, depth=0.68, location=(lx, ly, -0.40))
     L = bpy.context.object; L.name = f'leg{i}'
     L.rotation_euler = (math.radians(-ang * 0.4), math.radians(ang), 0)
     L.data.materials.append(mat(f'leg_m{i}', WOODD, 0.5))
     legs.append(L)
 for ob in [seat, rim] + legs:
     ob.parent = stroot
-x, z = px(360, 877)
+x, z = px(360, 800)
 kf(stroot, 41, loc=(2.4, 0, z)); kf(stroot, 45, loc=(x, 0, z))
-vis(stroot, 41, 89); ease(stroot)
+visgroup(stroot, 41, 89); ease(stroot)
 
-bink = text_obj('bink', 'BILLION', 135, INK, 0.04)
+bink = text_obj('bink', 'BILLION', 97, INK, 0.04)
 bink.rotation_euler = (math.radians(90), math.radians(-8), 0)
 x, z = px(362, 350); bink.location = (x, 0, z)
+kf(bink, 19, loc=px(362, 350)); kf(bink, 41, loc=px(362, 300))
 vis(bink, 19, 56)
-tag = text_obj('tag', 'TWENTY', 36, RED, 0.03)
+tag = text_obj('tag', 'TWENTY', 34, RED, 0.03)
 tag.rotation_euler = (math.radians(90), math.radians(-78), 0)
 x, z = px(140, 200); tag.location = (x, 0, z)
 vis(tag, 19, 56)
 
 # ---------- HE SAID / NO ----------
-he = text_obj('he', 'HE SAID', 105, lin((200, 30, 40)), 0.04)
+he = text_obj('he', 'HE SAID', 77, lin((200, 30, 40)), 0.04)
 x, z = px(352, 286); he.location = (x, 0, z)
 kf(he, 62, scale=(0.2, 0.2, 0.2)); kf(he, 69, scale=(1, 1, 1))
 vis(he, 62, 89); ease(he)
-no = text_obj('no', 'NO', 300, ROSE, 0.05)
+no = text_obj('no', 'NO', 228, ROSE, 0.05)
 x, z = px(360, 740); no.location = (x, 0, z)
 kf(no, 74, scale=(0.2, 0.2, 0.2)); kf(no, 82, scale=(1, 1, 1))
 vis(no, 74, 89); ease(no)
@@ -301,19 +322,19 @@ vis(no, 74, 89); ease(no)
 croot = bpy.data.objects.new('croot', None); sc.collection.objects.link(croot)
 bpy.ops.mesh.primitive_cube_add(size=1)
 cash = bpy.context.object; cash.name = 'cash'
-cash.scale = (0.15, 0.05, 0.085)
-cb = cash.modifiers.new('bev', 'BEVEL'); cb.width = 0.02; cb.segments = 3
+cash.scale = (0.30, 0.10, 0.17)
+cb = cash.modifiers.new('bev', 'BEVEL'); cb.width = 0.03; cb.segments = 3
 cash.data.materials.append(mat('cash_m', lin((150, 160, 140)), 0.6))
 bpy.ops.mesh.primitive_cube_add(size=1)
 cband = bpy.context.object; cband.name = 'cband'
-cband.scale = (0.05, 0.055, 0.09)
+cband.scale = (0.10, 0.11, 0.18)
 cband.data.materials.append(mat('cband_m', lin((90, 110, 80)), 0.6))
 cband.parent = croot
 cash.parent = croot
 x, z = px(520, 770)
 kf(croot, 98, loc=(3.0, 0, 1.2), rot=(0, math.radians(-35), 0))
 kf(croot, 110, loc=(x, 0, z), rot=(0, math.radians(-8), 0))
-vis(croot, 98, 176); ease(croot)
+visgroup(croot, 98, 176); ease(croot)
 
 # ---------- glove / hand2 / logo plates ----------
 gl = plate('glove', '/tmp/v11b/glove.png', 300, 202, *px(-200, 740))
@@ -328,8 +349,8 @@ vis(lg, 107, 176); ease(lg)
 # ---------- wireframe cube ----------
 bpy.ops.mesh.primitive_cube_add(size=1)
 wire = bpy.context.object; wire.name = 'wire'
-wire.scale = (0.42, 0.42, 0.42)
-wm = wire.modifiers.new('wf', 'WIREFRAME'); wm.thickness = 0.015
+wire.scale = (0.64, 0.64, 0.64)
+wm = wire.modifiers.new('wf', 'WIREFRAME'); wm.thickness = 0.02
 wire.data.materials.append(emis('wire_m', lin((250, 190, 200)) + (1.0,), 2.0))
 kf(wire, 105, loc=(x + 0.12, 0, z + 0.06), rot=(0.4, 0.5, 0))
 kf(wire, 176, loc=(x + 0.12, 0, z + 0.06), rot=(0.4 + 1.2, 0.5 + 1.6, 0.6))
@@ -342,7 +363,7 @@ for fc in wire.animation_data.action.fcurves:
 # ---------- 2008 digits ----------
 digs = []
 for i, ch in enumerate('2008'):
-    d = text_obj(f'd{i}', ch, 100, BONE, 0.03)
+    d = text_obj(f'd{i}', ch, 90, BONE, 0.03)
     x, z = px(150 + i * 96, 240)
     d.location = (x, 0, z)
     kf(d, 143 + i * 6, scale=(0.01, 0.01, 0.01))
@@ -358,19 +379,32 @@ kf(jen, 180, loc=(0, 0, -2.6)); kf(jen, 196, loc=(0, 0, z))
 vis(jen, 177, 269); ease(jen)
 sp = plate('sub', '/tmp/v11b/sub.png', 446, 276, *px(360, 1000)) if os.path.exists('/tmp/v11b/sub.png') else None
 if sp is None:
-    bpy.ops.mesh.primitive_plane_add(size=1)
+    bpy.ops.mesh.primitive_cube_add(size=1)
     sp = bpy.context.object; sp.name = 'sub'
-    sp.rotation_euler = (math.radians(90), 0, 0)
-    sp.scale = (0.62, 0.38, 1)
+    sp.scale = (1.24, 0.06, 0.77)
+    sb = sp.modifiers.new('bev', 'BEVEL'); sb.width = 0.09; sb.segments = 4
     sp.data.materials.append(emis('sub_m', GOLD, 1.0))
     x, z = px(360, 1000)
     sp.location = (x, 0, z)
-    stx = text_obj('subt', 'subscribe\n& like', 62, INK, 0.01, font=FM)
+    stx = text_obj('subt', 'subscribe\n& like', 46, INK, 0.01, font=FM)
     stx.location = (x, -0.02, z)
     kf(stx, 225, scale=(0.2, 0.2, 0.2)); kf(stx, 235, scale=(1, 1, 1))
     vis(stx, 225, 269); ease(stx)
-kf(sp, 225, scale=(0.2, 0.2, 0.2)); kf(sp, 235, scale=(1, 1, 1))
+kf(sp, 225, scale=(0.25, 0.012, 0.154)); kf(sp, 235, scale=(1.24, 0.06, 0.77))
 vis(sp, 225, 269); ease(sp)
+
+# ---------- diagnostics ----------
+import os as _os
+if _os.environ.get('DIAG'):
+    for f in (100,):
+        sc.frame_set(f)
+        dg = bpy.context.evaluated_depsgraph_get()
+        we = w.evaluated_get(dg)
+        print('DIAG world color f%d' % f, tuple(round(c, 3) for c in we.color), flush=True)
+        for o in sc.objects:
+            oe = o.evaluated_get(dg)
+            print('DIAG obj', o.name, 'hide_render_eval', oe.hide_render, flush=True)
+    raise SystemExit(0)
 
 # ---------- render ----------
 sc.render.image_settings.file_format = 'PNG'

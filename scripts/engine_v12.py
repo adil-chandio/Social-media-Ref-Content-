@@ -115,6 +115,13 @@ def render_frame(n):
     else:
         fr = np.zeros((H, W, 3), np.uint8)
         graded(fr, t, tl)
+        # crossfade from last gfx frame at scene cut (9.0s / 20.675s)
+        cut = 9.0 if t < PASS else 20.675
+        dt = t - cut
+        if 0 <= dt < 0.25:
+            g0 = gframe(270)
+            k = dt / 0.25
+            fr = (g0.astype(np.float32) * (1 - k) + fr.astype(np.float32) * k).clip(0, 255).astype(np.uint8)
     fr = (fr.astype(np.float32) * _vig).clip(0, 255).astype(np.uint8)
     grain = np.random.default_rng(n).normal(0, 1.1, (H, W, 1))
     fr = np.clip(fr.astype(np.float32) + grain, 0, 255).astype(np.uint8)
