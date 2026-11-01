@@ -8,7 +8,8 @@ Renders RGBA PNGs to /tmp/b3d/####.png
 import bpy, math, os
 from mathutils import Vector
 
-OUT = '/tmp/b3d'
+import os as _os0
+OUT = _os0.environ.get('OUTDIR', '/tmp/b3d')
 os.makedirs(OUT, exist_ok=True)
 F = 'assets/fonts/Anton-Regular.ttf'
 FM = 'assets/fonts/Manrope-800.ttf'
@@ -24,7 +25,7 @@ INK = lin((16, 16, 18)); BONE = lin((244, 241, 234)); RED = lin((255, 85, 96))
 LIME = lin((130, 195, 10)); WHITE = lin((236, 236, 234)); GREY = lin((206, 206, 204))
 FLASH = lin((185, 10, 8)); MAROON = lin((78, 20, 28)); GOLD = lin((212, 175, 55))
 WOOD = lin((150, 115, 80)); WOODD = lin((105, 78, 55)); ROSE = lin((240, 170, 170))
-DRED = lin((150, 20, 35))
+DRED = lin((92, 8, 10))
 
 sc = bpy.context.scene
 for o in list(sc.objects):
@@ -197,13 +198,13 @@ bars = bpy.data.objects.new('bars', me); sc.collection.objects.link(bars)
 mb = bpy.data.materials.new('bars_m'); mb.use_nodes = True
 nt = mb.node_tree; b = nt.nodes['Principled BSDF']
 wav = nt.nodes.new('ShaderNodeTexWave')
-wav.inputs['Scale'].default_value = 1.6
+wav.inputs['Scale'].default_value = 0.85
 wav.inputs['Distortion'].default_value = 0.0
 wav.bands_direction = 'DIAGONAL'
 ramp = nt.nodes.new('ShaderNodeValToRGB')
 ramp.color_ramp.interpolation = 'CONSTANT'
-ramp.color_ramp.elements[0].color = rgba(lin((150, 20, 35)))
-ramp.color_ramp.elements[1].color = rgba(lin((178, 28, 46)))
+ramp.color_ramp.elements[0].color = rgba(lin((92, 8, 10)))
+ramp.color_ramp.elements[1].color = rgba(lin((104, 14, 16)))
 ramp.color_ramp.elements[1].position = 0.5
 mapn = nt.nodes.new('ShaderNodeMapping'); mapn.inputs['Rotation'].default_value[1] = math.radians(14)
 tc = nt.nodes.new('ShaderNodeTexCoord')
@@ -322,38 +323,41 @@ vis(no, 74, 89); ease(no)
 croot = bpy.data.objects.new('croot', None); sc.collection.objects.link(croot)
 bpy.ops.mesh.primitive_cube_add(size=1)
 cash = bpy.context.object; cash.name = 'cash'
-cash.scale = (0.30, 0.10, 0.17)
-cb = cash.modifiers.new('bev', 'BEVEL'); cb.width = 0.03; cb.segments = 3
+cash.scale = (0.52, 0.17, 0.30)
+cb = cash.modifiers.new('bev', 'BEVEL'); cb.width = 0.04; cb.segments = 3
 cash.data.materials.append(mat('cash_m', lin((150, 160, 140)), 0.6))
 bpy.ops.mesh.primitive_cube_add(size=1)
 cband = bpy.context.object; cband.name = 'cband'
-cband.scale = (0.10, 0.11, 0.18)
+cband.scale = (0.175, 0.19, 0.315)
 cband.data.materials.append(mat('cband_m', lin((90, 110, 80)), 0.6))
 cband.parent = croot
 cash.parent = croot
-x, z = px(520, 770)
+x, z = px(460, 745)
 kf(croot, 98, loc=(3.0, 0, 1.2), rot=(0, math.radians(-35), 0))
 kf(croot, 110, loc=(x, 0, z), rot=(0, math.radians(-8), 0))
+vis(cash, 0, 0); vis(cband, 0, 0)
+cf = plate('cashfist', '/tmp/v11b/cashfist.png', 238, 172, 0, 0)
+cf.parent = croot; cf.location = (0, 0, 0)
 visgroup(croot, 98, 176); ease(croot)
 
 # ---------- glove / hand2 / logo plates ----------
-gl = plate('glove', '/tmp/v11b/glove.png', 300, 202, *px(-200, 740))
-kf(gl, 102, loc=(*px(-200, 740),)); kf(gl, 112, loc=(*px(150, 740),))
+gl = plate('glove', '/tmp/v11b/glove2.png', 300, 190, *px(-260, 760))
+kf(gl, 102, loc=(*px(-260, 760),)); kf(gl, 112, loc=(*px(140, 760),))
 vis(gl, 98, 176); ease(gl)
-h2 = plate('hand2', '/tmp/v11b/hand2.png', 148, 167, *px(590, 795))
-vis(h2, 107, 176)
-lg = plate('logo', '/tmp/v11b/logo.png', 110, 156, *px(160, 640))
-kf(lg, 107, scale=(0.2, 0.2, 0.2)); kf(lg, 116, scale=(0.85, 0.85, 0.85))
+h2 = plate('hand2', '/tmp/v11b/hand2.png', 207, 234, *px(570, 780))
+vis(h2, 0, 0)
+lg = plate('logo', '/tmp/v11b/logo2.png', 161, 108, *px(164, 637))
+kf(lg, 107, scale=(0.2, 0.2, 0.2)); kf(lg, 116, scale=(1.0, 1.0, 1.0))
 vis(lg, 107, 176); ease(lg)
 
 # ---------- wireframe cube ----------
 bpy.ops.mesh.primitive_cube_add(size=1)
 wire = bpy.context.object; wire.name = 'wire'
-wire.scale = (0.64, 0.64, 0.64)
-wm = wire.modifiers.new('wf', 'WIREFRAME'); wm.thickness = 0.02
-wire.data.materials.append(emis('wire_m', lin((250, 190, 200)) + (1.0,), 2.0))
-kf(wire, 105, loc=(x + 0.12, 0, z + 0.06), rot=(0.4, 0.5, 0))
-kf(wire, 176, loc=(x + 0.12, 0, z + 0.06), rot=(0.4 + 1.2, 0.5 + 1.6, 0.6))
+wire.scale = (0.42, 0.42, 0.42)
+wm = wire.modifiers.new('wf', 'WIREFRAME'); wm.thickness = 0.010
+wire.data.materials.append(emis('wire_m', lin((230, 170, 180)) + (1.0,), 0.8))
+kf(wire, 105, loc=(x + 0.11, 0, z + 0.02), rot=(0.4, 0.5, 0))
+kf(wire, 176, loc=(x + 0.11, 0, z + 0.02), rot=(0.4 + 1.2, 0.5 + 1.6, 0.6))
 vis(wire, 105, 176); ease(wire)
 for fc in wire.animation_data.action.fcurves:
     if 'rotation' in fc.data_path:
@@ -364,19 +368,19 @@ for fc in wire.animation_data.action.fcurves:
 digs = []
 for i, ch in enumerate('2008'):
     d = text_obj(f'd{i}', ch, 90, BONE, 0.03)
-    x, z = px(150 + i * 96, 240)
-    d.location = (x, 0, z)
+    x, z = px(300 + i * 80, 135)
+    d.location = (x, 0.3, z)
     kf(d, 143 + i * 6, scale=(0.01, 0.01, 0.01))
     kf(d, 146 + i * 6, scale=(1, 1, 1))
     vis(d, 143 + i * 6, 269)
     ease(d)
+    for nd in d.data.materials[0].node_tree.nodes:
+        if nd.type == 'EMISSION':
+            nd.inputs[1].default_value = 0.5
     digs.append(d)
 
 # ---------- jensen plate + subscribe plate ----------
-jen = plate('jen', '/tmp/v11b/jen.png', 642, 1100, *px(360, 1500))
-x, z = px(360, 723)
-kf(jen, 180, loc=(0, 0, -2.6)); kf(jen, 196, loc=(0, 0, z))
-vis(jen, 177, 269); ease(jen)
+# jen person comes from graded footage in the compositor (layered renders below)
 sp = plate('sub', '/tmp/v11b/sub.png', 446, 276, *px(360, 1000)) if os.path.exists('/tmp/v11b/sub.png') else None
 if sp is None:
     bpy.ops.mesh.primitive_cube_add(size=1)
@@ -392,6 +396,18 @@ if sp is None:
     vis(stx, 225, 269); ease(stx)
 kf(sp, 225, scale=(0.25, 0.012, 0.154)); kf(sp, 235, scale=(1.24, 0.06, 0.77))
 vis(sp, 225, 269); ease(sp)
+
+# ---------- layer mode (transparent passes for compositor) ----------
+LAYER = os.environ.get('LAYER', '')
+if LAYER:
+    sc.render.film_transparent = True
+    if LAYER == 'digits':
+        vis(sp, 0, 0); vis(stx, 0, 0)
+        for d in digs:
+            d.location = (d.location[0], 0, d.location[2])
+    elif LAYER == 'sub':
+        for d in digs:
+            vis(d, 0, 0)
 
 # ---------- diagnostics ----------
 import os as _os

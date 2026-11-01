@@ -44,36 +44,34 @@ def smoke(n):
         SM[n] = cv2.imread(f'/tmp/v11b/smoke/{n:04d}.png', 0)
     return SM[n]
 
+GFX_END = 5.9
+
 def scene_at(t):
     t = t % PASS
-    if t < 9.0:
+    if t < GFX_END:
         return 'gfx', t
     return 'graded', t
 
+BC = {}
+def bframe(g):
+    if g not in BC:
+        BC[g] = cv2.imread(f'/tmp/b3dB/{g:04d}.png', cv2.IMREAD_UNCHANGED)
+        if len(BC) > 40:
+            BC.pop(next(iter(BC)))
+    return BC[g]
+
 def graded(fr, t, tl):
-    e = min(int(t * 30), 696)
+    e = min(int(tl * 30), 696)
     f = fframe(e)
-    hsv = cv2.cvtColor(f, cv2.COLOR_BGR2HSV).astype(np.int16)
-    hch, sch, vch = hsv[..., 0], hsv[..., 1], hsv[..., 2]
     out = f.astype(np.float32)
-    reg = np.zeros_like(hch, bool); reg[940:1130, 150:570] = True
-    gl = cv2.cvtColor(f, cv2.COLOR_BGR2GRAY).astype(np.int16)
-    yel = reg & (((hch > 18) & (hch < 40) & (sch > 90)) | (gl > 130))
-    w = cv2.GaussianBlur(yel.astype(np.float32), (7, 7), 0)[..., None]
-    gold = np.array(bgr(GOLD), np.float32)
-    out = out * (1 - w) + (out * 0.35 + gold * 0.65) * w
-    txtm = reg & (gl > 185)
-    wt = cv2.GaussianBlur(txtm.astype(np.float32), (5, 5), 0)[..., None] * 0.9
-    out = out * (1 - wt) + np.array(bgr(INK), np.float32) * wt
-    reg2 = np.zeros_like(gl, bool); reg2[150:330, 40:680] = True
-    reg2[330:400, 40:240] = True; reg2[330:400, 480:680] = True
-    reg2[150:340, 210:510] = False
-    dig = reg2 & (gl > 100)
-    wd = cv2.GaussianBlur(dig.astype(np.float32), (5, 5), 0)[..., None]
-    wd = np.clip(wd * 1.2, 0, 1)
-    out = out * (1 - wd) + np.array(bgr(INK), np.float32) * wd
     fr[:] = out.clip(0, 255).astype(np.uint8)
     gk = min(1, seg(tl, 9.0, .6, lin) if tl < 11 else 1)
+    if gk > 0:
+        lum = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY).astype(np.float32)[..., None]
+        desat = fr.astype(np.float32) * 0.65 + lum * 0.35
+        mul = np.array((0.64, 0.50, 0.67), np.float32)[None, None, :]
+        gr = (desat * mul * 1.35).clip(0, 255)
+        fr[:] = (fr.astype(np.float32) * (1 - gk) + gr * gk).astype(np.uint8)
     if gk > 0:
         g = np.zeros((H, W), np.float32)
         for ex in (-60, 60):
@@ -115,8 +113,14 @@ def render_frame(n):
     else:
         fr = np.zeros((H, W, 3), np.uint8)
         graded(fr, t, tl)
-        # crossfade from last gfx frame at scene cut (9.0s / 20.675s)
-        cut = 9.0 if t < PASS else 20.675
+        g = int(tl * 30) + 1
+        if 225 <= g <= 270:
+            b = bframe(g)
+            if b is not None and b.shape[2] == 4:
+                a = (b[..., 3:4].astype(np.float32) / 255)
+                fr = (fr.astype(np.float32) * (1 - a) + b[..., :3].astype(np.float32) * a).clip(0, 255).astype(np.uint8)
+        # crossfade from last gfx frame at scene cut (5.9s / 17.575s)
+        cut = GFX_END if t < PASS else PASS + GFX_END
         dt = t - cut
         if 0 <= dt < 0.25:
             g0 = gframe(270)
