@@ -59,6 +59,27 @@ jobs:
           python3 -m pip install --user -q yt-dlp || python3 -m pip install -q yt-dlp || true
           python3 -m yt_dlp --version || true
           mkdir -p "out/${{ steps.q.outputs.folder }}"
+          # ---- transcripts (source scripts) via youtube-transcript-api
+          python3 -m pip install --user -q youtube-transcript-api || true
+          mkdir -p "out/${{ steps.q.outputs.folder }}/transcripts"
+          awk 'NF{n++; printf "%02d %s\n", n, $0}' /tmp/urls.txt | while read -r n url; do
+            ID=$(echo "$url" | grep -oE "[A-Za-z0-9_-]{11}" | tail -1)
+            python3 -m youtube_transcript_api "$ID" --languages en --languages hi --languages ur \
+              > "out/${{ steps.q.outputs.folder }}/transcripts/$ID.txt" \
+              2> "out/${{ steps.q.outputs.folder }}/transcripts/$ID.err" || true
+            wc -c "out/${{ steps.q.outputs.folder }}/transcripts/$ID.txt" || true
+          done
+          # ---- BotGuard PO-token provider (bgutil) for yt-dlp
+          git clone --depth=1 https://github.com/Brainicism/bgutil-ytdlp-pot-provider /tmp/pot || true
+          if [ -d /tmp/pot/server ]; then
+            (cd /tmp/pot/server && npm ci --no-audit --no-fund --silent && npm run build --silent && nohup node build/main.js > /tmp/pot.log 2>&1 & )
+            sleep 8; curl -s -m 3 http://localhost:4416/ping || true
+          fi
+          PDIR=$(python3 -c "import site;print(site.getusersitepackages())")/yt_dlp_plugins
+          mkdir -p "$PDIR"
+          if [ -d /tmp/pot/plugin/yt_dlp_plugins ]; then cp -r /tmp/pot/plugin/yt_dlp_plugins/* "$PDIR"/;
+          elif [ -d /tmp/pot/yt_dlp_plugins ]; then cp -r /tmp/pot/yt_dlp_plugins/* "$PDIR"/; fi
+          ls -R "$PDIR" | head -10 || true
           awk 'NF{n++; printf "%02d %s\n", n, $0}' /tmp/urls.txt | while read -r n url; do
             echo "::group::[$n] $url"
             bash scripts/ytget.sh "$url" "out/${{ steps.q.outputs.folder }}/${n}_${url##*=}.mp4" \
