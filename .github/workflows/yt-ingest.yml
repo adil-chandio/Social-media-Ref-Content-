@@ -67,7 +67,18 @@ jobs:
         env:
           FOLDER: ${{ steps.q.outputs.folder }}
         run: |
+          exec > >(tee /tmp/push.log) 2>&1
           set -x
+          report() {
+            RC=$?
+            cd "$GITHUB_WORKSPACE" || exit $RC
+            cp /tmp/push.log ingest/last-run.log 2>/dev/null || true
+            git add -f ingest/last-run.log 2>/dev/null || true
+            git commit -q -m "ci: ingest log run $GITHUB_RUN_ID (rc=$RC)" 2>/dev/null || true
+            git push -q origin "HEAD:$GITHUB_REF_NAME" 2>/dev/null || true
+            exit $RC
+          }
+          trap report EXIT
           echo "FOLDER=[$FOLDER]"; ls -la out/ "out/$FOLDER" || true
           git init pushdir
           cd pushdir
@@ -86,3 +97,4 @@ jobs:
           git commit -m "ingest: $FOLDER (run ${{ github.run_id }})"
           git rev-parse HEAD
           git push -v origin HEAD:refs/heads/ingest/media
+          trap - EXIT
