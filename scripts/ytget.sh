@@ -3,12 +3,13 @@
 # 1) Invidious public APIs (progressive 720p)  2) Piped APIs (adaptive+merge)  3) yt-dlp variants
 set -u
 url="$1"; out="$2"
-ID=$(echo "$url" | sed -E 's#.*(?:shorts/|watch\?v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11}).*#\1#')
+ID=$(echo "$url" | grep -oE "[A-Za-z0-9_-]{11}" | tail -1)
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 size() { stat -c%s "$1" 2>/dev/null || echo 0; }
 good() { [ "$(size "$1")" -gt 200000 ]; }
 
 echo "::strategy invidious for $ID"
+echo "ID=$ID"
 for api in yewtu.be invidious.nerdvpn.de inv.nadeko.net invidious.f5.si iv.melmac.space invidious.privacyredirect.com yt.artemislena.eu invidious.dhusch.com; do
   u=$(curl -s -m 12 -A "$UA" "https://$api/api/v1/videos/$ID" | jq -r '[.formatStreams[]? | select(.quality=="hd720" or .qualityLabel=="720p" or .quality=="medium")][0].url // empty' 2>/dev/null)
   if [ -n "$u" ]; then
