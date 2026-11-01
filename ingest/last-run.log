@@ -4,14 +4,14 @@ FOLDER=[test]
 + ls -la out/ out/test
 out/:
 total 12
-drwxr-xr-x  3 runner runner 4096 Nov  1 00:29 .
-drwxr-xr-x 14 runner runner 4096 Nov  1 00:29 ..
-drwxr-xr-x  2 runner runner 4096 Nov  1 00:29 test
+drwxr-xr-x  3 runner runner 4096 Nov  1 00:31 .
+drwxr-xr-x 14 runner runner 4096 Nov  1 00:31 ..
+drwxr-xr-x  2 runner runner 4096 Nov  1 00:31 test
 
 out/test:
 total 8
-drwxr-xr-x 2 runner runner 4096 Nov  1 00:29 .
-drwxr-xr-x 3 runner runner 4096 Nov  1 00:29 ..
+drwxr-xr-x 2 runner runner 4096 Nov  1 00:31 .
+drwxr-xr-x 3 runner runner 4096 Nov  1 00:31 ..
 + git init pushdir
 hint: Using 'master' as the name for the initial branch. This default branch name
 hint: will change to "main" in Git 3.0. To configure the initial branch name
@@ -28,7 +28,7 @@ hint:
 hint: Disable this message with "git config set advice.defaultBranchName false"
 Initialized empty Git repository in /home/runner/work/Social-media-Ref-Content-/Social-media-Ref-Content-/pushdir/.git/
 + cd pushdir
-+ git remote add origin https://x-access-token:ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiI1VnYxWFQ4aTFFbVI0cjlqQVU2X3BjdU42b1NIeGI4dVpTV3NCN1RKMGFLMzhXR29GYjc2MG40IiwiZXhwIjoxNzkzNDk2NTU2LCJpYXQiOjE3OTM0OTI5NTYsImlzcyI6ImdpdGh1YiIsImp0aSI6IjIyYzc3MmNmLTZkM2YtNGFmZC1iZjg1LWMxZTg3NzlhYjc1ZiIsInZlciI6M30.KjtItZqTwhpUP4hWZn2nSsGw5GJOMyd-d-V1vyfn6lEhGQq7sRz-PVryjfNa4lAlmtHjbotAGQu60310ay1x_w@github.com/adil-chandio/Social-media-Ref-Content-.git
++ git remote add origin https://x-access-token:ghs_15368_eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRobmQiLCJjdHgiOiJGUmZoVC1oRHBsVXV0ZHpLVEVSc1Jzd0VnNzdodUtyaDkxZWxMNFRsaVFmcG42U0J3MnVGdFdzIiwiZXhwIjoxNzkzNDk2Njg0LCJpYXQiOjE3OTM0OTMwODQsImlzcyI6ImdpdGh1YiIsImp0aSI6IjY3ODFkOTc5LTc5MTMtNGE3YS04NjI2LTU1NTY1ZTg0NGUyNCIsInZlciI6M30.z4lYiTTtaxoMkHRGY2s0Rq2YSxEfMILFzH3Xfhbml8D24zyXLV0sbHgT0pwOnn-xFCvwHReqVplsl3fjlKcTbQ@github.com/adil-chandio/Social-media-Ref-Content-.git
 + git config user.name arena-ingest
 + git config user.email arena-ingest@users.noreply.github.com
 + git fetch --depth=1 origin ingest/media
@@ -40,7 +40,7 @@ Switched to a new branch 'ingest/media'
 + git add -A ingest
 + git status --porcelain
 + head -20
-+ git commit -m 'ingest: test (run 41256950583)'
++ git commit -m 'ingest: test (run 41257112480)'
 On branch ingest/media
 
 Initial commit
