@@ -1,0 +1,60 @@
+name: yt-ingest
+
+# Downloads YouTube videos on a GitHub runner (full internet) and pushes them
+# to the orphan branch `ingest/media` so the sandbox can fetch them via git.
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "YouTube URLs, one per line"
+        required: true
+        type: string
+      folder:
+        description: "Subfolder under ingest/"
+        required: false
+        default: "batch1"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prep orphan branch
+        run: |
+          git init repo
+          cd repo
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config user.name "arena-ingest"
+          git config user.email "arena-ingest@users.noreply.github.com"
+          if git fetch --depth=1 origin ingest/media; then
+            git checkout -B ingest/media origin/ingest/media
+          else
+            git checkout --orphan ingest/media
+          fi
+          mkdir -p ingest
+
+      - name: Download videos
+        run: |
+          cd repo
+          python3 -m pip install -q --user yt-dlp || pip install -q yt-dlp
+          mkdir -p "ingest/${{ inputs.folder }}"
+          echo "${{ inputs.urls }}" | sed '/^[[:space:]]*$/d' | nl -ba -nr '%02d' | while read -r n url; do
+            echo "::group::[$n] $url"
+            python3 -m yt_dlp --no-warnings --restrict-filenames --max-filesize 95M \
+              -f "bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4]/bv*[height<=720]+ba/b[height<=720]/b" \
+              --merge-output-format mp4 \
+              -o "ingest/${{ inputs.folder }}/${n}_%(title).50s_[%(id)s].mp4" \
+              "$url" || echo "FAILED [$n] $url" >> "ingest/${{ inputs.folder }}/_failures.txt"
+            echo "::endgroup::"
+          done
+          ls -la "ingest/${{ inputs.folder }}"
+
+      - name: Push to ingest/media
+        run: |
+          cd repo
+          git add -A ingest
+          git commit -m "ingest: ${{ inputs.folder }}" || echo "nothing new to commit"
+          git push origin ingest/media
