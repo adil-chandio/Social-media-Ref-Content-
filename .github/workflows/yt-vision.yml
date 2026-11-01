@@ -1,0 +1,69 @@
+name: yt-vision
+
+# Grabs PUBLIC image-CDN vision for YouTube IDs (outside the player-API bot wall):
+#   thumbnails (maxres/hq/mq/default), legacy frame grabs (0-3.jpg),
+#   storyboard sprites (storyboard3_L0..L2 = frame grids across the video)
+# plus a videodl (CharlesPikachu) download attempt. Pushes results to orphan
+# branch ingest/media under vision/.
+on:
+  push:
+    paths:
+      - "ingest/vision-queue.txt"
+      - ".github/workflows/yt-vision.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  vision:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Grab vision
+        run: |
+          exec > >(tee /tmp/vision.log) 2>&1
+          set -x
+          report() {
+            RC=$?
+            cd "$GITHUB_WORKSPACE" || exit $RC
+            git config user.name "arena-ingest" 2>/dev/null || true
+            git config user.email "arena-ingest@users.noreply.github.com" 2>/dev/null || true
+            cp /tmp/vision.log ingest/vision-run.log 2>/dev/null || true
+            git add -f ingest/vision-run.log 2>/dev/null || true
+            git commit -q -m "ci: vision log run $GITHUB_RUN_ID (rc=$RC)" 2>/dev/null || true
+            git push -q origin "HEAD:$GITHUB_REF_NAME" 2>/dev/null || true
+            exit $RC
+          }
+          trap report EXIT
+          mkdir -p out/vision
+          python3 -m pip install --user -q videodl || true
+          sed '/^[[:space:]]*$/d' ingest/vision-queue.txt | while read -r ID; do
+            echo "::group::vision $ID"
+            for f in maxresdefault sddefault hqdefault mqdefault default 0 1 2 3; do
+              curl -s -m 20 -o "out/vision/${ID}_$f.jpg" "https://i.ytimg.com/vi/$ID/$f.jpg" || true
+            done
+            for L in 0 1 2 3; do
+              curl -s -m 25 -o "out/vision/${ID}_sb$L.jpg" "https://i.ytimg.com/sb/$ID/storyboard3_L$L.jpg" || true
+            done
+            python3 -m videodl --version 2>/dev/null || true
+            python3 -m videodl -i "https://www.youtube.com/watch?v=$ID" -o out/vision/ 2>&1 | tail -3 || true
+            echo "::endgroup::"
+          done
+          ls -la out/vision/ | head -60
+          git init pushdir
+          cd pushdir
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git config user.name "arena-ingest"
+          git config user.email "arena-ingest@users.noreply.github.com"
+          if git fetch --depth=1 origin ingest/media; then
+            git checkout -B ingest/media origin/ingest/media
+          else
+            git checkout --orphan ingest/media
+          fi
+          mkdir -p vision
+          cp -r ../out/vision/. vision/
+          git add -A vision
+          git commit -m "vision: frames run $GITHUB_RUN_ID" || true
+          git push -v origin HEAD:refs/heads/ingest/media
+          trap - EXIT
