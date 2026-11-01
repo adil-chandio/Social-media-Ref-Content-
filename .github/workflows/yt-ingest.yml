@@ -118,7 +118,8 @@ jobs:
             git checkout --orphan ingest/media
           fi
           mkdir -p ingest
-          cp -r "../out/$FOLDER" "ingest/$FOLDER"
+          mkdir -p "ingest/$FOLDER"
+          cp -r "../out/$FOLDER/." "ingest/$FOLDER/"
           git add -A ingest
           git status --porcelain | head -20
           git commit -m "ingest: $FOLDER (run ${{ github.run_id }})"
