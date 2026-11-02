@@ -308,8 +308,8 @@ visgroup(stroot, 41, 89); ease(stroot)
 for ob in [seat, rim] + legs:
     ob.animation_data_clear()
     ob.hide_render = True
-xs2, zs2 = px(360, 880)
-stp = plate('stoolp', 'assets/sprites/stool.png', 280, 280, xs2, zs2)
+xs2, zs2 = px(360, 827)
+stp = plate('stoolp', 'assets/sprites/stool.png', 457, 254, xs2, zs2)
 kf(stp, 41, loc=(2.4, 0, zs2)); kf(stp, 45, loc=(xs2, 0, zs2))
 vis(stp, 41, 89); ease(stp)
 
