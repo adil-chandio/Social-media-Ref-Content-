@@ -270,18 +270,20 @@ for i, ang in enumerate((-26, -13, 0, 13, 26)):
     bills.append(b)
 for ob in [bag] + flaps + bills:
     ob.parent = bagroot
-x, z = px(352, 749)
+x, z = px(355, 740)
 kf(bagroot, 27, loc=(x - 0.25, 0, -3.2), scale=(1.35, 1.35, 1.35))
 kf(bagroot, 40, loc=(x - 0.25, 0, z + 0.10), scale=(1.35, 1.35, 1.35))
 kf(bagroot, 41, loc=(x, 0, z), scale=(0.90, 0.90, 0.90))
 kf(bagroot, 46, loc=(x, 0, z))
 kf(bagroot, 49, loc=(x, 0, z - 0.10))
 kf(bagroot, 53, loc=(x, 0, z))
+kf(bagroot, 55, loc=(x, 0, z))
+kf(bagroot, 61, loc=(x, 0, -0.444))
 visgroup(bagroot, 27, 89); ease(bagroot)
 for ob in [bag] + flaps + bills:
     ob.animation_data_clear()
     ob.hide_render = True
-bb = plate('bagbills', 'assets/sprites/bagbills.png', 411, 333, 0, 0)
+bb = plate('bagbills', 'assets/sprites/bagbills.png', 407, 330, 0, 0)
 bb.parent = bagroot; bb.location = (0, 0, 0)
 vis(bb, 27, 89)
 
@@ -308,8 +310,8 @@ visgroup(stroot, 41, 89); ease(stroot)
 for ob in [seat, rim] + legs:
     ob.animation_data_clear()
     ob.hide_render = True
-xs2, zs2 = px(360, 827)
-stp = plate('stoolp', 'assets/sprites/stool.png', 457, 254, xs2, zs2)
+xs2, zs2 = px(360, 1115)
+stp = plate('stoolp', 'assets/sprites/stool.png', 320, 320, xs2, zs2)
 kf(stp, 41, loc=(2.4, 0, zs2)); kf(stp, 45, loc=(xs2, 0, zs2))
 vis(stp, 41, 89); ease(stp)
 
@@ -324,10 +326,12 @@ x, z = px(140, 200); tag.location = (x, 0, z)
 vis(tag, 27, 56)
 
 # ---------- HE SAID / NO ----------
-he = text_obj('he', 'HE SAID', 77, lin((200, 30, 40)), 0.04)
-x, z = px(352, 286); he.location = (x, 0, z)
-kf(he, 62, scale=(0.2, 0.2, 0.2)); kf(he, 69, scale=(1, 1, 1))
-vis(he, 62, 89); ease(he)
+he1 = text_obj('he1', 'HE', 77, lin((200, 30, 40)), 0.04, align='LEFT')
+x, z = px(192, 286); he1.location = (x, 0, z)
+vis(he1, 62, 89)
+he2 = text_obj('he2', 'SAID', 77, lin((200, 30, 40)), 0.04, align='LEFT')
+x, z = px(312, 286); he2.location = (x, 0, z)
+vis(he2, 67, 89)
 no = text_obj('no', 'NO', 228, ROSE, 0.05)
 x, z = px(360, 460); no.location = (x, -0.6, z)
 kf(no, 74, scale=(0.38, 0.2, 0.2)); kf(no, 82, scale=(1.9, 1, 1))
@@ -425,6 +429,23 @@ if LAYER:
 
 # ---------- diagnostics ----------
 import os as _os
+if _os.environ.get('DIAG2'):
+    sc.frame_set(48)
+    dg = bpy.context.evaluated_depsgraph_get()
+    for nm in ('stoolp', 'bagbills', 'bagroot', 'stroot'):
+        ob = bpy.data.objects.get(nm)
+        if ob is None:
+            print('DIAG2', nm, 'MISSING'); continue
+        oe = ob.evaluated_get(dg)
+        mw = oe.matrix_world.translation
+        print('DIAG2', nm, 'hide', oe.hide_render, 'loc', round(mw[0],2), round(mw[1],2), round(mw[2],2), 'scale', tuple(round(v,2) for v in oe.scale), flush=True)
+        if nm == 'stp':
+            img = ob.data.materials[0].node_tree.nodes.get('Image Texture')
+            if img is None:
+                for nd in ob.data.materials[0].node_tree.nodes:
+                    if nd.type == 'TEX_IMAGE': img = nd
+            print('DIAG2 stp img', img.image.filepath_raw if img else None, 'size', tuple(img.image.size) if img else None, flush=True)
+    raise SystemExit(0)
 if _os.environ.get('DIAG'):
     for f in (100,):
         sc.frame_set(f)

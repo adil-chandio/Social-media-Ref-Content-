@@ -39,6 +39,8 @@ def fframe(e):
     return FC[e]
 
 SM = {}
+GROUND = cv2.imread('/tmp/v11b/ground.png')
+
 def smoke(n):
     if n not in SM:
         SM[n] = cv2.imread(f'/tmp/v11b/smoke/{n:04d}.png', 0)
@@ -98,6 +100,14 @@ def render_frame(n):
             keep = (((hsv[..., 0] < 12) | (hsv[..., 0] > 168)) & (hsv[..., 1] > 110) & (hsv[..., 2] > 110)).astype(np.float32)
             keep = cv2.GaussianBlur(keep, (5, 5), 0)[..., None]
             fr = (des * (1 - keep) + fr.astype(np.float32) * keep).clip(0, 255).astype(np.uint8)
+        # ground band (ref photo-bg grass blur) 41-89
+        if 57 <= g <= 89:
+            gd = GROUND
+            if gd is not None:
+                gh = 280
+                gd2 = gd[gd.shape[0] - gh:]
+                ramp = (np.linspace(0.0, 0.92, gh, dtype=np.float32) ** 1.6)[:, None, None]
+                fr[H - gh:H] = (fr[H - gh:H].astype(np.float32) * (1 - ramp) + gd2.astype(np.float32) * ramp).astype(np.uint8)
         # smoke puffs 1.58-2.35
         if 1.55 <= tl < 2.45:
             sn = int(47 + (tl - 1.35) / .55 * 25)
@@ -127,7 +137,7 @@ def render_frame(n):
         cut = GFX_END if t < PASS else PASS + GFX_END
         dt = t - cut
         if 0 <= dt < 0.25:
-            g0 = gframe(270)
+            g0 = gframe(177)
             k = dt / 0.25
             fr = (g0.astype(np.float32) * (1 - k) + fr.astype(np.float32) * k).clip(0, 255).astype(np.uint8)
     fr = (fr.astype(np.float32) * _vig).clip(0, 255).astype(np.uint8)
